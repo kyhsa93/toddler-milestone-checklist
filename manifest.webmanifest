@@ -1,7 +1,7 @@
 {
   "name": "영유아 발달 관찰 수첩",
   "short_name": "발달수첩",
-  "description": "12~36개월 영유아 발달 관찰 체크리스트와 성장 기록 (진단 도구 아님)",
+  "description": "12~36개월 영유아 발달 지연 관찰 체크리스트와 성장 백분위 기록 (진단 도구 아님)",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

@@ -207,8 +207,35 @@
     cursor: pointer;
   }
   .tab-btn.active { color: var(--sage-deep); border-bottom-color: var(--sage); }
+  .tab-btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
+
+  /* Age setting */
+  .age-setting {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 16px;
+  }
+  .age-setting label { font-size: 13.5px; color: var(--ink); flex-shrink: 0; }
+  .age-setting input {
+    width: 72px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .age-setting input:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+  .age-setting-hint { font-size: 12px; color: var(--ink-faint); flex-basis: 100%; }
 
   /* Sticky progress */
   .progress-bar {
@@ -274,6 +301,14 @@
     font-size: 12px;
     color: var(--ink-faint);
     font-variant-numeric: tabular-nums;
+  }
+  .band.locked { opacity: 0.6; }
+  .band.locked .band-head { background: var(--paper); }
+  .band-locked-note {
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-style: italic;
   }
 
   .item {
@@ -474,9 +509,49 @@
     cursor: pointer;
   }
   .reset-btn:hover { border-color: var(--amber); color: var(--amber); }
+  .reset-btn:focus-visible, .lang-toggle:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+
+  .result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .result-actions button {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--sage);
+    background: var(--paper-raised);
+    color: var(--sage-deep);
+    cursor: pointer;
+  }
+  .result-actions button:hover { background: var(--sage-pale); }
+  .result-actions button:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+  .share-status {
+    font-size: 12px;
+    color: var(--sage-deep);
+    text-align: center;
+    margin-top: 8px;
+    min-height: 1em;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .progress-fill { transition: none; }
+  }
+
+  .item-print-state { display: none; font-weight: 600; }
+
+  @media print {
+    .lang-toggle, .tabs, .age-setting, .toggle, .growth-form,
+    .result-actions, footer, .progress-bar { display: none !important; }
+    .tab-panel { display: block !important; }
+    .item-print-state { display: inline; }
+    body { background: #fff; color: #000; }
+    .band, .result, .chart-card, .stamp, .sensory-note { box-shadow: none; break-inside: avoid; }
   }
 </style>
 
@@ -484,7 +559,7 @@
   <header class="masthead">
     <div class="masthead-top">
       <span class="eyebrow" id="txt-eyebrow"></span>
-      <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
+      <button class="lang-toggle" id="lang-toggle" type="button">
         <span aria-hidden="true">🌐</span><span id="lang-toggle-label"></span>
       </button>
     </div>
@@ -508,12 +583,18 @@
     <p id="txt-sensory-text"></p>
   </div>
 
-  <div class="tabs">
-    <button class="tab-btn active" type="button" data-tab="checklist" id="txt-tab-checklist"></button>
-    <button class="tab-btn" type="button" data-tab="growth" id="txt-tab-growth"></button>
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="panel-checklist" id="tab-checklist" data-tab="checklist"><span id="txt-tab-checklist"></span></button>
+    <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-growth" id="tab-growth" data-tab="growth"><span id="txt-tab-growth"></span></button>
   </div>
 
-  <section class="tab-panel active" id="panel-checklist">
+  <section class="tab-panel active" id="panel-checklist" role="tabpanel" aria-labelledby="tab-checklist" tabindex="0">
+    <div class="age-setting">
+      <label for="child-age-input" id="txt-age-setting-label"></label>
+      <input type="number" id="child-age-input" min="0" max="60" inputmode="numeric" />
+      <span class="age-setting-hint" id="txt-age-setting-hint"></span>
+    </div>
+
     <div class="progress-bar">
       <div class="progress-row">
         <span id="txt-progress-label"></span>
@@ -528,10 +609,16 @@
       <div class="result-badge" id="result-badge">–</div>
       <div class="result-title" id="result-title"></div>
       <div class="result-text" id="result-text"></div>
+      <div class="domain-breakdown" id="domain-breakdown"></div>
+      <div class="result-actions">
+        <button type="button" id="print-btn"></button>
+        <button type="button" id="share-btn"></button>
+      </div>
+      <div class="share-status" id="share-status"></div>
     </section>
   </section>
 
-  <section class="tab-panel" id="panel-growth">
+  <section class="tab-panel" id="panel-growth" role="tabpanel" aria-labelledby="tab-growth" tabindex="0">
     <form class="growth-form" id="growth-form">
       <div>
         <label for="g-date" id="txt-g-date-label"></label>
@@ -539,11 +626,11 @@
       </div>
       <div>
         <label for="g-height" id="txt-g-height-label"></label>
-        <input type="number" id="g-height" step="0.1" min="0" />
+        <input type="number" id="g-height" step="0.1" min="0" max="150" />
       </div>
       <div>
         <label for="g-weight" id="txt-g-weight-label"></label>
-        <input type="number" id="g-weight" step="0.1" min="0" />
+        <input type="number" id="g-weight" step="0.1" min="0" max="40" />
       </div>
       <button type="submit" id="txt-g-add-btn"></button>
     </form>
@@ -639,6 +726,21 @@
       resetChecklistConfirm: "체크리스트 응답을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.",
       resetGrowthConfirm: "성장 기록을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.",
       langToggleLabel: "EN",
+      langToggleAria: "언어 전환",
+      ageSettingLabel: "아이는 지금 몇 개월인가요?",
+      ageSettingHint: "입력하면 아직 해당하지 않는 연령대는 자동으로 잠겨서 결과가 더 정확해져요. (선택 입력)",
+      bandLockedNote: (age) => "아직 이 시기가 아니에요 (현재 " + age + "개월) · 이 구간은 결과 집계에서 제외돼요",
+      printBtn: "결과 인쇄하기",
+      shareBtn: "결과 공유/복사",
+      shareCopied: "결과가 복사됐어요. 메모 앱이나 메시지에 붙여넣어 보세요.",
+      shareFailed: "복사에 실패했어요. 화면을 캡처해서 활용해보세요.",
+      shareNoneYet: "아직 체크한 항목이 없어요.",
+      shareTitle: "영유아 발달 관찰 결과",
+      shareNotYetLabel: "아직 안 보이는 항목",
+      shareNoneFlagged: "아직 안 보이는 항목 없음",
+      printStateYes: "네",
+      printStateNotYet: "아직",
+      deleteEntryAria: (date) => "삭제: " + date + " 기록",
     },
     en: {
       docTitle: "Toddler Development Notebook",
@@ -691,6 +793,21 @@
       resetChecklistConfirm: "Clear all checklist answers? The data stored on this device will be lost.",
       resetGrowthConfirm: "Clear all growth entries? The data stored on this device will be lost.",
       langToggleLabel: "KO",
+      langToggleAria: "Switch language",
+      ageSettingLabel: "How many months old is your child?",
+      ageSettingHint: "If you enter this, age bands your child hasn't reached yet are locked automatically, making the result more accurate. (Optional)",
+      bandLockedNote: (age) => "Not this stage yet (currently " + age + " months) · excluded from the result",
+      printBtn: "Print summary",
+      shareBtn: "Share / copy summary",
+      shareCopied: "Summary copied. Paste it into a notes app or message.",
+      shareFailed: "Couldn't copy. Try taking a screenshot instead.",
+      shareNoneYet: "No items checked yet.",
+      shareTitle: "Toddler Development Observation Summary",
+      shareNotYetLabel: "Items not yet shown",
+      shareNoneFlagged: "No items flagged as not-yet",
+      printStateYes: "Yes",
+      printStateNotYet: "Not yet",
+      deleteEntryAria: (date) => "Delete entry: " + date,
     },
   };
 
@@ -762,6 +879,18 @@
     return STRINGS[locale];
   }
 
+  const CHILD_AGE_KEY = "dev-child-age-months";
+  function getInitialChildAge() {
+    const saved = localStorage.getItem(CHILD_AGE_KEY);
+    const n = saved === null ? NaN : parseInt(saved, 10);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }
+  let childAgeMonths = getInitialChildAge();
+
+  function isBandLocked(band) {
+    return childAgeMonths !== null && band.month > childAgeMonths;
+  }
+
   function applyStaticText() {
     const s = t();
     document.title = s.docTitle;
@@ -796,6 +925,11 @@
     document.getElementById("reset-checklist-btn").textContent = s.resetChecklistBtn;
     document.getElementById("reset-growth-btn").textContent = s.resetGrowthBtn;
     document.getElementById("lang-toggle-label").textContent = s.langToggleLabel;
+    document.getElementById("lang-toggle").setAttribute("aria-label", s.langToggleAria);
+    document.getElementById("txt-age-setting-label").textContent = s.ageSettingLabel;
+    document.getElementById("txt-age-setting-hint").textContent = s.ageSettingHint;
+    document.getElementById("print-btn").textContent = s.printBtn;
+    document.getElementById("share-btn").textContent = s.shareBtn;
   }
 
   const STORAGE_KEY = "dev-checklist-responses-v2";
@@ -813,10 +947,12 @@
   }
 
   function render() {
+    const s = t();
     bandsEl.innerHTML = "";
     DATA.forEach((band) => {
+      const locked = isBandLocked(band);
       const section = document.createElement("section");
-      section.className = "band";
+      section.className = "band" + (locked ? " locked" : "");
 
       const head = document.createElement("div");
       head.className = "band-head";
@@ -826,8 +962,17 @@
       head.innerHTML =
         '<span class="band-month">' + band.month + "M</span>" +
         '<span class="band-label">' + band.label[locale] + "</span>" +
-        '<span class="band-tally">' + t().bandTally(notYetCount) + "</span>";
+        '<span class="band-tally">' + (locked ? "🔒" : s.bandTally(notYetCount)) + "</span>";
       section.appendChild(head);
+
+      if (locked) {
+        const note = document.createElement("div");
+        note.className = "band-locked-note";
+        note.textContent = s.bandLockedNote(childAgeMonths);
+        section.appendChild(note);
+        bandsEl.appendChild(section);
+        return;
+      }
 
       band.items.forEach((item, idx) => {
         const key = itemKey(band.month, idx);
@@ -844,6 +989,10 @@
         const label = document.createElement("div");
         label.className = "item-text";
         label.textContent = item[locale];
+        const printState = document.createElement("span");
+        printState.className = "item-print-state";
+        printState.textContent = state === "yes" ? " — " + s.printStateYes : state === "notyet" ? " — " + s.printStateNotYet : "";
+        label.appendChild(printState);
         body.appendChild(domainTag);
         body.appendChild(label);
         row.appendChild(body);
@@ -853,13 +1002,15 @@
 
         const yesBtn = document.createElement("button");
         yesBtn.type = "button";
-        yesBtn.textContent = t().yesBtn;
+        yesBtn.textContent = s.yesBtn;
+        yesBtn.setAttribute("aria-pressed", state === "yes" ? "true" : "false");
         if (state === "yes") yesBtn.classList.add("active-yes");
         yesBtn.addEventListener("click", () => setResponse(key, state === "yes" ? null : "yes"));
 
         const notYetBtn = document.createElement("button");
         notYetBtn.type = "button";
-        notYetBtn.textContent = t().notYetBtn;
+        notYetBtn.textContent = s.notYetBtn;
+        notYetBtn.setAttribute("aria-pressed", state === "notyet" ? "true" : "false");
         if (state === "notyet") notYetBtn.classList.add("active-notyet");
         notYetBtn.addEventListener("click", () => setResponse(key, state === "notyet" ? null : "notyet"));
 
@@ -887,12 +1038,13 @@
   }
 
   function totalItems() {
-    return DATA.reduce((sum, b) => sum + b.items.length, 0);
+    return DATA.reduce((sum, b) => sum + (isBandLocked(b) ? 0 : b.items.length), 0);
   }
 
   function itemsByDomain() {
     const map = { social: [], language: [], cognitive: [], physical: [] };
     DATA.forEach((band) => {
+      if (isBandLocked(band)) return;
       band.items.forEach((item, idx) => {
         map[item.domain].push(itemKey(band.month, idx));
       });
@@ -900,8 +1052,18 @@
     return map;
   }
 
+  function unlockedKeySet() {
+    const set = new Set();
+    DATA.forEach((band) => {
+      if (isBandLocked(band)) return;
+      band.items.forEach((_, idx) => set.add(itemKey(band.month, idx)));
+    });
+    return set;
+  }
+
   function updateProgress() {
-    const answered = Object.keys(responses).length;
+    const unlocked = unlockedKeySet();
+    const answered = Object.keys(responses).filter((k) => unlocked.has(k)).length;
     const total = totalItems();
     document.getElementById("progress-nums").textContent = answered + " / " + total;
     document.getElementById("progress-fill").style.width = (total ? (answered / total) * 100 : 0) + "%";
@@ -909,18 +1071,14 @@
 
   function updateResult() {
     const s = t();
-    const answered = Object.keys(responses).length;
-    const notYet = Object.values(responses).filter((v) => v === "notyet").length;
+    const unlocked = unlockedKeySet();
+    const relevantEntries = Object.entries(responses).filter(([k]) => unlocked.has(k));
+    const answered = relevantEntries.length;
+    const notYet = relevantEntries.filter(([, v]) => v === "notyet").length;
     const badge = document.getElementById("result-badge");
     const title = document.getElementById("result-title");
     const text = document.getElementById("result-text");
-    let breakdown = document.getElementById("domain-breakdown");
-    if (!breakdown) {
-      breakdown = document.createElement("div");
-      breakdown.className = "domain-breakdown";
-      breakdown.id = "domain-breakdown";
-      document.getElementById("result").appendChild(breakdown);
-    }
+    const breakdown = document.getElementById("domain-breakdown");
 
     if (answered === 0) {
       badge.textContent = "–";
@@ -970,6 +1128,21 @@
     }
   }
 
+  const childAgeInput = document.getElementById("child-age-input");
+  childAgeInput.value = childAgeMonths === null ? "" : String(childAgeMonths);
+  childAgeInput.addEventListener("input", () => {
+    const raw = childAgeInput.value.trim();
+    if (raw === "") {
+      childAgeMonths = null;
+      localStorage.removeItem(CHILD_AGE_KEY);
+    } else {
+      const n = parseInt(raw, 10);
+      childAgeMonths = Number.isFinite(n) && n >= 0 ? n : null;
+      if (childAgeMonths !== null) localStorage.setItem(CHILD_AGE_KEY, String(childAgeMonths));
+    }
+    render();
+  });
+
   document.getElementById("reset-checklist-btn").addEventListener("click", () => {
     if (confirm(t().resetChecklistConfirm)) {
       responses = {};
@@ -981,9 +1154,13 @@
   // ---- Tabs ----
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
       document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
       btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
       document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
     });
   });
@@ -995,6 +1172,62 @@
     applyStaticText();
     render();
     renderGrowth();
+  });
+
+  // ---- Print & share ----
+  function composeShareText() {
+    const s = t();
+    const unlocked = unlockedKeySet();
+    const answeredKeys = Object.keys(responses).filter((k) => unlocked.has(k));
+    if (answeredKeys.length === 0) return null;
+
+    const lines = [s.shareTitle, ""];
+    lines.push(document.getElementById("result-title").textContent);
+    lines.push(document.getElementById("result-text").textContent);
+    lines.push("");
+    lines.push(s.shareNotYetLabel + ":");
+
+    const notYetLines = [];
+    DATA.forEach((band) => {
+      if (isBandLocked(band)) return;
+      band.items.forEach((item, idx) => {
+        const key = itemKey(band.month, idx);
+        if (responses[key] === "notyet") {
+          notYetLines.push("- [" + band.label[locale] + " / " + DOMAIN_LABELS[locale][item.domain] + "] " + item[locale]);
+        }
+      });
+    });
+    lines.push(notYetLines.length ? notYetLines.join("\n") : s.shareNoneFlagged);
+
+    return lines.join("\n");
+  }
+
+  document.getElementById("print-btn").addEventListener("click", () => {
+    window.print();
+  });
+
+  document.getElementById("share-btn").addEventListener("click", async () => {
+    const s = t();
+    const statusEl = document.getElementById("share-status");
+    const text = composeShareText();
+    if (!text) {
+      statusEl.textContent = s.shareNoneYet;
+      return;
+    }
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: s.shareTitle, text });
+        return;
+      } catch (e) {
+        // fall through to clipboard on cancel/failure
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      statusEl.textContent = s.shareCopied;
+    } catch (e) {
+      statusEl.textContent = s.shareFailed;
+    }
   });
 
   // ---- Growth log ----
@@ -1033,7 +1266,7 @@
           "<td>" + entry.date + "</td>" +
           "<td>" + (entry.height != null ? entry.height : "–") + "</td>" +
           "<td>" + (entry.weight != null ? entry.weight : "–") + "</td>" +
-          '<td class="del"><button type="button" data-id="' + entry.id + '">' + s.delBtn + "</button></td>";
+          '<td class="del"><button type="button" data-id="' + entry.id + '" aria-label="' + s.deleteEntryAria(entry.date) + '">' + s.delBtn + "</button></td>";
         tbody.appendChild(tr);
       });
       tbody.querySelectorAll("button[data-id]").forEach((btn) => {

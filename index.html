@@ -590,13 +590,6 @@
   }
   .result-actions button:hover { background: var(--sage-pale); }
   .result-actions button:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
-  .share-status {
-    font-size: 12px;
-    color: var(--sage-deep);
-    text-align: center;
-    margin-top: 8px;
-    min-height: 1em;
-  }
 
   @media (prefers-reduced-motion: reduce) {
     .progress-fill { transition: none; }
@@ -693,9 +686,7 @@
       </div>
       <div class="result-actions">
         <button type="button" id="print-btn"></button>
-        <button type="button" id="share-btn"></button>
       </div>
-      <div class="share-status" id="share-status"></div>
     </section>
   </section>
 
@@ -817,10 +808,12 @@
       footerNote: "모든 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요.",
       resetChecklistBtn: "체크리스트 초기화",
       resetGrowthBtn: "성장 기록 초기화",
-      shareAppBtn: "이 앱 공유하기",
+      shareAppBtn: "공유하기",
       shareAppTitle: "영유아 발달 관찰 수첩",
       shareAppText: "영유아 발달을 관찰하고 성장을 기록하는 개인용 웹앱이에요. 진단 도구는 아니에요.",
+      shareIncludeResultConfirm: "지금까지 체크한 결과가 있어요. 결과 내용도 함께 공유할까요?\n\n확인: 결과 포함해서 공유\n취소: 앱 정보만 공유",
       shareAppCopied: "앱 링크가 복사됐어요. 개인 기록은 포함되지 않아요.",
+      shareCopiedWithResult: "결과가 포함된 내용이 복사됐어요.",
       shareAppFailed: "복사에 실패했어요. 주소를 직접 복사해주세요.",
       regressionTitle: "혹시, 예전엔 할 수 있었던 걸 지금은 못 하게 됐나요?",
       regressionText: "예전에 하던 말이나 몸짓, 놀이 방식을 어느 순간부터 갑자기 하지 않게 된 경우를 말해요. 몇 개 항목을 체크했는지와 관계없이, 이 신호 하나만으로도 소아과 상담이 필요할 수 있어요.",
@@ -840,10 +833,6 @@
       ageSettingHint: "생년월일과 성별을 입력하면 체크리스트 연령 잠금과 성장 백분위 계산에 쓰여요. (선택 입력, 기기에만 저장돼요)",
       bandLockedNote: (age) => "아직 이 시기가 아니에요 (현재 " + age + "개월) · 이 구간은 결과 집계에서 제외돼요",
       printBtn: "결과 인쇄하기",
-      shareBtn: "결과 공유/복사",
-      shareCopied: "결과가 복사됐어요. 메모 앱이나 메시지에 붙여넣어 보세요.",
-      shareFailed: "복사에 실패했어요. 화면을 캡처해서 활용해보세요.",
-      shareNoneYet: "아직 체크한 항목이 없어요.",
       shareTitle: "영유아 발달 관찰 결과",
       shareNotYetLabel: "아직 안 보이는 항목",
       shareNoneFlagged: "아직 안 보이는 항목 없음",
@@ -909,10 +898,12 @@
       footerNote: "All records are stored only in this browser (device) and are never sent to a server.",
       resetChecklistBtn: "Reset checklist",
       resetGrowthBtn: "Reset growth log",
-      shareAppBtn: "Share this app",
+      shareAppBtn: "Share",
       shareAppTitle: "Toddler Development Notebook",
       shareAppText: "A personal web app for observing toddler development and logging growth. Not a diagnostic tool.",
+      shareIncludeResultConfirm: "You have a checked result so far. Include the result in what you share?\n\nOK: share app + result\nCancel: share app info only",
       shareAppCopied: "App link copied. No personal records are included.",
+      shareCopiedWithResult: "Copied, including your result.",
       shareAppFailed: "Couldn't copy. Please copy the address manually.",
       regressionTitle: "Has your child lost a skill they used to have?",
       regressionText: "This means a word, gesture, or way of playing they used to do that they suddenly stopped doing. Regardless of how many checklist items you've marked, this sign alone can be worth a pediatrician visit.",
@@ -932,10 +923,6 @@
       ageSettingHint: "Birthdate and sex are used for the checklist's age lock and for growth percentile calculation. (Optional, stored on this device only)",
       bandLockedNote: (age) => "Not this stage yet (currently " + age + " months) · excluded from the result",
       printBtn: "Print summary",
-      shareBtn: "Share / copy summary",
-      shareCopied: "Summary copied. Paste it into a notes app or message.",
-      shareFailed: "Couldn't copy. Try taking a screenshot instead.",
-      shareNoneYet: "No items checked yet.",
       shareTitle: "Toddler Development Observation Summary",
       shareNotYetLabel: "Items not yet shown",
       shareNoneFlagged: "No items flagged as not-yet",
@@ -1148,7 +1135,6 @@
     document.getElementById("txt-age-setting-hint").textContent = s.ageSettingHint;
     updateCurrentAgeDisplay();
     document.getElementById("print-btn").textContent = s.printBtn;
-    document.getElementById("share-btn").textContent = s.shareBtn;
     document.getElementById("txt-regression-title").textContent = s.regressionTitle;
     document.getElementById("txt-regression-text").textContent = s.regressionText;
     document.getElementById("regression-no").textContent = s.regressionNo;
@@ -1389,24 +1375,36 @@
     renderGrowth();
   });
 
-  // Shares only the app's name/description/URL — never reads `responses`,
-  // `growthEntries`, `childBirthdate`, or `childSex`, so no personal data can leak in.
+  // Shares the app's name/description/URL by default — reads `responses`/
+  // `regressionFlag` ONLY to ask the user whether to append the result, and
+  // only appends it if they explicitly say yes. Never reads `growthEntries`,
+  // `childBirthdate`, or `childSex`, so growth/personal data can never leak in.
   document.getElementById("share-app-btn").addEventListener("click", async () => {
     const s = t();
     const statusEl = document.getElementById("app-share-status");
-    const payload = { title: s.shareAppTitle, text: s.shareAppText, url: APP_URL };
+    statusEl.textContent = "";
+
+    const resultSummary = composeResultSummaryText();
+    const includeResult = resultSummary ? confirm(s.shareIncludeResultConfirm) : false;
+
+    const lines = [s.shareAppTitle, s.shareAppText, APP_URL];
+    if (includeResult) {
+      lines.push("");
+      lines.push(resultSummary);
+    }
+    const text = lines.join("\n");
 
     if (navigator.share) {
       try {
-        await navigator.share(payload);
+        await navigator.share({ title: s.shareAppTitle, text });
         return;
       } catch (e) {
         // fall through to clipboard on cancel/failure
       }
     }
     try {
-      await navigator.clipboard.writeText(s.shareAppTitle + " — " + s.shareAppText + "\n" + APP_URL);
-      statusEl.textContent = s.shareAppCopied;
+      await navigator.clipboard.writeText(text);
+      statusEl.textContent = includeResult ? s.shareCopiedWithResult : s.shareAppCopied;
     } catch (e) {
       statusEl.textContent = s.shareAppFailed + " " + APP_URL;
     }
@@ -1445,7 +1443,9 @@
   });
 
   // ---- Print & share ----
-  function composeShareText() {
+  // Returns null when there's nothing to summarize yet (no checked items and
+  // no regression flag), so callers can tell "no result" apart from "empty result".
+  function composeResultSummaryText() {
     const s = t();
     const unlocked = unlockedKeySet();
     const answeredKeys = Object.keys(responses).filter((k) => unlocked.has(k));
@@ -1474,30 +1474,6 @@
 
   document.getElementById("print-btn").addEventListener("click", () => {
     window.print();
-  });
-
-  document.getElementById("share-btn").addEventListener("click", async () => {
-    const s = t();
-    const statusEl = document.getElementById("share-status");
-    const text = composeShareText();
-    if (!text) {
-      statusEl.textContent = s.shareNoneYet;
-      return;
-    }
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: s.shareTitle, text });
-        return;
-      } catch (e) {
-        // fall through to clipboard on cancel/failure
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(text);
-      statusEl.textContent = s.shareCopied;
-    } catch (e) {
-      statusEl.textContent = s.shareFailed;
-    }
   });
 
   // ---- Growth percentile reference data ----

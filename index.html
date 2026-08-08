@@ -90,6 +90,12 @@
 
   /* Masthead */
   .masthead { padding: 6px 2px 22px; border-bottom: 1px solid var(--line); }
+  .masthead-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
   .eyebrow {
     display: inline-flex;
     align-items: center;
@@ -103,6 +109,24 @@
     padding: 4px 10px;
     border-radius: 3px;
   }
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .lang-toggle:hover { border-color: var(--sage); }
+  .lang-toggle:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
   h1 {
     font-family: var(--font-display);
     font-size: clamp(26px, 6vw, 32px);
@@ -458,36 +482,41 @@
 
 <div class="wrap">
   <header class="masthead">
-    <span class="eyebrow">개인 참고용 · 진단 도구 아님</span>
-    <h1>영유아 발달 관찰 수첩</h1>
-    <p class="sub">아이의 평소 모습을 떠올리며 편하게 체크해보세요. 결과는 기기에만 저장되고 어디로도 전송되지 않아요.</p>
-    <span class="age-chip">관찰 연령 12–36개월 · 사회성·언어·인지·신체 4개 영역</span>
+    <div class="masthead-top">
+      <span class="eyebrow" id="txt-eyebrow"></span>
+      <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Switch language">
+        <span aria-hidden="true">🌐</span><span id="lang-toggle-label"></span>
+      </button>
+    </div>
+    <h1 id="txt-title"></h1>
+    <p class="sub" id="txt-sub"></p>
+    <span class="age-chip" id="txt-agechip"></span>
   </header>
 
   <div class="stamp">
-    <div class="stamp-title">꼭 읽어주세요</div>
+    <div class="stamp-title" id="txt-disclaimer-title"></div>
     <ul>
-      <li>이 체크리스트는 <strong>의학적 진단 도구가 아닙니다.</strong> 발달 관련 진단은 소아청소년과·발달 전문의의 표준화된 평가와 임상 관찰을 통해서만 확인할 수 있어요.</li>
-      <li>신생아·초기 영아기에는 발달 신호를 임상적으로 관찰하기 어려워, 이 도구는 <strong>12개월 이후</strong>부터 사용하도록 구성했어요.</li>
-      <li>여기 담긴 지표는 CDC &ldquo;Learn the Signs. Act Early.&rdquo; 프로그램이 제시하는 사회성·정서 / 언어·의사소통 / 인지 / 신체·운동 4개 영역을 참고해 개인 기록용으로 정리한 것입니다.</li>
-      <li>결과와 상관없이 걱정되는 부분이 있다면 다음 영유아 검진 때 소아과 선생님과 꼭 이야기해보세요.</li>
+      <li id="txt-disclaimer-1"></li>
+      <li id="txt-disclaimer-2"></li>
+      <li id="txt-disclaimer-3"></li>
+      <li id="txt-disclaimer-4"></li>
     </ul>
   </div>
 
   <div class="sensory-note">
-    <div class="sensory-note-title">청각·시각 신호도 함께 살펴보세요</div>
-    <p>말이 늦는 것처럼 보여도 실제로는 잘 안 들려서인 경우가 있어요. 큰 소리에도 반응이 없거나, TV·음악 소리를 유독 크게 키우거나, 사물을 아주 가까이서 보는 습관이 있다면 발달 체크와 별개로 소아과에서 청각·시각 검사를 함께 받아보는 걸 권해요.</p>
+    <div class="sensory-note-title" id="txt-sensory-title"></div>
+    <p id="txt-sensory-text"></p>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" type="button" data-tab="checklist">발달 체크리스트</button>
-    <button class="tab-btn" type="button" data-tab="growth">성장 기록</button>
+    <button class="tab-btn active" type="button" data-tab="checklist" id="txt-tab-checklist"></button>
+    <button class="tab-btn" type="button" data-tab="growth" id="txt-tab-growth"></button>
   </div>
 
   <section class="tab-panel active" id="panel-checklist">
     <div class="progress-bar">
       <div class="progress-row">
-        <span>응답</span>
+        <span id="txt-progress-label"></span>
         <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
         <span class="progress-nums" id="progress-nums">0 / 0</span>
       </div>
@@ -497,124 +526,277 @@
 
     <section class="result" id="result">
       <div class="result-badge" id="result-badge">–</div>
-      <div class="result-title" id="result-title">아직 응답한 항목이 없어요</div>
-      <div class="result-text" id="result-text">위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.</div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-text" id="result-text"></div>
     </section>
   </section>
 
   <section class="tab-panel" id="panel-growth">
     <form class="growth-form" id="growth-form">
       <div>
-        <label for="g-date">날짜</label>
+        <label for="g-date" id="txt-g-date-label"></label>
         <input type="date" id="g-date" required />
       </div>
       <div>
-        <label for="g-height">키(cm)</label>
-        <input type="number" id="g-height" step="0.1" min="0" placeholder="예: 85.5" />
+        <label for="g-height" id="txt-g-height-label"></label>
+        <input type="number" id="g-height" step="0.1" min="0" />
       </div>
       <div>
-        <label for="g-weight">몸무게(kg)</label>
-        <input type="number" id="g-weight" step="0.1" min="0" placeholder="예: 11.2" />
+        <label for="g-weight" id="txt-g-weight-label"></label>
+        <input type="number" id="g-weight" step="0.1" min="0" />
       </div>
-      <button type="submit">기록 추가</button>
+      <button type="submit" id="txt-g-add-btn"></button>
     </form>
 
     <div class="chart-card">
-      <div class="chart-title">키 변화 (cm)</div>
+      <div class="chart-title" id="txt-chart-height-title"></div>
       <canvas id="chart-height"></canvas>
-      <div class="chart-empty" id="chart-height-empty" style="display:none;">기록을 2건 이상 추가하면 그래프가 나타나요.</div>
+      <div class="chart-empty" id="chart-height-empty" style="display:none;"></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">몸무게 변화 (kg)</div>
+      <div class="chart-title" id="txt-chart-weight-title"></div>
       <canvas id="chart-weight"></canvas>
-      <div class="chart-empty" id="chart-weight-empty" style="display:none;">기록을 2건 이상 추가하면 그래프가 나타나요.</div>
+      <div class="chart-empty" id="chart-weight-empty" style="display:none;"></div>
     </div>
 
     <table class="growth-table" id="growth-table" style="display:none;">
       <thead>
-        <tr><th>날짜</th><th>키(cm)</th><th>몸무게(kg)</th><th></th></tr>
+        <tr><th id="txt-gth-1"></th><th id="txt-gth-2"></th><th id="txt-gth-3"></th><th></th></tr>
       </thead>
       <tbody id="growth-table-body"></tbody>
     </table>
-    <p class="growth-empty" id="growth-empty">아직 기록이 없어요. 위에서 첫 기록을 추가해보세요.</p>
-    <p class="growth-empty">이 기록은 개인 추적용이에요. 정확한 백분위·성장 평가는 영유아 검진에서 확인해주세요.</p>
+    <p class="growth-empty" id="growth-empty"></p>
+    <p class="growth-empty" id="growth-note2"></p>
   </section>
 
   <footer>
-    <p>모든 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요.</p>
+    <p id="txt-footer-note"></p>
     <div class="footer-actions">
-      <button class="reset-btn" id="reset-checklist-btn" type="button">체크리스트 초기화</button>
-      <button class="reset-btn" id="reset-growth-btn" type="button">성장 기록 초기화</button>
+      <button class="reset-btn" id="reset-checklist-btn" type="button"></button>
+      <button class="reset-btn" id="reset-growth-btn" type="button"></button>
     </div>
   </footer>
 </div>
 
 <script>
+  // ---- i18n ----
+  const LOCALE_KEY = "lang";
+  function getInitialLocale() {
+    const saved = localStorage.getItem(LOCALE_KEY);
+    return saved === "en" || saved === "ko" ? saved : "en";
+  }
+  let locale = getInitialLocale();
+
+  const STRINGS = {
+    ko: {
+      docTitle: "영유아 발달 관찰 수첩",
+      eyebrow: "개인 참고용 · 진단 도구 아님",
+      title: "영유아 발달 관찰 수첩",
+      sub: "아이의 평소 모습을 떠올리며 편하게 체크해보세요. 결과는 기기에만 저장되고 어디로도 전송되지 않아요.",
+      ageChip: "관찰 연령 12–36개월 · 사회성·언어·인지·신체 4개 영역",
+      disclaimerTitle: "꼭 읽어주세요",
+      disclaimer: [
+        "이 체크리스트는 <strong>의학적 진단 도구가 아닙니다.</strong> 발달 관련 진단은 소아청소년과·발달 전문의의 표준화된 평가와 임상 관찰을 통해서만 확인할 수 있어요.",
+        "신생아·초기 영아기에는 발달 신호를 임상적으로 관찰하기 어려워, 이 도구는 <strong>12개월 이후</strong>부터 사용하도록 구성했어요.",
+        "여기 담긴 지표는 CDC &ldquo;Learn the Signs. Act Early.&rdquo; 프로그램이 제시하는 사회성·정서 / 언어·의사소통 / 인지 / 신체·운동 4개 영역을 참고해 개인 기록용으로 정리한 것입니다.",
+        "결과와 상관없이 걱정되는 부분이 있다면 다음 영유아 검진 때 소아과 선생님과 꼭 이야기해보세요.",
+      ],
+      sensoryTitle: "청각·시각 신호도 함께 살펴보세요",
+      sensoryText: "말이 늦는 것처럼 보여도 실제로는 잘 안 들려서인 경우가 있어요. 큰 소리에도 반응이 없거나, TV·음악 소리를 유독 크게 키우거나, 사물을 아주 가까이서 보는 습관이 있다면 발달 체크와 별개로 소아과에서 청각·시각 검사를 함께 받아보는 걸 권해요.",
+      tabChecklist: "발달 체크리스트",
+      tabGrowth: "성장 기록",
+      progressLabel: "응답",
+      yesBtn: "네, 보여요",
+      notYetBtn: "아직이요",
+      bandTally: (n) => n + "건 아직이요",
+      resultEmptyTitle: "아직 응답한 항목이 없어요",
+      resultEmptyText: "위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.",
+      resultNoneTitle: "지금까지는 특별한 우려가 보이지 않아요",
+      resultNoneText: "체크한 항목들에서는 우려 신호가 발견되지 않았어요. 아이마다 발달 속도는 다를 수 있으니, 정기 영유아 검진으로 계속 지켜봐 주세요.",
+      resultFewTitle: "몇 가지 항목이 아직 나타나지 않았어요",
+      resultFewText: "대부분 정상 범위 안의 차이일 수 있어요. 그래도 다음 영유아 검진 때 소아과 선생님께 이 부분을 함께 이야기해보시길 권해요.",
+      resultManyTitle: "여러 항목에서 우려가 있어요",
+      resultManyText: "이 체크리스트는 진단 도구가 아니에요. 다만 이런 경우엔 가능한 빨리 소아과 또는 발달 전문 클리닉과 상담해보시길 권해드려요.",
+      worstDomainNote: (d) => " 특히 “" + d + "” 영역에서 여러 항목이 아직 안 보이니, 이 부분을 짚어서 이야기해보시면 좋아요.",
+      gDateLabel: "날짜",
+      gHeightLabel: "키(cm)",
+      gWeightLabel: "몸무게(kg)",
+      gHeightPlaceholder: "예: 85.5",
+      gWeightPlaceholder: "예: 11.2",
+      gAddBtn: "기록 추가",
+      chartHeightTitle: "키 변화 (cm)",
+      chartWeightTitle: "몸무게 변화 (kg)",
+      chartEmpty: "기록을 2건 이상 추가하면 그래프가 나타나요.",
+      gthDate: "날짜",
+      gthHeight: "키(cm)",
+      gthWeight: "몸무게(kg)",
+      delBtn: "삭제",
+      growthEmpty: "아직 기록이 없어요. 위에서 첫 기록을 추가해보세요.",
+      growthNote2: "이 기록은 개인 추적용이에요. 정확한 백분위·성장 평가는 영유아 검진에서 확인해주세요.",
+      footerNote: "모든 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요.",
+      resetChecklistBtn: "체크리스트 초기화",
+      resetGrowthBtn: "성장 기록 초기화",
+      resetChecklistConfirm: "체크리스트 응답을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.",
+      resetGrowthConfirm: "성장 기록을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.",
+      langToggleLabel: "EN",
+    },
+    en: {
+      docTitle: "Toddler Development Notebook",
+      eyebrow: "Personal reference · not a diagnostic tool",
+      title: "Toddler Development Notebook",
+      sub: "Check off items based on your child's everyday behavior. Everything stays on this device — nothing is sent anywhere.",
+      ageChip: "Ages 12–36 months · 4 domains: social, language, cognitive, physical",
+      disclaimerTitle: "Please read before using",
+      disclaimer: [
+        "This checklist is <strong>not a medical diagnostic tool.</strong> Developmental conditions can only be confirmed through standardized evaluation and clinical observation by a pediatrician or developmental specialist.",
+        "Developmental signs aren't clinically observable in newborns or early infancy, so this tool is designed for use <strong>from 12 months onward</strong>.",
+        "The items here were compiled for personal record-keeping, informed by the four domains — social/emotional, language/communication, cognitive, and physical/motor — used by the CDC's &ldquo;Learn the Signs. Act Early.&rdquo; program.",
+        "Regardless of the result, if you have any concerns, please bring them up with your pediatrician at the next checkup.",
+      ],
+      sensoryTitle: "Watch for hearing and vision signs too",
+      sensoryText: "What looks like a speech delay is sometimes actually a hearing issue. If your child doesn't react to loud sounds, turns the TV or music up unusually loud, or tends to look at things very close up, it's worth getting a hearing and vision check at the pediatrician alongside this checklist.",
+      tabChecklist: "Development checklist",
+      tabGrowth: "Growth log",
+      progressLabel: "Answered",
+      yesBtn: "Yes, I see it",
+      notYetBtn: "Not yet",
+      bandTally: (n) => n + " not yet",
+      resultEmptyTitle: "No items answered yet",
+      resultEmptyText: "Check items above and a summary will appear here.",
+      resultNoneTitle: "No particular concerns so far",
+      resultNoneText: "No concerning signs were found among the items you checked. Every child develops at their own pace, so keep observing through regular checkups.",
+      resultFewTitle: "A few items haven't shown up yet",
+      resultFewText: "This is often still within the normal range of variation. Still, it's worth mentioning to your pediatrician at the next checkup.",
+      resultManyTitle: "Several items raise concern",
+      resultManyText: "This checklist isn't a diagnostic tool. Still, in a case like this, we'd recommend consulting a pediatrician or developmental clinic as soon as you reasonably can.",
+      worstDomainNote: (d) => " In particular, several items in the “" + d + "” domain haven't shown up yet — it may help to bring that up specifically.",
+      gDateLabel: "Date",
+      gHeightLabel: "Height (cm)",
+      gWeightLabel: "Weight (kg)",
+      gHeightPlaceholder: "e.g. 85.5",
+      gWeightPlaceholder: "e.g. 11.2",
+      gAddBtn: "Add entry",
+      chartHeightTitle: "Height over time (cm)",
+      chartWeightTitle: "Weight over time (kg)",
+      chartEmpty: "Add at least 2 entries to see a chart.",
+      gthDate: "Date",
+      gthHeight: "Height (cm)",
+      gthWeight: "Weight (kg)",
+      delBtn: "Delete",
+      growthEmpty: "No entries yet. Add your first one above.",
+      growthNote2: "This log is for personal tracking only. Get official percentile and growth assessments at checkups.",
+      footerNote: "All records are stored only in this browser (device) and are never sent to a server.",
+      resetChecklistBtn: "Reset checklist",
+      resetGrowthBtn: "Reset growth log",
+      resetChecklistConfirm: "Clear all checklist answers? The data stored on this device will be lost.",
+      resetGrowthConfirm: "Clear all growth entries? The data stored on this device will be lost.",
+      langToggleLabel: "KO",
+    },
+  };
+
   const DOMAIN_LABELS = {
-    social: "사회성·정서",
-    language: "언어·의사소통",
-    cognitive: "인지",
-    physical: "신체·운동",
+    ko: { social: "사회성·정서", language: "언어·의사소통", cognitive: "인지", physical: "신체·운동" },
+    en: { social: "Social/Emotional", language: "Language/Communication", cognitive: "Cognitive", physical: "Physical/Motor" },
   };
 
   const DATA = [
     {
       month: 12,
-      label: "12개월 무렵",
+      label: { ko: "12개월 무렵", en: "Around 12 months" },
       items: [
-        { domain: "social", text: "낯선 사람과 익숙한 사람을 다르게 대한다" },
-        { domain: "social", text: "눈을 맞추며 웃거나 표정으로 반응한다" },
-        { domain: "language", text: "이름을 부르면 돌아보거나 반응한다" },
-        { domain: "language", text: "옹알이에 자음이 섞여 나온다 (예: “마마”, “바바”)" },
-        { domain: "cognitive", text: "장난감을 숨기면 찾으려고 한다" },
-        { domain: "cognitive", text: "간단한 몸짓(빠이빠이, 까꿍)을 흉내 낸다" },
-        { domain: "physical", text: "잡고 서거나 붙잡고 걸음을 뗀다" },
-        { domain: "physical", text: "큰 소리나 부름에 몸을 돌리는 등 반응을 보인다" },
+        { domain: "social", ko: "낯선 사람과 익숙한 사람을 다르게 대한다", en: "Responds differently to strangers than to familiar people" },
+        { domain: "social", ko: "눈을 맞추며 웃거나 표정으로 반응한다", en: "Makes eye contact while smiling or reacting with facial expressions" },
+        { domain: "language", ko: "이름을 부르면 돌아보거나 반응한다", en: "Turns or responds when called by name" },
+        { domain: "language", ko: "옹알이에 자음이 섞여 나온다 (예: “마마”, “바바”)", en: "Babbling includes consonant sounds (e.g. “mama”, “baba”)" },
+        { domain: "cognitive", ko: "장난감을 숨기면 찾으려고 한다", en: "Tries to find a toy after it's hidden" },
+        { domain: "cognitive", ko: "간단한 몸짓(빠이빠이, 까꿍)을 흉내 낸다", en: "Imitates simple gestures (waving bye-bye, peekaboo)" },
+        { domain: "physical", ko: "잡고 서거나 붙잡고 걸음을 뗀다", en: "Stands while holding on, or takes steps while holding support" },
+        { domain: "physical", ko: "큰 소리나 부름에 몸을 돌리는 등 반응을 보인다", en: "Reacts to loud sounds or being called, such as turning toward them" },
       ],
     },
     {
       month: 18,
-      label: "18개월 무렵",
+      label: { ko: "18개월 무렵", en: "Around 18 months" },
       items: [
-        { domain: "social", text: "양육자의 표정이나 반응을 살피며 행동한다" },
-        { domain: "social", text: "다른 사람에게 물건을 보여주거나 건네며 상호작용한다" },
-        { domain: "language", text: "몇 개의 단어를 의미 있게 사용한다" },
-        { domain: "language", text: "간단한 지시(“이리 와”, “공 줘”)를 이해하고 따른다" },
-        { domain: "cognitive", text: "인형이나 장난감으로 간단한 흉내놀이를 시도한다" },
-        { domain: "cognitive", text: "원하는 물건을 가리키거나 소리 내어 요구한다" },
-        { domain: "physical", text: "혼자 걷고 계단을 기어오르려 한다" },
-        { domain: "physical", text: "작은 물건을 손가락으로 집는다" },
+        { domain: "social", ko: "양육자의 표정이나 반응을 살피며 행동한다", en: "Checks a caregiver's expression or reaction before acting" },
+        { domain: "social", ko: "다른 사람에게 물건을 보여주거나 건네며 상호작용한다", en: "Interacts by showing or handing objects to others" },
+        { domain: "language", ko: "몇 개의 단어를 의미 있게 사용한다", en: "Uses a few words meaningfully" },
+        { domain: "language", ko: "간단한 지시(“이리 와”, “공 줘”)를 이해하고 따른다", en: "Understands and follows simple instructions (“come here”, “give me the ball”)" },
+        { domain: "cognitive", ko: "인형이나 장난감으로 간단한 흉내놀이를 시도한다", en: "Attempts simple pretend play with dolls or toys" },
+        { domain: "cognitive", ko: "원하는 물건을 가리키거나 소리 내어 요구한다", en: "Points at or vocalizes to request a wanted object" },
+        { domain: "physical", ko: "혼자 걷고 계단을 기어오르려 한다", en: "Walks independently and tries to climb stairs" },
+        { domain: "physical", ko: "작은 물건을 손가락으로 집는다", en: "Picks up small objects with fingers" },
       ],
     },
     {
       month: 24,
-      label: "24개월 무렵",
+      label: { ko: "24개월 무렵", en: "Around 24 months" },
       items: [
-        { domain: "social", text: "다른 아이에게 관심을 보이거나 함께 놀려고 한다" },
-        { domain: "social", text: "익숙한 일과가 바뀌어도 크게 힘들어하지 않고 적응한다" },
-        { domain: "language", text: "두 단어를 조합해서 말한다 (예: “엄마 물”)" },
-        { domain: "language", text: "그림책 속 사물을 가리키며 이름을 말하면 반응한다" },
-        { domain: "cognitive", text: "어른의 행동을 흉내 내는 상상놀이를 한다" },
-        { domain: "cognitive", text: "반복적인 몸짓이 놀이 시간 대부분을 차지하지 않는다" },
-        { domain: "physical", text: "뛰거나 공을 발로 찬다" },
-        { domain: "physical", text: "블록을 몇 개 쌓아 올린다" },
+        { domain: "social", ko: "다른 아이에게 관심을 보이거나 함께 놀려고 한다", en: "Shows interest in other children or tries to play with them" },
+        { domain: "social", ko: "익숙한 일과가 바뀌어도 크게 힘들어하지 않고 적응한다", en: "Adapts without much distress when a familiar routine changes" },
+        { domain: "language", ko: "두 단어를 조합해서 말한다 (예: “엄마 물”)", en: "Combines two words when speaking (e.g. “mommy water”)" },
+        { domain: "language", ko: "그림책 속 사물을 가리키며 이름을 말하면 반응한다", en: "Responds by pointing at objects in a picture book when named" },
+        { domain: "cognitive", ko: "어른의 행동을 흉내 내는 상상놀이를 한다", en: "Engages in pretend play imitating adult actions" },
+        { domain: "cognitive", ko: "반복적인 몸짓이 놀이 시간 대부분을 차지하지 않는다", en: "Repetitive movements don't dominate most of playtime" },
+        { domain: "physical", ko: "뛰거나 공을 발로 찬다", en: "Runs or kicks a ball" },
+        { domain: "physical", ko: "블록을 몇 개 쌓아 올린다", en: "Stacks a few blocks" },
       ],
     },
     {
       month: 36,
-      label: "36개월 무렵",
+      label: { ko: "36개월 무렵", en: "Around 36 months" },
       items: [
-        { domain: "social", text: "또래와 역할을 나누어 노는 놀이에 참여한다" },
-        { domain: "social", text: "새로운 사람이나 장소에 심한 불안 없이 적응한다" },
-        { domain: "language", text: "짧은 문장으로 대화를 주고받는다" },
-        { domain: "language", text: "“왜?”, “누구랑?” 같은 질문에 대답할 수 있다" },
-        { domain: "cognitive", text: "특정 사물이나 주제에 지나치게 집착하지 않고 관심사를 유연하게 바꾼다" },
-        { domain: "cognitive", text: "색이나 크기 등 간단한 기준으로 사물을 구분한다" },
-        { domain: "physical", text: "세발자전거 페달을 밟거나 계단을 발을 바꿔가며 오른다" },
-        { domain: "physical", text: "간단한 선이나 원을 따라 그린다" },
+        { domain: "social", ko: "또래와 역할을 나누어 노는 놀이에 참여한다", en: "Takes part in role-sharing play with peers" },
+        { domain: "social", ko: "새로운 사람이나 장소에 심한 불안 없이 적응한다", en: "Adjusts to new people or places without severe anxiety" },
+        { domain: "language", ko: "짧은 문장으로 대화를 주고받는다", en: "Has back-and-forth conversations using short sentences" },
+        { domain: "language", ko: "“왜?”, “누구랑?” 같은 질문에 대답할 수 있다", en: "Can answer questions like “why?” or “with whom?”" },
+        { domain: "cognitive", ko: "특정 사물이나 주제에 지나치게 집착하지 않고 관심사를 유연하게 바꾼다", en: "Shifts interests flexibly rather than fixating on one object or topic" },
+        { domain: "cognitive", ko: "색이나 크기 등 간단한 기준으로 사물을 구분한다", en: "Sorts objects by simple criteria like color or size" },
+        { domain: "physical", ko: "세발자전거 페달을 밟거나 계단을 발을 바꿔가며 오른다", en: "Pedals a tricycle or climbs stairs alternating feet" },
+        { domain: "physical", ko: "간단한 선이나 원을 따라 그린다", en: "Draws simple lines or circles" },
       ],
     },
   ];
+
+  function t() {
+    return STRINGS[locale];
+  }
+
+  function applyStaticText() {
+    const s = t();
+    document.title = s.docTitle;
+    document.documentElement.setAttribute("lang", locale);
+    document.getElementById("txt-eyebrow").textContent = s.eyebrow;
+    document.getElementById("txt-title").textContent = s.title;
+    document.getElementById("txt-sub").textContent = s.sub;
+    document.getElementById("txt-agechip").textContent = s.ageChip;
+    document.getElementById("txt-disclaimer-title").textContent = s.disclaimerTitle;
+    s.disclaimer.forEach((html, i) => {
+      document.getElementById("txt-disclaimer-" + (i + 1)).innerHTML = html;
+    });
+    document.getElementById("txt-sensory-title").textContent = s.sensoryTitle;
+    document.getElementById("txt-sensory-text").textContent = s.sensoryText;
+    document.getElementById("txt-tab-checklist").textContent = s.tabChecklist;
+    document.getElementById("txt-tab-growth").textContent = s.tabGrowth;
+    document.getElementById("txt-progress-label").textContent = s.progressLabel;
+    document.getElementById("txt-g-date-label").textContent = s.gDateLabel;
+    document.getElementById("txt-g-height-label").textContent = s.gHeightLabel;
+    document.getElementById("txt-g-weight-label").textContent = s.gWeightLabel;
+    document.getElementById("g-height").placeholder = s.gHeightPlaceholder;
+    document.getElementById("g-weight").placeholder = s.gWeightPlaceholder;
+    document.getElementById("txt-g-add-btn").textContent = s.gAddBtn;
+    document.getElementById("txt-chart-height-title").textContent = s.chartHeightTitle;
+    document.getElementById("txt-chart-weight-title").textContent = s.chartWeightTitle;
+    document.getElementById("chart-height-empty").textContent = s.chartEmpty;
+    document.getElementById("chart-weight-empty").textContent = s.chartEmpty;
+    document.getElementById("txt-gth-1").textContent = s.gthDate;
+    document.getElementById("txt-gth-2").textContent = s.gthHeight;
+    document.getElementById("txt-gth-3").textContent = s.gthWeight;
+    document.getElementById("txt-footer-note").textContent = s.footerNote;
+    document.getElementById("reset-checklist-btn").textContent = s.resetChecklistBtn;
+    document.getElementById("reset-growth-btn").textContent = s.resetGrowthBtn;
+    document.getElementById("lang-toggle-label").textContent = s.langToggleLabel;
+  }
 
   const STORAGE_KEY = "dev-checklist-responses-v2";
   let responses = {};
@@ -643,8 +825,8 @@
       ).length;
       head.innerHTML =
         '<span class="band-month">' + band.month + "M</span>" +
-        '<span class="band-label">' + band.label + "</span>" +
-        '<span class="band-tally">' + notYetCount + "건 아직이요</span>";
+        '<span class="band-label">' + band.label[locale] + "</span>" +
+        '<span class="band-tally">' + t().bandTally(notYetCount) + "</span>";
       section.appendChild(head);
 
       band.items.forEach((item, idx) => {
@@ -658,10 +840,10 @@
         body.className = "item-body";
         const domainTag = document.createElement("div");
         domainTag.className = "item-domain";
-        domainTag.textContent = DOMAIN_LABELS[item.domain];
+        domainTag.textContent = DOMAIN_LABELS[locale][item.domain];
         const label = document.createElement("div");
         label.className = "item-text";
-        label.textContent = item.text;
+        label.textContent = item[locale];
         body.appendChild(domainTag);
         body.appendChild(label);
         row.appendChild(body);
@@ -671,13 +853,13 @@
 
         const yesBtn = document.createElement("button");
         yesBtn.type = "button";
-        yesBtn.textContent = "네, 보여요";
+        yesBtn.textContent = t().yesBtn;
         if (state === "yes") yesBtn.classList.add("active-yes");
         yesBtn.addEventListener("click", () => setResponse(key, state === "yes" ? null : "yes"));
 
         const notYetBtn = document.createElement("button");
         notYetBtn.type = "button";
-        notYetBtn.textContent = "아직이요";
+        notYetBtn.textContent = t().notYetBtn;
         if (state === "notyet") notYetBtn.classList.add("active-notyet");
         notYetBtn.addEventListener("click", () => setResponse(key, state === "notyet" ? null : "notyet"));
 
@@ -726,6 +908,7 @@
   }
 
   function updateResult() {
+    const s = t();
     const answered = Object.keys(responses).length;
     const notYet = Object.values(responses).filter((v) => v === "notyet").length;
     const badge = document.getElementById("result-badge");
@@ -742,8 +925,8 @@
     if (answered === 0) {
       badge.textContent = "–";
       badge.classList.remove("flag");
-      title.textContent = "아직 응답한 항목이 없어요";
-      text.textContent = "위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.";
+      title.textContent = s.resultEmptyTitle;
+      text.textContent = s.resultEmptyText;
       breakdown.style.display = "none";
       return;
     }
@@ -765,30 +948,30 @@
 
     breakdown.style.display = "flex";
     breakdown.innerHTML = Object.keys(domainCounts)
-      .map((d) => "<span>" + DOMAIN_LABELS[d] + " <b>" + domainCounts[d] + "</b></span>")
+      .map((d) => "<span>" + DOMAIN_LABELS[locale][d] + " <b>" + domainCounts[d] + "</b></span>")
       .join("");
 
     if (notYet === 0) {
       badge.classList.remove("flag");
-      title.textContent = "지금까지는 특별한 우려가 보이지 않아요";
-      text.textContent = "체크한 항목들에서는 우려 신호가 발견되지 않았어요. 아이마다 발달 속도는 다를 수 있으니, 정기 영유아 검진으로 계속 지켜봐 주세요.";
+      title.textContent = s.resultNoneTitle;
+      text.textContent = s.resultNoneText;
     } else if (notYet <= 3) {
       badge.classList.add("flag");
-      title.textContent = "몇 가지 항목이 아직 나타나지 않았어요";
-      text.textContent = "대부분 정상 범위 안의 차이일 수 있어요. 그래도 다음 영유아 검진 때 소아과 선생님께 이 부분을 함께 이야기해보시길 권해요.";
+      title.textContent = s.resultFewTitle;
+      text.textContent = s.resultFewText;
     } else {
       badge.classList.add("flag");
-      title.textContent = "여러 항목에서 우려가 있어요";
-      text.textContent = "이 체크리스트는 진단 도구가 아니에요. 다만 이런 경우엔 가능한 빨리 소아과 또는 발달 전문 클리닉과 상담해보시길 권해드려요.";
+      title.textContent = s.resultManyTitle;
+      text.textContent = s.resultManyText;
     }
 
     if (worstDomain && worstCount >= 3) {
-      text.textContent += " 특히 “" + DOMAIN_LABELS[worstDomain] + "” 영역에서 여러 항목이 아직 안 보이니, 이 부분을 짚어서 이야기해보시면 좋아요.";
+      text.textContent += s.worstDomainNote(DOMAIN_LABELS[locale][worstDomain]);
     }
   }
 
   document.getElementById("reset-checklist-btn").addEventListener("click", () => {
-    if (confirm("체크리스트 응답을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.")) {
+    if (confirm(t().resetChecklistConfirm)) {
       responses = {};
       localStorage.removeItem(STORAGE_KEY);
       render();
@@ -805,6 +988,15 @@
     });
   });
 
+  // ---- Language toggle ----
+  document.getElementById("lang-toggle").addEventListener("click", () => {
+    locale = locale === "en" ? "ko" : "en";
+    localStorage.setItem(LOCALE_KEY, locale);
+    applyStaticText();
+    render();
+    renderGrowth();
+  });
+
   // ---- Growth log ----
   const GROWTH_KEY = "dev-growth-log-v1";
   let growthEntries = [];
@@ -819,16 +1011,19 @@
   }
 
   function renderGrowth() {
+    const s = t();
     growthEntries.sort((a, b) => a.date.localeCompare(b.date));
 
     const tbody = document.getElementById("growth-table-body");
     const table = document.getElementById("growth-table");
     const empty = document.getElementById("growth-empty");
+    document.getElementById("growth-note2").textContent = s.growthNote2;
     tbody.innerHTML = "";
 
     if (growthEntries.length === 0) {
       table.style.display = "none";
       empty.style.display = "block";
+      empty.textContent = s.growthEmpty;
     } else {
       table.style.display = "table";
       empty.style.display = "none";
@@ -838,7 +1033,7 @@
           "<td>" + entry.date + "</td>" +
           "<td>" + (entry.height != null ? entry.height : "–") + "</td>" +
           "<td>" + (entry.weight != null ? entry.weight : "–") + "</td>" +
-          '<td class="del"><button type="button" data-id="' + entry.id + '">삭제</button></td>';
+          '<td class="del"><button type="button" data-id="' + entry.id + '">' + s.delBtn + "</button></td>";
         tbody.appendChild(tr);
       });
       tbody.querySelectorAll("button[data-id]").forEach((btn) => {
@@ -964,13 +1159,14 @@
   });
 
   document.getElementById("reset-growth-btn").addEventListener("click", () => {
-    if (confirm("성장 기록을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.")) {
+    if (confirm(t().resetGrowthConfirm)) {
       growthEntries = [];
       localStorage.removeItem(GROWTH_KEY);
       renderGrowth();
     }
   });
 
+  applyStaticText();
   render();
   renderGrowth();
 

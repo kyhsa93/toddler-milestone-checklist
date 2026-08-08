@@ -4,7 +4,7 @@ A personal, installable PWA for tracking developmental milestones in toddlers ag
 
 Live app: https://kyhsa93.github.io/toddler-milestone-checklist/
 
-The checklist covers four domains — social/emotional, language/communication, cognitive, and physical/motor — for four age bands (12, 18, 24, 36 months).
+The checklist covers four domains — social/emotional, language/communication, cognitive, and physical/motor — for four age bands (12, 18, 24, 36 months). It's not autism-specific: this is CDC's own general developmental surveillance approach for spotting possible delay in any of the four domains, and the result breaks down "not yet" counts per domain for exactly that reason.
 
 ## Features
 

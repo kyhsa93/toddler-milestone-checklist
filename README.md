@@ -8,11 +8,11 @@ The checklist covers four domains — social/emotional, language/communication, 
 
 ## Features
 
-- **Age lock**: entering the child's current age (in months) automatically locks age bands they haven't reached yet, so the result isn't skewed by milestones they can't be expected to show.
+- **Age lock**: entering the child's birthdate automatically locks age bands they haven't reached yet, so the result isn't skewed by milestones they can't be expected to show. Age is computed from the birthdate on every visit, so it never goes stale.
 - **Regression check**: a standalone question — has the child lost a skill they used to have? — independent of the age-band checklist, since CDC/AAP guidance treats regression as worth a pediatrician visit on its own, regardless of age or other results.
 - **Print / share summary**: the result card has buttons to print a clean summary or share/copy it as text — meant to be brought to a pediatrician visit, not just looked at once.
-- **Share this app**: a separate footer button shares only the app's name, description, and URL — it never reads checklist responses, growth entries, or the child's age, so no personal data can be included.
-- **Growth log**: a simple date/height/weight log with a small trend chart. No percentile calculation.
+- **Share this app**: a separate footer button shares only the app's name, description, and URL — it never reads checklist responses, growth entries, birthdate, or sex, so no personal data can be included.
+- **Growth log with percentiles**: a date/height/weight log with a trend chart, plus a height/weight percentile per entry (requires entering the child's birthdate and sex). Uses the WHO Child Growth Standards under 24 months and the CDC 2000 growth charts from 24 months on — the same switch point CDC itself recommends — computed via the standard LMS method with linear interpolation between reference grid points. Only covers ages 12–36 months; entries outside that range show "out of range" instead of a number rather than extrapolating.
 - **Offline-capable**: installable as a home-screen app; works offline after the first visit via a service worker.
 - Built with accessibility in mind — toggle states and tabs expose `aria-pressed` / `aria-selected` for screen readers.
 
@@ -24,7 +24,7 @@ Developmental or medical conditions can only be assessed through standardized ev
 
 The checklist intentionally starts at 12 months, since developmental signs relevant here are not clinically observable in newborns.
 
-The growth log does not compute percentiles — it's a plain personal record of height/weight over time. Ask your pediatrician for official growth-chart percentiles at checkups.
+Growth percentiles are a reference calculation, not a diagnosis — official growth assessment should come from your pediatrician. WHO reference data was fetched directly from who.int (WHO copyright, but openly published for exactly this kind of reuse); CDC reference data was sourced via the CDC-DNPAO-maintained `cdcanthro` package, which mirrors CDC's own published percentile data files (US federal public domain).
 
 ## Usage
 
@@ -32,4 +32,4 @@ Open `index.html` in any browser, or visit the live app above. No build step, no
 
 ## Data
 
-Everything (checklist responses, growth entries, child's age, language choice) is stored only in the browser's `localStorage`. Nothing is sent to a server or leaves the device. There is currently no export/backup option, so data does not survive clearing site data or switching devices.
+Everything (checklist responses, growth entries, child's birthdate and sex, language choice) is stored only in the browser's `localStorage`. Nothing is sent to a server or leaves the device. There is currently no export/backup option, so data does not survive clearing site data or switching devices.

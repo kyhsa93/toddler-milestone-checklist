@@ -16,7 +16,7 @@ The checklist covers four domains — social/emotional, language/communication, 
 
 ## Disclaimer
 
-This is **not a diagnostic tool**. It is not affiliated with, and does not reproduce, any clinical screening instrument (e.g. M-CHAT-R/F). The milestone items are a personal summary informed by publicly available guidance such as the CDC's "Learn the Signs. Act Early." program.
+This is **not a diagnostic tool**. It is not affiliated with, and does not reproduce, any clinical screening instrument (e.g. M-CHAT-R/F). The milestone items are drawn from the CDC's "Learn the Signs. Act Early." program (2022-revision checklists), cross-checked against the official checklist content rather than written from memory.
 
 Developmental or medical conditions can only be assessed through standardized evaluation and clinical observation by a qualified pediatrician or developmental specialist. If you have concerns about your child's development, please talk to one — regardless of what this checklist shows.
 

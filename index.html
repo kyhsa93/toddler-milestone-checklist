@@ -575,6 +575,7 @@
       <li id="txt-disclaimer-2"></li>
       <li id="txt-disclaimer-3"></li>
       <li id="txt-disclaimer-4"></li>
+      <li id="txt-disclaimer-5"></li>
     </ul>
   </div>
 
@@ -687,6 +688,7 @@
         "신생아·초기 영아기에는 발달 신호를 임상적으로 관찰하기 어려워, 이 도구는 <strong>12개월 이후</strong>부터 사용하도록 구성했어요.",
         "여기 담긴 지표는 CDC &ldquo;Learn the Signs. Act Early.&rdquo; 프로그램이 제시하는 사회성·정서 / 언어·의사소통 / 인지 / 신체·운동 4개 영역을 참고해 개인 기록용으로 정리한 것입니다.",
         "결과와 상관없이 걱정되는 부분이 있다면 다음 영유아 검진 때 소아과 선생님과 꼭 이야기해보세요.",
+        "참고로 미국소아과학회(AAP)는 18개월과 24개월 영유아 검진에서 자폐 스펙트럼 선별검사를 받도록 권장하고 있어요.",
       ],
       sensoryTitle: "청각·시각 신호도 함께 살펴보세요",
       sensoryText: "말이 늦는 것처럼 보여도 실제로는 잘 안 들려서인 경우가 있어요. 큰 소리에도 반응이 없거나, TV·음악 소리를 유독 크게 키우거나, 사물을 아주 가까이서 보는 습관이 있다면 발달 체크와 별개로 소아과에서 청각·시각 검사를 함께 받아보는 걸 권해요.",
@@ -754,6 +756,7 @@
         "Developmental signs aren't clinically observable in newborns or early infancy, so this tool is designed for use <strong>from 12 months onward</strong>.",
         "The items here were compiled for personal record-keeping, informed by the four domains — social/emotional, language/communication, cognitive, and physical/motor — used by the CDC's &ldquo;Learn the Signs. Act Early.&rdquo; program.",
         "Regardless of the result, if you have any concerns, please bring them up with your pediatrician at the next checkup.",
+        "For reference, the American Academy of Pediatrics (AAP) recommends autism-specific screening at the 18-month and 24-month checkups.",
       ],
       sensoryTitle: "Watch for hearing and vision signs too",
       sensoryText: "What looks like a speech delay is sometimes actually a hearing issue. If your child doesn't react to loud sounds, turns the TV or music up unusually loud, or tends to look at things very close up, it's worth getting a hearing and vision check at the pediatrician alongside this checklist.",
@@ -816,61 +819,65 @@
     en: { social: "Social/Emotional", language: "Language/Communication", cognitive: "Cognitive", physical: "Physical/Motor" },
   };
 
+  // Items are drawn from the CDC's "Learn the Signs. Act Early." milestone
+  // checklists (2022 revision), cross-checked against two independent
+  // government mirrors of the official CDC PDF. Domain item counts follow
+  // the real checklist and are not forced to be even (CDC's own 12-month
+  // Social/Emotional list has exactly one item).
   const DATA = [
     {
       month: 12,
       label: { ko: "12개월 무렵", en: "Around 12 months" },
       items: [
-        { domain: "social", ko: "낯선 사람과 익숙한 사람을 다르게 대한다", en: "Responds differently to strangers than to familiar people" },
-        { domain: "social", ko: "눈을 맞추며 웃거나 표정으로 반응한다", en: "Makes eye contact while smiling or reacting with facial expressions" },
-        { domain: "language", ko: "이름을 부르면 돌아보거나 반응한다", en: "Turns or responds when called by name" },
-        { domain: "language", ko: "옹알이에 자음이 섞여 나온다 (예: “마마”, “바바”)", en: "Babbling includes consonant sounds (e.g. “mama”, “baba”)" },
-        { domain: "cognitive", ko: "장난감을 숨기면 찾으려고 한다", en: "Tries to find a toy after it's hidden" },
-        { domain: "cognitive", ko: "간단한 몸짓(빠이빠이, 까꿍)을 흉내 낸다", en: "Imitates simple gestures (waving bye-bye, peekaboo)" },
-        { domain: "physical", ko: "잡고 서거나 붙잡고 걸음을 뗀다", en: "Stands while holding on, or takes steps while holding support" },
-        { domain: "physical", ko: "큰 소리나 부름에 몸을 돌리는 등 반응을 보인다", en: "Reacts to loud sounds or being called, such as turning toward them" },
+        { domain: "social", ko: "짝짜꿍 같은 간단한 놀이를 함께 한다", en: "Plays simple games with you, like pat-a-cake" },
+        { domain: "language", ko: "“빠이빠이” 하고 손을 흔든다", en: "Waves “bye-bye”" },
+        { domain: "language", ko: "“엄마”, “아빠” 등 특정 호칭으로 부모를 부른다", en: "Calls a parent “mama”, “dada”, or another special name" },
+        { domain: "cognitive", ko: "컵에 블록을 넣는 등 물건을 용기 안에 넣는다", en: "Puts something in a container, like a block in a cup" },
+        { domain: "cognitive", ko: "담요 밑에 숨긴 장난감처럼, 숨겨진 물건을 찾으려 한다", en: "Looks for objects when they're hidden, like a toy under a blanket" },
+        { domain: "physical", ko: "잡고 일어서서 선다", en: "Pulls up to stand" },
+        { domain: "physical", ko: "가구를 붙잡고 걷는다", en: "Walks while holding on to furniture" },
       ],
     },
     {
       month: 18,
       label: { ko: "18개월 무렵", en: "Around 18 months" },
       items: [
-        { domain: "social", ko: "양육자의 표정이나 반응을 살피며 행동한다", en: "Checks a caregiver's expression or reaction before acting" },
-        { domain: "social", ko: "다른 사람에게 물건을 보여주거나 건네며 상호작용한다", en: "Interacts by showing or handing objects to others" },
-        { domain: "language", ko: "몇 개의 단어를 의미 있게 사용한다", en: "Uses a few words meaningfully" },
-        { domain: "language", ko: "간단한 지시(“이리 와”, “공 줘”)를 이해하고 따른다", en: "Understands and follows simple instructions (“come here”, “give me the ball”)" },
-        { domain: "cognitive", ko: "인형이나 장난감으로 간단한 흉내놀이를 시도한다", en: "Attempts simple pretend play with dolls or toys" },
-        { domain: "cognitive", ko: "원하는 물건을 가리키거나 소리 내어 요구한다", en: "Points at or vocalizes to request a wanted object" },
-        { domain: "physical", ko: "혼자 걷고 계단을 기어오르려 한다", en: "Walks independently and tries to climb stairs" },
-        { domain: "physical", ko: "작은 물건을 손가락으로 집는다", en: "Picks up small objects with fingers" },
+        { domain: "social", ko: "부모가 가까이 있는지 확인하며 떨어져서 논다", en: "Moves away from you but checks that you're still close by" },
+        { domain: "social", ko: "흥미로운 것을 손가락으로 가리켜 보여준다", en: "Points to show you something interesting" },
+        { domain: "language", ko: "“엄마”, “아빠” 외에 세 개 이상의 단어를 말하려고 한다", en: "Tries to say three or more words besides “mama” or “dada”" },
+        { domain: "language", ko: "몸짓 없이 한 단계짜리 지시를 따른다 (예: “그거 줘”)", en: "Follows one-step directions without gestures, like “give it to me”" },
+        { domain: "cognitive", ko: "빗자루질 등 집안일을 흉내 낸다", en: "Copies you doing chores, like sweeping with a broom" },
+        { domain: "cognitive", ko: "장난감 차를 미는 등 단순한 방식으로 장난감을 갖고 논다", en: "Plays with toys in a simple way, like pushing a toy car" },
+        { domain: "physical", ko: "누구의 도움도 없이 혼자 걷는다", en: "Walks without holding on to anyone or anything" },
+        { domain: "physical", ko: "낙서를 한다", en: "Scribbles" },
       ],
     },
     {
       month: 24,
       label: { ko: "24개월 무렵", en: "Around 24 months" },
       items: [
-        { domain: "social", ko: "다른 아이에게 관심을 보이거나 함께 놀려고 한다", en: "Shows interest in other children or tries to play with them" },
-        { domain: "social", ko: "익숙한 일과가 바뀌어도 크게 힘들어하지 않고 적응한다", en: "Adapts without much distress when a familiar routine changes" },
-        { domain: "language", ko: "두 단어를 조합해서 말한다 (예: “엄마 물”)", en: "Combines two words when speaking (e.g. “mommy water”)" },
-        { domain: "language", ko: "그림책 속 사물을 가리키며 이름을 말하면 반응한다", en: "Responds by pointing at objects in a picture book when named" },
-        { domain: "cognitive", ko: "어른의 행동을 흉내 내는 상상놀이를 한다", en: "Engages in pretend play imitating adult actions" },
-        { domain: "cognitive", ko: "반복적인 몸짓이 놀이 시간 대부분을 차지하지 않는다", en: "Repetitive movements don't dominate most of playtime" },
-        { domain: "physical", ko: "뛰거나 공을 발로 찬다", en: "Runs or kicks a ball" },
-        { domain: "physical", ko: "블록을 몇 개 쌓아 올린다", en: "Stacks a few blocks" },
+        { domain: "social", ko: "다른 사람이 다치거나 속상해하면 알아챈다 (멈추거나 슬픈 표정 등)", en: "Notices when others are hurt or upset, such as pausing or looking sad" },
+        { domain: "social", ko: "새로운 상황에서 부모의 표정을 살피며 반응을 판단한다", en: "Looks at your face to see how to react in a new situation" },
+        { domain: "language", ko: "“곰 어디 있어?”처럼 물으면 책 속 사물을 가리킨다", en: "Points to things in a book when asked, like “where's the bear?”" },
+        { domain: "language", ko: "“우유 더”처럼 두 단어를 조합해서 말한다", en: "Says at least two words together, like “more milk”" },
+        { domain: "cognitive", ko: "장난감의 스위치, 손잡이, 버튼을 조작해보려 한다", en: "Tries to use switches, knobs, or buttons on a toy" },
+        { domain: "cognitive", ko: "장난감 두 개 이상을 동시에 갖고 논다", en: "Plays with more than one toy at the same time" },
+        { domain: "physical", ko: "공을 발로 찬다", en: "Kicks a ball" },
+        { domain: "physical", ko: "뛴다", en: "Runs" },
       ],
     },
     {
       month: 36,
       label: { ko: "36개월 무렵", en: "Around 36 months" },
       items: [
-        { domain: "social", ko: "또래와 역할을 나누어 노는 놀이에 참여한다", en: "Takes part in role-sharing play with peers" },
-        { domain: "social", ko: "새로운 사람이나 장소에 심한 불안 없이 적응한다", en: "Adjusts to new people or places without severe anxiety" },
-        { domain: "language", ko: "짧은 문장으로 대화를 주고받는다", en: "Has back-and-forth conversations using short sentences" },
-        { domain: "language", ko: "“왜?”, “누구랑?” 같은 질문에 대답할 수 있다", en: "Can answer questions like “why?” or “with whom?”" },
-        { domain: "cognitive", ko: "특정 사물이나 주제에 지나치게 집착하지 않고 관심사를 유연하게 바꾼다", en: "Shifts interests flexibly rather than fixating on one object or topic" },
-        { domain: "cognitive", ko: "색이나 크기 등 간단한 기준으로 사물을 구분한다", en: "Sorts objects by simple criteria like color or size" },
-        { domain: "physical", ko: "세발자전거 페달을 밟거나 계단을 발을 바꿔가며 오른다", en: "Pedals a tricycle or climbs stairs alternating feet" },
-        { domain: "physical", ko: "간단한 선이나 원을 따라 그린다", en: "Draws simple lines or circles" },
+        { domain: "social", ko: "어린이집 등원처럼 헤어진 뒤 10분 안에 진정한다", en: "Calms down within 10 minutes after you leave, like at a childcare drop-off" },
+        { domain: "social", ko: "다른 아이들을 알아채고 함께 놀려고 한다", en: "Notices other children and joins in to play" },
+        { domain: "language", ko: "최소 두 번 이상 주고받는 대화를 한다", en: "Talks with you in a conversation with at least two back-and-forth exchanges" },
+        { domain: "language", ko: "“누구”, “뭐”, “어디”, “왜” 같은 질문을 한다", en: "Asks “who”, “what”, “where”, or “why” questions" },
+        { domain: "cognitive", ko: "보여주면 원을 따라 그린다", en: "Draws a circle when you show them how" },
+        { domain: "cognitive", ko: "뜨거운 물건이라고 알려주면 만지지 않는다", en: "Avoids touching hot objects, like a stove, when warned" },
+        { domain: "physical", ko: "큰 구슬이나 마카로니 같은 것을 줄에 꿴다", en: "Strings items together, like large beads or macaroni" },
+        { domain: "physical", ko: "헐렁한 바지나 겉옷 등을 혼자 벗고 입는다", en: "Puts on some clothes by themselves, like loose pants or a jacket" },
       ],
     },
   ];
@@ -932,7 +939,7 @@
     document.getElementById("share-btn").textContent = s.shareBtn;
   }
 
-  const STORAGE_KEY = "dev-checklist-responses-v2";
+  const STORAGE_KEY = "dev-checklist-responses-v3";
   let responses = {};
   try {
     responses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};

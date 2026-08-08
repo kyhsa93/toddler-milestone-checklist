@@ -1,0 +1,513 @@
+<title>영유아 발달 관찰 수첩</title>
+<style>
+  :root {
+    --paper: #f1f4ee;
+    --paper-raised: #ffffff;
+    --ink: #263029;
+    --ink-soft: #5b6a5f;
+    --ink-faint: #8b988e;
+    --sage: #5c7a64;
+    --sage-deep: #3f5b47;
+    --sage-pale: #e2ebe1;
+    --amber: #c97c2c;
+    --amber-pale: #f7e9d6;
+    --line: #d7ded2;
+    --shadow: 0 1px 2px rgba(38, 48, 41, 0.06), 0 4px 14px rgba(38, 48, 41, 0.05);
+    --font-display: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    --font-body: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Roboto Mono", "Noto Sans Mono CJK KR", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #182119;
+      --paper-raised: #202b22;
+      --ink: #e9efe6;
+      --ink-soft: #adbdae;
+      --ink-faint: #71847a;
+      --sage: #8fb49b;
+      --sage-deep: #b7d4c1;
+      --sage-pale: #26362b;
+      --amber: #e2a15c;
+      --amber-pale: #3a2e1c;
+      --line: #33402f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #182119;
+    --paper-raised: #202b22;
+    --ink: #e9efe6;
+    --ink-soft: #adbdae;
+    --ink-faint: #71847a;
+    --sage: #8fb49b;
+    --sage-deep: #b7d4c1;
+    --sage-pale: #26362b;
+    --amber: #e2a15c;
+    --amber-pale: #3a2e1c;
+    --line: #33402f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.25);
+  }
+  :root[data-theme="light"] {
+    --paper: #f1f4ee;
+    --paper-raised: #ffffff;
+    --ink: #263029;
+    --ink-soft: #5b6a5f;
+    --ink-faint: #8b988e;
+    --sage: #5c7a64;
+    --sage-deep: #3f5b47;
+    --sage-pale: #e2ebe1;
+    --amber: #c97c2c;
+    --amber-pale: #f7e9d6;
+    --line: #d7ded2;
+    --shadow: 0 1px 2px rgba(38, 48, 41, 0.06), 0 4px 14px rgba(38, 48, 41, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  /* Masthead */
+  .masthead { padding: 6px 2px 22px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--sage-deep);
+    background: var(--sage-pale);
+    border: 1px solid var(--line);
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 6vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 14px 0 6px;
+    text-wrap: balance;
+  }
+  .sub { color: var(--ink-soft); font-size: 15px; max-width: 46ch; }
+  .age-chip {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+
+  /* Disclaimer stamp */
+  .stamp {
+    margin-top: 22px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--amber);
+    border-radius: 4px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .stamp-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+  .stamp ul { margin: 0; padding-left: 18px; }
+  .stamp li { font-size: 14px; color: var(--ink-soft); margin-bottom: 5px; }
+  .stamp li:last-child { margin-bottom: 0; }
+  .stamp strong { color: var(--ink); font-weight: 600; }
+
+  /* Sticky progress */
+  .progress-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin-top: 22px;
+    background: var(--paper);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .progress-track {
+    flex: 1;
+    height: 5px;
+    background: var(--sage-pale);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--sage);
+    transition: width 0.25s ease;
+  }
+  .progress-nums { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* Age band section */
+  .band {
+    margin-top: 30px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .band-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--sage-pale);
+  }
+  .band-month {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--sage-deep);
+    font-variant-numeric: tabular-nums;
+  }
+  .band-label { font-size: 14px; color: var(--ink-soft); }
+  .band-tally {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .item:last-child { border-bottom: none; }
+  .item-text { flex: 1; font-size: 14.5px; }
+  .toggle { display: flex; gap: 6px; flex-shrink: 0; }
+  .toggle button {
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .toggle button:hover { border-color: var(--sage); }
+  .toggle button:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+  .toggle button.active-yes { background: var(--sage); border-color: var(--sage); color: #fff; }
+  .toggle button.active-notyet { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+  /* Result stamp */
+  .result {
+    margin-top: 34px;
+    padding: 24px 22px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper-raised);
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .result-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--sage-deep);
+    font-variant-numeric: tabular-nums;
+  }
+  .result-badge.flag { border-color: var(--amber); color: var(--amber); }
+  .result-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .result-text { font-size: 14px; color: var(--ink-soft); max-width: 44ch; margin: 0 auto; }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  footer p { font-size: 12px; color: var(--ink-faint); max-width: 40ch; margin: 0; }
+  #reset-btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  #reset-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill { transition: none; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <span class="eyebrow">개인 참고용 · 진단 도구 아님</span>
+    <h1>영유아 발달 관찰 수첩</h1>
+    <p class="sub">아이의 평소 모습을 떠올리며 편하게 체크해보세요. 결과는 기기에만 저장되고 어디로도 전송되지 않아요.</p>
+    <span class="age-chip">관찰 연령 12–36개월</span>
+  </header>
+
+  <div class="stamp">
+    <div class="stamp-title">꼭 읽어주세요</div>
+    <ul>
+      <li>이 체크리스트는 <strong>의학적 진단 도구가 아닙니다.</strong> 자폐 스펙트럼 여부는 소아정신과·발달 전문의의 표준화된 평가와 임상 관찰을 통해서만 확인할 수 있어요.</li>
+      <li>신생아·초기 영아기에는 자폐 관련 신호를 임상적으로 관찰하기 어려워, 이 도구는 <strong>12개월 이후</strong>부터 사용하도록 구성했어요.</li>
+      <li>여기 담긴 발달 지표는 CDC &ldquo;Learn the Signs. Act Early.&rdquo; 프로그램 등 공개된 일반 발달 정보를 참고해 개인 기록용으로 정리한 것입니다.</li>
+      <li>결과와 상관없이 걱정되는 부분이 있다면 다음 영유아 검진 때 소아과 선생님과 꼭 이야기해보세요.</li>
+    </ul>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-row">
+      <span>응답</span>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <span class="progress-nums" id="progress-nums">0 / 24</span>
+    </div>
+  </div>
+
+  <main id="bands"></main>
+
+  <section class="result" id="result">
+    <div class="result-badge" id="result-badge">–</div>
+    <div class="result-title" id="result-title">아직 응답한 항목이 없어요</div>
+    <div class="result-text" id="result-text">위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.</div>
+  </section>
+
+  <footer>
+    <p>이 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요. 다른 기기에서는 보이지 않아요.</p>
+    <button id="reset-btn" type="button">전체 초기화</button>
+  </footer>
+</div>
+
+<script>
+  const DATA = [
+    {
+      month: 12,
+      label: "12개월 무렵",
+      items: [
+        "이름을 부르면 돌아보거나 반응한다",
+        "손가락으로 원하는 것을 가리킨다",
+        "“빠이빠이” 같은 간단한 몸짓을 따라 한다",
+        "옹알이에 자음이 섞여 나온다 (예: “마마”, “바바”)",
+        "눈을 맞추며 웃거나 반응한다",
+        "소리, 표정, 몸짓을 주고받으며 함께 논다",
+      ],
+    },
+    {
+      month: 18,
+      label: "18개월 무렵",
+      items: [
+        "몇 개의 단어를 의미 있게 사용한다",
+        "관심 있는 것을 손가락으로 가리켜 보여준다",
+        "원하는 것이 있을 때 손짓이나 소리로 요구한다",
+        "간단한 지시(“이리 와”, “공 줘”)를 이해하고 따른다",
+        "인형이나 장난감으로 흉내놀이를 시도한다",
+        "양육자의 표정이나 반응을 살피며 행동한다",
+      ],
+    },
+    {
+      month: 24,
+      label: "24개월 무렵",
+      items: [
+        "두 단어를 조합해서 말한다 (예: “엄마 물”)",
+        "어른의 행동을 흉내 내는 상상놀이를 한다",
+        "다른 아이에게 관심을 보이거나 함께 놀려고 한다",
+        "그림책 속 사물을 가리키며 이름을 말하면 반응한다",
+        "반복적인 몸짓이 놀이 시간 대부분을 차지하지 않는다",
+        "익숙한 일과가 바뀌어도 크게 힘들어하지 않고 적응한다",
+      ],
+    },
+    {
+      month: 36,
+      label: "36개월 무렵",
+      items: [
+        "짧은 문장으로 대화를 주고받는다",
+        "또래와 역할을 나누어 노는 놀이에 참여한다",
+        "감정을 말이나 표정으로 비교적 잘 표현한다",
+        "“왜?”, “누구랑?” 같은 질문에 대답할 수 있다",
+        "특정 사물이나 주제에 지나치게 집착하지 않고 관심사를 유연하게 바꾼다",
+        "새로운 사람이나 장소에 심한 불안 없이 적응한다",
+      ],
+    },
+  ];
+
+  const STORAGE_KEY = "dev-checklist-responses-v1";
+  let responses = {};
+  try {
+    responses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch (e) {
+    responses = {};
+  }
+
+  const bandsEl = document.getElementById("bands");
+
+  function itemKey(month, idx) {
+    return month + "-" + idx;
+  }
+
+  function render() {
+    bandsEl.innerHTML = "";
+    DATA.forEach((band) => {
+      const section = document.createElement("section");
+      section.className = "band";
+
+      const head = document.createElement("div");
+      head.className = "band-head";
+      const notYetCount = band.items.filter(
+        (_, i) => responses[itemKey(band.month, i)] === "notyet"
+      ).length;
+      head.innerHTML =
+        '<span class="band-month">' + band.month + "M</span>" +
+        '<span class="band-label">' + band.label + "</span>" +
+        '<span class="band-tally">' + notYetCount + "건 아직이요</span>";
+      section.appendChild(head);
+
+      band.items.forEach((text, idx) => {
+        const key = itemKey(band.month, idx);
+        const state = responses[key];
+
+        const row = document.createElement("div");
+        row.className = "item";
+
+        const label = document.createElement("div");
+        label.className = "item-text";
+        label.textContent = text;
+        row.appendChild(label);
+
+        const toggle = document.createElement("div");
+        toggle.className = "toggle";
+
+        const yesBtn = document.createElement("button");
+        yesBtn.type = "button";
+        yesBtn.textContent = "네, 보여요";
+        if (state === "yes") yesBtn.classList.add("active-yes");
+        yesBtn.addEventListener("click", () => setResponse(key, state === "yes" ? null : "yes"));
+
+        const notYetBtn = document.createElement("button");
+        notYetBtn.type = "button";
+        notYetBtn.textContent = "아직이요";
+        if (state === "notyet") notYetBtn.classList.add("active-notyet");
+        notYetBtn.addEventListener("click", () => setResponse(key, state === "notyet" ? null : "notyet"));
+
+        toggle.appendChild(yesBtn);
+        toggle.appendChild(notYetBtn);
+        row.appendChild(toggle);
+        section.appendChild(row);
+      });
+
+      bandsEl.appendChild(section);
+    });
+
+    updateProgress();
+    updateResult();
+  }
+
+  function setResponse(key, value) {
+    if (value === null) {
+      delete responses[key];
+    } else {
+      responses[key] = value;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+    render();
+  }
+
+  function totalItems() {
+    return DATA.reduce((sum, b) => sum + b.items.length, 0);
+  }
+
+  function updateProgress() {
+    const answered = Object.keys(responses).length;
+    const total = totalItems();
+    document.getElementById("progress-nums").textContent = answered + " / " + total;
+    document.getElementById("progress-fill").style.width = (total ? (answered / total) * 100 : 0) + "%";
+  }
+
+  function updateResult() {
+    const answered = Object.keys(responses).length;
+    const notYet = Object.values(responses).filter((v) => v === "notyet").length;
+    const badge = document.getElementById("result-badge");
+    const title = document.getElementById("result-title");
+    const text = document.getElementById("result-text");
+
+    if (answered === 0) {
+      badge.textContent = "–";
+      badge.classList.remove("flag");
+      title.textContent = "아직 응답한 항목이 없어요";
+      text.textContent = "위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.";
+      return;
+    }
+
+    badge.textContent = notYet;
+
+    if (notYet === 0) {
+      badge.classList.remove("flag");
+      title.textContent = "지금까지는 특별한 우려가 보이지 않아요";
+      text.textContent = "체크한 항목들에서는 우려 신호가 발견되지 않았어요. 아이마다 발달 속도는 다를 수 있으니, 정기 영유아 검진으로 계속 지켜봐 주세요.";
+    } else if (notYet <= 2) {
+      badge.classList.add("flag");
+      title.textContent = "몇 가지 항목이 아직 나타나지 않았어요";
+      text.textContent = "대부분 정상 범위 안의 차이일 수 있어요. 그래도 다음 영유아 검진 때 소아과 선생님께 이 부분을 함께 이야기해보시길 권해요.";
+    } else {
+      badge.classList.add("flag");
+      title.textContent = "여러 항목에서 우려가 있어요";
+      text.textContent = "이 체크리스트는 진단 도구가 아니에요. 다만 이런 경우엔 가능한 빨리 소아과 또는 발달 전문 클리닉과 상담해보시길 권해드려요.";
+    }
+  }
+
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    if (confirm("모든 응답을 지울까요? 이 기기에 저장된 기록이 사라져요.")) {
+      responses = {};
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+    }
+  });
+
+  render();
+</script>

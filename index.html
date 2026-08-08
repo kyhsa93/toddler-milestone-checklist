@@ -1,4 +1,14 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>영유아 발달 관찰 수첩</title>
+<meta name="description" content="12~36개월 영유아 발달 관찰 체크리스트와 성장 기록 (진단 도구 아님)" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#5c7a64" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="발달수첩" />
 <style>
   :root {
     --paper: #f1f4ee;
@@ -963,4 +973,10 @@
 
   render();
   renderGrowth();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
 </script>

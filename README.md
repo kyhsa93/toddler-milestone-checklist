@@ -9,7 +9,9 @@ The checklist covers four domains — social/emotional, language/communication, 
 ## Features
 
 - **Age lock**: entering the child's current age (in months) automatically locks age bands they haven't reached yet, so the result isn't skewed by milestones they can't be expected to show.
+- **Regression check**: a standalone question — has the child lost a skill they used to have? — independent of the age-band checklist, since CDC/AAP guidance treats regression as worth a pediatrician visit on its own, regardless of age or other results.
 - **Print / share summary**: the result card has buttons to print a clean summary or share/copy it as text — meant to be brought to a pediatrician visit, not just looked at once.
+- **Share this app**: a separate footer button shares only the app's name, description, and URL — it never reads checklist responses, growth entries, or the child's age, so no personal data can be included.
 - **Growth log**: a simple date/height/weight log with a small trend chart. No percentile calculation.
 - **Offline-capable**: installable as a home-screen app; works offline after the first visit via a service worker.
 - Built with accessibility in mind — toggle states and tabs expose `aria-pressed` / `aria-selected` for screen readers.

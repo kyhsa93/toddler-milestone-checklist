@@ -311,6 +311,40 @@
     font-style: italic;
   }
 
+  /* Regression check */
+  .regression-check {
+    margin-top: 30px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--amber);
+    border-radius: 4px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .regression-check-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+  .regression-check p { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; }
+  .regression-toggle { display: flex; gap: 8px; flex-wrap: wrap; }
+  .regression-toggle button {
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .regression-toggle button:hover { border-color: var(--sage); }
+  .regression-toggle button:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+  .regression-toggle button.active-safe { background: var(--sage); border-color: var(--sage); color: #fff; }
+  .regression-toggle button.active-concern { background: var(--amber); border-color: var(--amber); color: #fff; }
+
   .item {
     display: flex;
     align-items: center;
@@ -497,7 +531,26 @@
     flex-wrap: wrap;
   }
   footer p { font-size: 12px; color: var(--ink-faint); max-width: 34ch; margin: 0; }
-  .footer-actions { display: flex; gap: 8px; }
+  .footer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .footer-share-status {
+    flex-basis: 100%;
+    font-size: 12px;
+    color: var(--sage-deep);
+    margin: 0;
+  }
+  .share-app-btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--sage);
+    background: var(--sage);
+    color: #fff;
+    cursor: pointer;
+  }
+  .share-app-btn:hover { background: var(--sage-deep); border-color: var(--sage-deep); }
+  .share-app-btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
   .reset-btn {
     font-family: var(--font-body);
     font-size: 13px;
@@ -547,7 +600,7 @@
 
   @media print {
     .lang-toggle, .tabs, .age-setting, .toggle, .growth-form,
-    .result-actions, footer, .progress-bar { display: none !important; }
+    .result-actions, footer, .progress-bar, .regression-toggle { display: none !important; }
     .tab-panel { display: block !important; }
     .item-print-state { display: inline; }
     body { background: #fff; color: #000; }
@@ -606,6 +659,16 @@
 
     <main id="bands"></main>
 
+    <div class="regression-check">
+      <div class="regression-check-title" id="txt-regression-title"></div>
+      <p id="txt-regression-text"></p>
+      <div class="regression-toggle">
+        <button type="button" id="regression-no"></button>
+        <button type="button" id="regression-yes"></button>
+      </div>
+      <span class="item-print-state" id="regression-print-state"></span>
+    </div>
+
     <section class="result" id="result">
       <div class="result-badge" id="result-badge">–</div>
       <div class="result-title" id="result-title"></div>
@@ -660,9 +723,11 @@
   <footer>
     <p id="txt-footer-note"></p>
     <div class="footer-actions">
+      <button class="share-app-btn" id="share-app-btn" type="button"></button>
       <button class="reset-btn" id="reset-checklist-btn" type="button"></button>
       <button class="reset-btn" id="reset-growth-btn" type="button"></button>
     </div>
+    <p class="footer-share-status" id="app-share-status"></p>
   </footer>
 </div>
 
@@ -725,6 +790,17 @@
       footerNote: "모든 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요.",
       resetChecklistBtn: "체크리스트 초기화",
       resetGrowthBtn: "성장 기록 초기화",
+      shareAppBtn: "이 앱 공유하기",
+      shareAppTitle: "영유아 발달 관찰 수첩",
+      shareAppText: "영유아 발달을 관찰하고 성장을 기록하는 개인용 웹앱이에요. 진단 도구는 아니에요.",
+      shareAppCopied: "앱 링크가 복사됐어요. 개인 기록은 포함되지 않아요.",
+      shareAppFailed: "복사에 실패했어요. 주소를 직접 복사해주세요.",
+      regressionTitle: "혹시, 예전엔 할 수 있었던 걸 지금은 못 하게 됐나요?",
+      regressionText: "예전에 하던 말이나 몸짓, 놀이 방식을 어느 순간부터 갑자기 하지 않게 된 경우를 말해요. 몇 개 항목을 체크했는지와 관계없이, 이 신호 하나만으로도 소아과 상담이 필요할 수 있어요.",
+      regressionNo: "아니요, 그런 적 없어요",
+      regressionYes: "네, 그런 것 같아요",
+      regressionResultTitle: "퇴행 신호가 있어요 — 되도록 빨리 상담해보세요",
+      regressionResultText: "예전에 하던 것을 갑자기 못 하게 되는 건 나이나 다른 체크 결과와 관계없이, 소아과 또는 발달 전문의와 되도록 빨리 상담해봐야 하는 신호예요.",
       resetChecklistConfirm: "체크리스트 응답을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.",
       resetGrowthConfirm: "성장 기록을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.",
       langToggleLabel: "EN",
@@ -793,6 +869,17 @@
       footerNote: "All records are stored only in this browser (device) and are never sent to a server.",
       resetChecklistBtn: "Reset checklist",
       resetGrowthBtn: "Reset growth log",
+      shareAppBtn: "Share this app",
+      shareAppTitle: "Toddler Development Notebook",
+      shareAppText: "A personal web app for observing toddler development and logging growth. Not a diagnostic tool.",
+      shareAppCopied: "App link copied. No personal records are included.",
+      shareAppFailed: "Couldn't copy. Please copy the address manually.",
+      regressionTitle: "Has your child lost a skill they used to have?",
+      regressionText: "This means a word, gesture, or way of playing they used to do that they suddenly stopped doing. Regardless of how many checklist items you've marked, this sign alone can be worth a pediatrician visit.",
+      regressionNo: "No, that hasn't happened",
+      regressionYes: "Yes, I think so",
+      regressionResultTitle: "A regression sign is present — please consult soon",
+      regressionResultText: "Suddenly losing a skill your child used to have is worth discussing with a pediatrician or developmental specialist as soon as reasonably possible — regardless of age or other results.",
       resetChecklistConfirm: "Clear all checklist answers? The data stored on this device will be lost.",
       resetGrowthConfirm: "Clear all growth entries? The data stored on this device will be lost.",
       langToggleLabel: "KO",
@@ -886,6 +973,8 @@
     return STRINGS[locale];
   }
 
+  const APP_URL = "https://kyhsa93.github.io/toddler-milestone-checklist/";
+
   const CHILD_AGE_KEY = "dev-child-age-months";
   function getInitialChildAge() {
     const saved = localStorage.getItem(CHILD_AGE_KEY);
@@ -896,6 +985,33 @@
 
   function isBandLocked(band) {
     return childAgeMonths !== null && band.month > childAgeMonths;
+  }
+
+  const REGRESSION_KEY = "dev-regression-flag";
+  function getInitialRegressionFlag() {
+    const saved = localStorage.getItem(REGRESSION_KEY);
+    return saved === "yes" || saved === "no" ? saved : null;
+  }
+  let regressionFlag = getInitialRegressionFlag();
+
+  function renderRegression() {
+    const s = t();
+    const noBtn = document.getElementById("regression-no");
+    const yesBtn = document.getElementById("regression-yes");
+    noBtn.classList.toggle("active-safe", regressionFlag === "no");
+    yesBtn.classList.toggle("active-concern", regressionFlag === "yes");
+    noBtn.setAttribute("aria-pressed", regressionFlag === "no" ? "true" : "false");
+    yesBtn.setAttribute("aria-pressed", regressionFlag === "yes" ? "true" : "false");
+    document.getElementById("regression-print-state").textContent =
+      regressionFlag === "no" ? " — " + s.regressionNo : regressionFlag === "yes" ? " — " + s.regressionYes : "";
+  }
+
+  function setRegressionFlag(value) {
+    regressionFlag = regressionFlag === value ? null : value;
+    if (regressionFlag === null) localStorage.removeItem(REGRESSION_KEY);
+    else localStorage.setItem(REGRESSION_KEY, regressionFlag);
+    renderRegression();
+    updateResult();
   }
 
   function applyStaticText() {
@@ -931,12 +1047,17 @@
     document.getElementById("txt-footer-note").textContent = s.footerNote;
     document.getElementById("reset-checklist-btn").textContent = s.resetChecklistBtn;
     document.getElementById("reset-growth-btn").textContent = s.resetGrowthBtn;
+    document.getElementById("share-app-btn").textContent = s.shareAppBtn;
     document.getElementById("lang-toggle-label").textContent = s.langToggleLabel;
     document.getElementById("lang-toggle").setAttribute("aria-label", s.langToggleAria);
     document.getElementById("txt-age-setting-label").textContent = s.ageSettingLabel;
     document.getElementById("txt-age-setting-hint").textContent = s.ageSettingHint;
     document.getElementById("print-btn").textContent = s.printBtn;
     document.getElementById("share-btn").textContent = s.shareBtn;
+    document.getElementById("txt-regression-title").textContent = s.regressionTitle;
+    document.getElementById("txt-regression-text").textContent = s.regressionText;
+    document.getElementById("regression-no").textContent = s.regressionNo;
+    document.getElementById("regression-yes").textContent = s.regressionYes;
   }
 
   const STORAGE_KEY = "dev-checklist-responses-v3";
@@ -1087,11 +1208,20 @@
     const text = document.getElementById("result-text");
     const breakdown = document.getElementById("domain-breakdown");
 
-    if (answered === 0) {
+    if (answered === 0 && regressionFlag !== "yes") {
       badge.textContent = "–";
       badge.classList.remove("flag");
       title.textContent = s.resultEmptyTitle;
       text.textContent = s.resultEmptyText;
+      breakdown.style.display = "none";
+      return;
+    }
+
+    if (regressionFlag === "yes") {
+      badge.textContent = "!";
+      badge.classList.add("flag");
+      title.textContent = s.regressionResultTitle;
+      text.textContent = s.regressionResultText;
       breakdown.style.display = "none";
       return;
     }
@@ -1135,6 +1265,9 @@
     }
   }
 
+  document.getElementById("regression-no").addEventListener("click", () => setRegressionFlag("no"));
+  document.getElementById("regression-yes").addEventListener("click", () => setRegressionFlag("yes"));
+
   const childAgeInput = document.getElementById("child-age-input");
   childAgeInput.value = childAgeMonths === null ? "" : String(childAgeMonths);
   childAgeInput.addEventListener("input", () => {
@@ -1148,6 +1281,29 @@
       if (childAgeMonths !== null) localStorage.setItem(CHILD_AGE_KEY, String(childAgeMonths));
     }
     render();
+  });
+
+  // Shares only the app's name/description/URL — never reads `responses`,
+  // `growthEntries`, or `childAgeMonths`, so no personal data can leak in.
+  document.getElementById("share-app-btn").addEventListener("click", async () => {
+    const s = t();
+    const statusEl = document.getElementById("app-share-status");
+    const payload = { title: s.shareAppTitle, text: s.shareAppText, url: APP_URL };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(payload);
+        return;
+      } catch (e) {
+        // fall through to clipboard on cancel/failure
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(s.shareAppTitle + " — " + s.shareAppText + "\n" + APP_URL);
+      statusEl.textContent = s.shareAppCopied;
+    } catch (e) {
+      statusEl.textContent = s.shareAppFailed + " " + APP_URL;
+    }
   });
 
   document.getElementById("reset-checklist-btn").addEventListener("click", () => {
@@ -1178,6 +1334,7 @@
     localStorage.setItem(LOCALE_KEY, locale);
     applyStaticText();
     render();
+    renderRegression();
     renderGrowth();
   });
 
@@ -1186,7 +1343,7 @@
     const s = t();
     const unlocked = unlockedKeySet();
     const answeredKeys = Object.keys(responses).filter((k) => unlocked.has(k));
-    if (answeredKeys.length === 0) return null;
+    if (answeredKeys.length === 0 && regressionFlag !== "yes") return null;
 
     const lines = [s.shareTitle, ""];
     lines.push(document.getElementById("result-title").textContent);
@@ -1408,6 +1565,7 @@
 
   applyStaticText();
   render();
+  renderRegression();
   renderGrowth();
 
   if ("serviceWorker" in navigator) {

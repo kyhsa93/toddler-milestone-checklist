@@ -136,12 +136,52 @@
   .stamp li:last-child { margin-bottom: 0; }
   .stamp strong { color: var(--ink); font-weight: 600; }
 
+  /* Sensory reference note */
+  .sensory-note {
+    margin-top: 14px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 18px;
+    background: var(--sage-pale);
+  }
+  .sensory-note-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--sage-deep);
+    margin-bottom: 6px;
+  }
+  .sensory-note p { font-size: 13.5px; color: var(--ink-soft); margin: 0; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab-btn {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 4px;
+    margin-right: 18px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+  }
+  .tab-btn.active { color: var(--sage-deep); border-bottom-color: var(--sage); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
   /* Sticky progress */
   .progress-bar {
     position: sticky;
     top: 0;
     z-index: 5;
-    margin-top: 22px;
+    margin-top: 18px;
     background: var(--paper);
     padding: 10px 0;
     border-bottom: 1px solid var(--line);
@@ -210,7 +250,19 @@
     border-bottom: 1px solid var(--line);
   }
   .item:last-child { border-bottom: none; }
-  .item-text { flex: 1; font-size: 14.5px; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-domain {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    color: var(--ink-faint);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-bottom: 5px;
+  }
+  .item-text { font-size: 14.5px; }
   .toggle { display: flex; gap: 6px; flex-shrink: 0; }
   .toggle button {
     font-family: var(--font-body);
@@ -255,7 +307,115 @@
   }
   .result-badge.flag { border-color: var(--amber); color: var(--amber); }
   .result-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .result-text { font-size: 14px; color: var(--ink-soft); max-width: 44ch; margin: 0 auto; }
+  .result-text { font-size: 14px; color: var(--ink-soft); max-width: 44ch; margin: 0 auto 14px; }
+  .domain-breakdown {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    margin-top: 4px;
+  }
+  .domain-breakdown b { color: var(--ink-soft); font-weight: 600; }
+
+  /* Growth tab */
+  .growth-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 8px;
+    margin-top: 20px;
+    align-items: end;
+  }
+  .growth-form label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .growth-form input {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 8px 9px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+  .growth-form input:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+  .growth-form button {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--sage);
+    background: var(--sage);
+    color: #fff;
+    cursor: pointer;
+  }
+  @media (max-width: 480px) {
+    .growth-form { grid-template-columns: 1fr 1fr; }
+    .growth-form button { grid-column: span 2; }
+  }
+
+  .chart-card {
+    margin-top: 24px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+  }
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .chart-card canvas { width: 100%; height: 140px; display: block; }
+  .chart-empty { font-size: 13px; color: var(--ink-faint); padding: 30px 0; text-align: center; }
+
+  .growth-table {
+    margin-top: 24px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .growth-table th, .growth-table td {
+    text-align: left;
+    padding: 9px 8px;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .growth-table th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+  .growth-table td.del {
+    text-align: right;
+  }
+  .growth-table td.del button {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--ink-faint);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .growth-table td.del button:hover { color: var(--amber); }
+  .growth-empty { font-size: 13px; color: var(--ink-faint); margin-top: 18px; }
 
   footer {
     margin-top: 40px;
@@ -267,8 +427,9 @@
     gap: 12px;
     flex-wrap: wrap;
   }
-  footer p { font-size: 12px; color: var(--ink-faint); max-width: 40ch; margin: 0; }
-  #reset-btn {
+  footer p { font-size: 12px; color: var(--ink-faint); max-width: 34ch; margin: 0; }
+  .footer-actions { display: flex; gap: 8px; }
+  .reset-btn {
     font-family: var(--font-body);
     font-size: 13px;
     padding: 8px 14px;
@@ -278,7 +439,7 @@
     color: var(--ink-soft);
     cursor: pointer;
   }
-  #reset-btn:hover { border-color: var(--amber); color: var(--amber); }
+  .reset-btn:hover { border-color: var(--amber); color: var(--amber); }
 
   @media (prefers-reduced-motion: reduce) {
     .progress-fill { transition: none; }
@@ -290,94 +451,162 @@
     <span class="eyebrow">개인 참고용 · 진단 도구 아님</span>
     <h1>영유아 발달 관찰 수첩</h1>
     <p class="sub">아이의 평소 모습을 떠올리며 편하게 체크해보세요. 결과는 기기에만 저장되고 어디로도 전송되지 않아요.</p>
-    <span class="age-chip">관찰 연령 12–36개월</span>
+    <span class="age-chip">관찰 연령 12–36개월 · 사회성·언어·인지·신체 4개 영역</span>
   </header>
 
   <div class="stamp">
     <div class="stamp-title">꼭 읽어주세요</div>
     <ul>
-      <li>이 체크리스트는 <strong>의학적 진단 도구가 아닙니다.</strong> 자폐 스펙트럼 여부는 소아정신과·발달 전문의의 표준화된 평가와 임상 관찰을 통해서만 확인할 수 있어요.</li>
-      <li>신생아·초기 영아기에는 자폐 관련 신호를 임상적으로 관찰하기 어려워, 이 도구는 <strong>12개월 이후</strong>부터 사용하도록 구성했어요.</li>
-      <li>여기 담긴 발달 지표는 CDC &ldquo;Learn the Signs. Act Early.&rdquo; 프로그램 등 공개된 일반 발달 정보를 참고해 개인 기록용으로 정리한 것입니다.</li>
+      <li>이 체크리스트는 <strong>의학적 진단 도구가 아닙니다.</strong> 발달 관련 진단은 소아청소년과·발달 전문의의 표준화된 평가와 임상 관찰을 통해서만 확인할 수 있어요.</li>
+      <li>신생아·초기 영아기에는 발달 신호를 임상적으로 관찰하기 어려워, 이 도구는 <strong>12개월 이후</strong>부터 사용하도록 구성했어요.</li>
+      <li>여기 담긴 지표는 CDC &ldquo;Learn the Signs. Act Early.&rdquo; 프로그램이 제시하는 사회성·정서 / 언어·의사소통 / 인지 / 신체·운동 4개 영역을 참고해 개인 기록용으로 정리한 것입니다.</li>
       <li>결과와 상관없이 걱정되는 부분이 있다면 다음 영유아 검진 때 소아과 선생님과 꼭 이야기해보세요.</li>
     </ul>
   </div>
 
-  <div class="progress-bar">
-    <div class="progress-row">
-      <span>응답</span>
-      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-      <span class="progress-nums" id="progress-nums">0 / 24</span>
-    </div>
+  <div class="sensory-note">
+    <div class="sensory-note-title">청각·시각 신호도 함께 살펴보세요</div>
+    <p>말이 늦는 것처럼 보여도 실제로는 잘 안 들려서인 경우가 있어요. 큰 소리에도 반응이 없거나, TV·음악 소리를 유독 크게 키우거나, 사물을 아주 가까이서 보는 습관이 있다면 발달 체크와 별개로 소아과에서 청각·시각 검사를 함께 받아보는 걸 권해요.</p>
   </div>
 
-  <main id="bands"></main>
+  <div class="tabs">
+    <button class="tab-btn active" type="button" data-tab="checklist">발달 체크리스트</button>
+    <button class="tab-btn" type="button" data-tab="growth">성장 기록</button>
+  </div>
 
-  <section class="result" id="result">
-    <div class="result-badge" id="result-badge">–</div>
-    <div class="result-title" id="result-title">아직 응답한 항목이 없어요</div>
-    <div class="result-text" id="result-text">위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.</div>
+  <section class="tab-panel active" id="panel-checklist">
+    <div class="progress-bar">
+      <div class="progress-row">
+        <span>응답</span>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <span class="progress-nums" id="progress-nums">0 / 0</span>
+      </div>
+    </div>
+
+    <main id="bands"></main>
+
+    <section class="result" id="result">
+      <div class="result-badge" id="result-badge">–</div>
+      <div class="result-title" id="result-title">아직 응답한 항목이 없어요</div>
+      <div class="result-text" id="result-text">위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.</div>
+    </section>
+  </section>
+
+  <section class="tab-panel" id="panel-growth">
+    <form class="growth-form" id="growth-form">
+      <div>
+        <label for="g-date">날짜</label>
+        <input type="date" id="g-date" required />
+      </div>
+      <div>
+        <label for="g-height">키(cm)</label>
+        <input type="number" id="g-height" step="0.1" min="0" placeholder="예: 85.5" />
+      </div>
+      <div>
+        <label for="g-weight">몸무게(kg)</label>
+        <input type="number" id="g-weight" step="0.1" min="0" placeholder="예: 11.2" />
+      </div>
+      <button type="submit">기록 추가</button>
+    </form>
+
+    <div class="chart-card">
+      <div class="chart-title">키 변화 (cm)</div>
+      <canvas id="chart-height"></canvas>
+      <div class="chart-empty" id="chart-height-empty" style="display:none;">기록을 2건 이상 추가하면 그래프가 나타나요.</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">몸무게 변화 (kg)</div>
+      <canvas id="chart-weight"></canvas>
+      <div class="chart-empty" id="chart-weight-empty" style="display:none;">기록을 2건 이상 추가하면 그래프가 나타나요.</div>
+    </div>
+
+    <table class="growth-table" id="growth-table" style="display:none;">
+      <thead>
+        <tr><th>날짜</th><th>키(cm)</th><th>몸무게(kg)</th><th></th></tr>
+      </thead>
+      <tbody id="growth-table-body"></tbody>
+    </table>
+    <p class="growth-empty" id="growth-empty">아직 기록이 없어요. 위에서 첫 기록을 추가해보세요.</p>
+    <p class="growth-empty">이 기록은 개인 추적용이에요. 정확한 백분위·성장 평가는 영유아 검진에서 확인해주세요.</p>
   </section>
 
   <footer>
-    <p>이 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요. 다른 기기에서는 보이지 않아요.</p>
-    <button id="reset-btn" type="button">전체 초기화</button>
+    <p>모든 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요.</p>
+    <div class="footer-actions">
+      <button class="reset-btn" id="reset-checklist-btn" type="button">체크리스트 초기화</button>
+      <button class="reset-btn" id="reset-growth-btn" type="button">성장 기록 초기화</button>
+    </div>
   </footer>
 </div>
 
 <script>
+  const DOMAIN_LABELS = {
+    social: "사회성·정서",
+    language: "언어·의사소통",
+    cognitive: "인지",
+    physical: "신체·운동",
+  };
+
   const DATA = [
     {
       month: 12,
       label: "12개월 무렵",
       items: [
-        "이름을 부르면 돌아보거나 반응한다",
-        "손가락으로 원하는 것을 가리킨다",
-        "“빠이빠이” 같은 간단한 몸짓을 따라 한다",
-        "옹알이에 자음이 섞여 나온다 (예: “마마”, “바바”)",
-        "눈을 맞추며 웃거나 반응한다",
-        "소리, 표정, 몸짓을 주고받으며 함께 논다",
+        { domain: "social", text: "낯선 사람과 익숙한 사람을 다르게 대한다" },
+        { domain: "social", text: "눈을 맞추며 웃거나 표정으로 반응한다" },
+        { domain: "language", text: "이름을 부르면 돌아보거나 반응한다" },
+        { domain: "language", text: "옹알이에 자음이 섞여 나온다 (예: “마마”, “바바”)" },
+        { domain: "cognitive", text: "장난감을 숨기면 찾으려고 한다" },
+        { domain: "cognitive", text: "간단한 몸짓(빠이빠이, 까꿍)을 흉내 낸다" },
+        { domain: "physical", text: "잡고 서거나 붙잡고 걸음을 뗀다" },
+        { domain: "physical", text: "큰 소리나 부름에 몸을 돌리는 등 반응을 보인다" },
       ],
     },
     {
       month: 18,
       label: "18개월 무렵",
       items: [
-        "몇 개의 단어를 의미 있게 사용한다",
-        "관심 있는 것을 손가락으로 가리켜 보여준다",
-        "원하는 것이 있을 때 손짓이나 소리로 요구한다",
-        "간단한 지시(“이리 와”, “공 줘”)를 이해하고 따른다",
-        "인형이나 장난감으로 흉내놀이를 시도한다",
-        "양육자의 표정이나 반응을 살피며 행동한다",
+        { domain: "social", text: "양육자의 표정이나 반응을 살피며 행동한다" },
+        { domain: "social", text: "다른 사람에게 물건을 보여주거나 건네며 상호작용한다" },
+        { domain: "language", text: "몇 개의 단어를 의미 있게 사용한다" },
+        { domain: "language", text: "간단한 지시(“이리 와”, “공 줘”)를 이해하고 따른다" },
+        { domain: "cognitive", text: "인형이나 장난감으로 간단한 흉내놀이를 시도한다" },
+        { domain: "cognitive", text: "원하는 물건을 가리키거나 소리 내어 요구한다" },
+        { domain: "physical", text: "혼자 걷고 계단을 기어오르려 한다" },
+        { domain: "physical", text: "작은 물건을 손가락으로 집는다" },
       ],
     },
     {
       month: 24,
       label: "24개월 무렵",
       items: [
-        "두 단어를 조합해서 말한다 (예: “엄마 물”)",
-        "어른의 행동을 흉내 내는 상상놀이를 한다",
-        "다른 아이에게 관심을 보이거나 함께 놀려고 한다",
-        "그림책 속 사물을 가리키며 이름을 말하면 반응한다",
-        "반복적인 몸짓이 놀이 시간 대부분을 차지하지 않는다",
-        "익숙한 일과가 바뀌어도 크게 힘들어하지 않고 적응한다",
+        { domain: "social", text: "다른 아이에게 관심을 보이거나 함께 놀려고 한다" },
+        { domain: "social", text: "익숙한 일과가 바뀌어도 크게 힘들어하지 않고 적응한다" },
+        { domain: "language", text: "두 단어를 조합해서 말한다 (예: “엄마 물”)" },
+        { domain: "language", text: "그림책 속 사물을 가리키며 이름을 말하면 반응한다" },
+        { domain: "cognitive", text: "어른의 행동을 흉내 내는 상상놀이를 한다" },
+        { domain: "cognitive", text: "반복적인 몸짓이 놀이 시간 대부분을 차지하지 않는다" },
+        { domain: "physical", text: "뛰거나 공을 발로 찬다" },
+        { domain: "physical", text: "블록을 몇 개 쌓아 올린다" },
       ],
     },
     {
       month: 36,
       label: "36개월 무렵",
       items: [
-        "짧은 문장으로 대화를 주고받는다",
-        "또래와 역할을 나누어 노는 놀이에 참여한다",
-        "감정을 말이나 표정으로 비교적 잘 표현한다",
-        "“왜?”, “누구랑?” 같은 질문에 대답할 수 있다",
-        "특정 사물이나 주제에 지나치게 집착하지 않고 관심사를 유연하게 바꾼다",
-        "새로운 사람이나 장소에 심한 불안 없이 적응한다",
+        { domain: "social", text: "또래와 역할을 나누어 노는 놀이에 참여한다" },
+        { domain: "social", text: "새로운 사람이나 장소에 심한 불안 없이 적응한다" },
+        { domain: "language", text: "짧은 문장으로 대화를 주고받는다" },
+        { domain: "language", text: "“왜?”, “누구랑?” 같은 질문에 대답할 수 있다" },
+        { domain: "cognitive", text: "특정 사물이나 주제에 지나치게 집착하지 않고 관심사를 유연하게 바꾼다" },
+        { domain: "cognitive", text: "색이나 크기 등 간단한 기준으로 사물을 구분한다" },
+        { domain: "physical", text: "세발자전거 페달을 밟거나 계단을 발을 바꿔가며 오른다" },
+        { domain: "physical", text: "간단한 선이나 원을 따라 그린다" },
       ],
     },
   ];
 
-  const STORAGE_KEY = "dev-checklist-responses-v1";
+  const STORAGE_KEY = "dev-checklist-responses-v2";
   let responses = {};
   try {
     responses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -408,17 +637,24 @@
         '<span class="band-tally">' + notYetCount + "건 아직이요</span>";
       section.appendChild(head);
 
-      band.items.forEach((text, idx) => {
+      band.items.forEach((item, idx) => {
         const key = itemKey(band.month, idx);
         const state = responses[key];
 
         const row = document.createElement("div");
         row.className = "item";
 
+        const body = document.createElement("div");
+        body.className = "item-body";
+        const domainTag = document.createElement("div");
+        domainTag.className = "item-domain";
+        domainTag.textContent = DOMAIN_LABELS[item.domain];
         const label = document.createElement("div");
         label.className = "item-text";
-        label.textContent = text;
-        row.appendChild(label);
+        label.textContent = item.text;
+        body.appendChild(domainTag);
+        body.appendChild(label);
+        row.appendChild(body);
 
         const toggle = document.createElement("div");
         toggle.className = "toggle";
@@ -462,6 +698,16 @@
     return DATA.reduce((sum, b) => sum + b.items.length, 0);
   }
 
+  function itemsByDomain() {
+    const map = { social: [], language: [], cognitive: [], physical: [] };
+    DATA.forEach((band) => {
+      band.items.forEach((item, idx) => {
+        map[item.domain].push(itemKey(band.month, idx));
+      });
+    });
+    return map;
+  }
+
   function updateProgress() {
     const answered = Object.keys(responses).length;
     const total = totalItems();
@@ -475,22 +721,48 @@
     const badge = document.getElementById("result-badge");
     const title = document.getElementById("result-title");
     const text = document.getElementById("result-text");
+    let breakdown = document.getElementById("domain-breakdown");
+    if (!breakdown) {
+      breakdown = document.createElement("div");
+      breakdown.className = "domain-breakdown";
+      breakdown.id = "domain-breakdown";
+      document.getElementById("result").appendChild(breakdown);
+    }
 
     if (answered === 0) {
       badge.textContent = "–";
       badge.classList.remove("flag");
       title.textContent = "아직 응답한 항목이 없어요";
       text.textContent = "위 항목들을 체크하면 이 자리에 결과 요약이 나타나요.";
+      breakdown.style.display = "none";
       return;
     }
 
     badge.textContent = notYet;
 
+    const domainMap = itemsByDomain();
+    const domainCounts = {};
+    let worstDomain = null;
+    let worstCount = 0;
+    Object.keys(domainMap).forEach((d) => {
+      const count = domainMap[d].filter((k) => responses[k] === "notyet").length;
+      domainCounts[d] = count;
+      if (count > worstCount) {
+        worstCount = count;
+        worstDomain = d;
+      }
+    });
+
+    breakdown.style.display = "flex";
+    breakdown.innerHTML = Object.keys(domainCounts)
+      .map((d) => "<span>" + DOMAIN_LABELS[d] + " <b>" + domainCounts[d] + "</b></span>")
+      .join("");
+
     if (notYet === 0) {
       badge.classList.remove("flag");
       title.textContent = "지금까지는 특별한 우려가 보이지 않아요";
       text.textContent = "체크한 항목들에서는 우려 신호가 발견되지 않았어요. 아이마다 발달 속도는 다를 수 있으니, 정기 영유아 검진으로 계속 지켜봐 주세요.";
-    } else if (notYet <= 2) {
+    } else if (notYet <= 3) {
       badge.classList.add("flag");
       title.textContent = "몇 가지 항목이 아직 나타나지 않았어요";
       text.textContent = "대부분 정상 범위 안의 차이일 수 있어요. 그래도 다음 영유아 검진 때 소아과 선생님께 이 부분을 함께 이야기해보시길 권해요.";
@@ -499,15 +771,196 @@
       title.textContent = "여러 항목에서 우려가 있어요";
       text.textContent = "이 체크리스트는 진단 도구가 아니에요. 다만 이런 경우엔 가능한 빨리 소아과 또는 발달 전문 클리닉과 상담해보시길 권해드려요.";
     }
+
+    if (worstDomain && worstCount >= 3) {
+      text.textContent += " 특히 “" + DOMAIN_LABELS[worstDomain] + "” 영역에서 여러 항목이 아직 안 보이니, 이 부분을 짚어서 이야기해보시면 좋아요.";
+    }
   }
 
-  document.getElementById("reset-btn").addEventListener("click", () => {
-    if (confirm("모든 응답을 지울까요? 이 기기에 저장된 기록이 사라져요.")) {
+  document.getElementById("reset-checklist-btn").addEventListener("click", () => {
+    if (confirm("체크리스트 응답을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.")) {
       responses = {};
       localStorage.removeItem(STORAGE_KEY);
       render();
     }
   });
 
+  // ---- Tabs ----
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---- Growth log ----
+  const GROWTH_KEY = "dev-growth-log-v1";
+  let growthEntries = [];
+  try {
+    growthEntries = JSON.parse(localStorage.getItem(GROWTH_KEY)) || [];
+  } catch (e) {
+    growthEntries = [];
+  }
+
+  function saveGrowth() {
+    localStorage.setItem(GROWTH_KEY, JSON.stringify(growthEntries));
+  }
+
+  function renderGrowth() {
+    growthEntries.sort((a, b) => a.date.localeCompare(b.date));
+
+    const tbody = document.getElementById("growth-table-body");
+    const table = document.getElementById("growth-table");
+    const empty = document.getElementById("growth-empty");
+    tbody.innerHTML = "";
+
+    if (growthEntries.length === 0) {
+      table.style.display = "none";
+      empty.style.display = "block";
+    } else {
+      table.style.display = "table";
+      empty.style.display = "none";
+      growthEntries.forEach((entry) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+          "<td>" + entry.date + "</td>" +
+          "<td>" + (entry.height != null ? entry.height : "–") + "</td>" +
+          "<td>" + (entry.weight != null ? entry.weight : "–") + "</td>" +
+          '<td class="del"><button type="button" data-id="' + entry.id + '">삭제</button></td>';
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll("button[data-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          growthEntries = growthEntries.filter((e) => String(e.id) !== btn.dataset.id);
+          saveGrowth();
+          renderGrowth();
+        });
+      });
+    }
+
+    drawChart("chart-height", growthEntries.filter((e) => e.height != null).map((e) => ({ date: e.date, value: e.height })));
+    drawChart("chart-weight", growthEntries.filter((e) => e.weight != null).map((e) => ({ date: e.date, value: e.weight })));
+  }
+
+  function drawChart(canvasId, points) {
+    const canvas = document.getElementById(canvasId);
+    const emptyEl = document.getElementById(canvasId + "-empty");
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const w = rect.width || 560;
+    const h = 140;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    if (points.length < 2) {
+      canvas.style.display = "none";
+      emptyEl.style.display = "block";
+      return;
+    }
+    canvas.style.display = "block";
+    emptyEl.style.display = "none";
+
+    const pad = { top: 10, right: 10, bottom: 10, left: 34 };
+    const plotW = w - pad.left - pad.right;
+    const plotH = h - pad.top - pad.bottom;
+
+    const values = points.map((p) => p.value);
+    let min = Math.min(...values);
+    let max = Math.max(...values);
+    if (min === max) { min -= 1; max += 1; }
+    const margin = (max - min) * 0.15;
+    min -= margin;
+    max += margin;
+
+    const styles = getComputedStyle(document.documentElement);
+    const line = styles.getPropertyValue("--line").trim();
+    const sage = styles.getPropertyValue("--sage").trim();
+    const amber = styles.getPropertyValue("--amber").trim();
+    const inkFaint = styles.getPropertyValue("--ink-faint").trim();
+
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 1;
+    ctx.font = "10px " + getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = inkFaint;
+    for (let i = 0; i <= 3; i++) {
+      const y = pad.top + (plotH / 3) * i;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(w - pad.right, y);
+      ctx.stroke();
+      const val = max - ((max - min) / 3) * i;
+      ctx.fillText(val.toFixed(1), 2, y + 3);
+    }
+
+    const xFor = (i) => pad.left + (points.length === 1 ? 0 : (plotW / (points.length - 1)) * i);
+    const yFor = (v) => pad.top + plotH - ((v - min) / (max - min)) * plotH;
+
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = xFor(i);
+      const y = yFor(p.value);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.lineTo(xFor(points.length - 1), pad.top + plotH);
+    ctx.lineTo(xFor(0), pad.top + plotH);
+    ctx.closePath();
+    ctx.fillStyle = sage + "22";
+    ctx.fill();
+
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = xFor(i);
+      const y = yFor(p.value);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = sage;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    points.forEach((p, i) => {
+      const x = xFor(i);
+      const y = yFor(p.value);
+      const isLast = i === points.length - 1;
+      ctx.beginPath();
+      ctx.arc(x, y, isLast ? 4 : 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = isLast ? amber : sage;
+      ctx.fill();
+    });
+  }
+
+  document.getElementById("growth-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const date = document.getElementById("g-date").value;
+    const heightVal = document.getElementById("g-height").value;
+    const weightVal = document.getElementById("g-weight").value;
+    if (!date || (!heightVal && !weightVal)) return;
+
+    growthEntries.push({
+      id: date + "-" + Math.random().toString(36).slice(2, 8),
+      date,
+      height: heightVal ? parseFloat(heightVal) : null,
+      weight: weightVal ? parseFloat(weightVal) : null,
+    });
+    saveGrowth();
+    e.target.reset();
+    renderGrowth();
+  });
+
+  document.getElementById("reset-growth-btn").addEventListener("click", () => {
+    if (confirm("성장 기록을 모두 지울까요? 이 기기에 저장된 기록이 사라져요.")) {
+      growthEntries = [];
+      localStorage.removeItem(GROWTH_KEY);
+      renderGrowth();
+    }
+  });
+
   render();
+  renderGrowth();
 </script>

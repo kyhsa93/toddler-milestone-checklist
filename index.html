@@ -319,6 +319,18 @@
     font-style: italic;
   }
 
+  .band-tips { margin: 4px 18px 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .band-tips summary {
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sage-deep);
+  }
+  .band-tips summary:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
+  .band-tips-item { margin-top: 10px; font-size: 13.5px; color: var(--ink-soft); }
+  .band-tips-item .item-domain { margin-right: 6px; margin-bottom: 0; vertical-align: middle; }
+  .band-tips-source { margin-top: 10px; font-size: 11.5px; color: var(--ink-faint); }
+
   /* Regression check */
   .regression-check {
     margin-top: 30px;
@@ -440,6 +452,8 @@
     flex-shrink: 0;
   }
   .symptom-check-row label { font-size: 14px; color: var(--ink); }
+  .symptom-card-body ol { margin: 8px 0 16px; padding-left: 22px; font-size: 14px; color: var(--ink); }
+  .symptom-card-body ol li { margin-bottom: 6px; }
 
   .symptom-result {
     margin-top: 16px;
@@ -778,6 +792,7 @@
     <button class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="panel-checklist" id="tab-checklist" data-tab="checklist"><span id="txt-tab-checklist"></span></button>
     <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-growth" id="tab-growth" data-tab="growth"><span id="txt-tab-growth"></span></button>
     <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-symptom" id="tab-symptom" data-tab="symptom"><span id="txt-tab-symptom"></span></button>
+    <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-care" id="tab-care" data-tab="care"><span id="txt-tab-care"></span></button>
   </div>
 
   <section class="tab-panel active" id="panel-checklist" role="tabpanel" aria-labelledby="tab-checklist" tabindex="0">
@@ -865,6 +880,10 @@
     <p class="symptom-footer-note" id="txt-symptom-footer-note"></p>
   </section>
 
+  <section class="tab-panel" id="panel-care" role="tabpanel" aria-labelledby="tab-care" tabindex="0">
+    <div id="care-cards"></div>
+  </section>
+
   <footer>
     <p id="txt-footer-note"></p>
     <div class="footer-actions">
@@ -906,6 +925,7 @@
       tabChecklist: "발달 체크리스트",
       tabGrowth: "성장 기록",
       tabSymptom: "증상 응급도",
+      tabCare: "응급처치·투약",
       progressLabel: "응답",
       yesBtn: "네, 보여요",
       notYetBtn: "아직이요",
@@ -920,6 +940,8 @@
       resultManyText: "이 체크리스트는 진단 도구가 아니에요. 다만 이런 경우엔 가능한 빨리 소아과 또는 발달 전문 클리닉과 상담해보시길 권해드려요.",
       worstDomainNote: (d) => " 특히 “" + d + "” 영역은 또래보다 발달이 늦어지고 있을 수 있으니, 이 부분을 짚어서 이야기해보시면 좋아요.",
       breakdownLabel: "영역별 아직 안 보이는 항목 수",
+      tipsToggleLabel: "이 시기에 도움되는 놀이",
+      tipsSourceNote: "출처: CDC “Learn the Signs. Act Early.” 각 연령 페이지의 Tips and Activities (영역 분류는 재구성)",
       gDateLabel: "날짜",
       gHeightLabel: "키(cm)",
       gWeightLabel: "몸무게(kg)",
@@ -1005,6 +1027,50 @@
       symptomFeverTier3Title: "닷새 이상 열이 이어지고 있어요",
       symptomFeverTier3Text: "고열 기준 아래여도, 5일 이상 지속되는 발열은 진료를 받아보는 게 좋아요.",
       symptomFeverTier4Text: "체온만으로는 특별한 응급 신호가 없어요. 그래도 평소와 다르게 처지거나 잘 안 먹으면 병원에 문의하세요.",
+
+      careChokingTitle: "기도폐쇄(질식) 응급처치",
+      careChokingIntro: "의식을 잃으면 즉시 119에 신고하고 심폐소생술을 시작하세요. 이 내용은 실제 응급처치 교육을 대신하지 않아요 — 가능하다면 대한적십자사 등의 영유아 응급처치 교육을 받아보시길 권해요.",
+      careChokingUnder12: "12개월 미만 (영아)",
+      careChokingUnder12Steps: [
+        "아이 얼굴이 아래를 향하게 팔뚝 위에 엎드려 놓고, 머리를 가슴보다 낮게 유지해요",
+        "손바닥 아랫부분으로 양쪽 어깨뼈 사이를 5회 강하게 두드려요 (등 두드리기)",
+        "얼굴이 위를 향하게 뒤집고, 머리는 계속 가슴보다 낮게 유지해요",
+        "젖꼭지 사이 선 바로 아래, 가슴 중앙에 손가락 두 개를 놓고 약 4cm 깊이로 5회 눌러요 (가슴 압박)",
+        "이물이 나오거나 기침·울음이 시작될 때까지 2~4단계를 반복해요",
+        "의식을 잃으면 평평하고 단단한 바닥에 눕히고 즉시 심폐소생술(가슴압박)을 시작하세요. 인공호흡 전, 입 안에 이물이 눈에 보일 때만 손가락으로 제거하세요",
+      ],
+      careChokingUnder12Warning: "복부를 밀어내는 행동(하임리히법)은 영아에게 절대 하지 마세요 — 장기 손상 위험이 있어요. 발목을 잡고 거꾸로 흔드는 것도 하지 마세요.",
+      careChokingOver12: "12개월 이상 (유아·소아)",
+      careChokingOver12Steps: [
+        "아이의 옆이나 뒤에서, 한쪽 팔로 가슴을 대각선으로 받치며 상체를 앞으로 숙이게 해요",
+        "손바닥 아랫부분으로 양쪽 어깨뼈 사이를 5회 강하게 두드려요",
+        "나아지지 않으면 아이를 세우고, 뒤에서(아이가 작으면 무릎을 꿇고) 양팔로 감싸요",
+        "배꼽 위쪽에 주먹을 대고 다른 손으로 감싸 쥔 뒤, 배 안쪽·위쪽으로 5회 강하게 당겨 밀어내요 (복부 밀어내기)",
+        "이물이 나오거나 기침·울음·목소리가 돌아올 때까지 1~4단계를 반복해요",
+        "의식을 잃으면 평평한 바닥에 눕히고 즉시 심폐소생술(가슴압박)을 시작하세요. 인공호흡 전, 입 안에 이물이 눈에 보일 때만 제거하세요",
+      ],
+      careChokingOver12Warning: "발목을 잡고 거꾸로 흔들지 마세요 — 효과가 없고 낙상 위험이 있어요.",
+      careChokingSourceNote: "출처: 미국적십자사(American Red Cross), 미국심장협회(AHA) 2025년 개정 가이드라인. 참고로 한국 중앙응급의료센터(E-GEN)는 이 글 작성 시점에 12개월 이상 대응법으로 복부 밀어내기만 안내하고 있어 국제 최신 기준(등 두드리기 병행)과 차이가 있어요 — 두 방법 모두 시행 가능하지만, 여기서는 최신 국제 기준을 우선 안내해요.",
+
+      careDoseTitle: "해열제 용량 계산기 (참고용)",
+      careDoseDisclaimerTitle: "이 계산기가 하는 일 / 하지 않는 일",
+      careDoseDisclaimer1: "이 계산기는 <strong>실제 투약을 대신하지 않아요.</strong> 체중을 기준으로 한 mg(밀리그램) 참고 범위만 보여줘요 — 최종 용량은 반드시 약사나 의사에게 확인하세요.",
+      careDoseDisclaimer2: "실제로 몇 mL를 먹여야 하는지는 <strong>사용 중인 제품에 적힌 mg/mL 농도</strong>로 직접 환산해서 확인하세요. 제품마다 농도가 달라서 여기서는 mL로 바꿔주지 않아요.",
+      careDoseDisclaimer3: "이부프로펜과 덱시부프로펜(맥시부펜 등)은 성분과 용량 기준이 달라요. 여기 '이부프로펜' 값을 맥시부펜류에 그대로 적용하지 마세요.",
+      careDoseDisclaimer4: "두 성분(아세트아미노펜·이부프로펜)을 번갈아 먹이는 건 의사가 구체적인 일정을 지시했을 때만 하세요 — 각각 다른 간격이라 실수로 과다 투여하기 쉬워요.",
+      careWeightLabel: "현재 체중(kg)",
+      careWeightHint: (latest) => "성장 기록의 최근 체중(" + latest + "kg)을 불러왔어요. 오늘 체중과 다르면 수정하세요.",
+      careDrugLabel: "약물",
+      careDrugAcetaminophen: "아세트아미노펜 (타이레놀·챔프시럽 등)",
+      careDrugIbuprofen: "이부프로펜 (부루펜 등 — 덱시부프로펜/맥시부펜 제외)",
+      careNeedBirthdate: "정확한 계산을 위해 위쪽 '아이 생년월일'을 입력해주세요.",
+      careBlockedUnder3mo: "생후 3개월 미만 발열은 해열제를 집에서 임의로 먹이지 말고 반드시 병원 진료를 받으세요.",
+      careBlockedIbuprofenUnder6mo: "이부프로펜은 생후 6개월 미만 아이에게 사용하면 안 돼요.",
+      careNeedWeight: "체중을 입력하면 용량 범위가 나타나요.",
+      careDoseResult: (min, max) => "1회 용량: " + min + "~" + max + "mg",
+      careIntervalResult: (interval) => "투여 간격: 최소 " + interval + "시간",
+      careMaxPerDayResult: (times, cap) => "1일 최대 " + times + "회, 하루 총 " + cap + "mg를 넘지 않게",
+      careSourceNote: "출처: 미국소아과학회(AAP)/HealthyChildren.org, FDA 소아 라벨링 자료, 식품의약품안전처(MFDS) 자료를 교차 확인했어요.",
     },
     en: {
       docTitle: "Toddler Development Notebook",
@@ -1026,6 +1092,7 @@
       tabChecklist: "Development checklist",
       tabGrowth: "Growth log",
       tabSymptom: "Symptom urgency",
+      tabCare: "First Aid & Dosing",
       progressLabel: "Answered",
       yesBtn: "Yes, I see it",
       notYetBtn: "Not yet",
@@ -1040,6 +1107,8 @@
       resultManyText: "This checklist isn't a diagnostic tool. Still, in a case like this, we'd recommend consulting a pediatrician or developmental clinic as soon as you reasonably can.",
       worstDomainNote: (d) => " In particular, development in the “" + d + "” domain may be lagging behind peers — it may help to bring that up specifically.",
       breakdownLabel: "Items not yet shown, by domain",
+      tipsToggleLabel: "Play ideas for this age",
+      tipsSourceNote: "Source: CDC's “Learn the Signs. Act Early.” Tips and Activities for each age page (domain grouping is our own)",
       gDateLabel: "Date",
       gHeightLabel: "Height (cm)",
       gWeightLabel: "Weight (kg)",
@@ -1125,6 +1194,50 @@
       symptomFeverTier3Title: "Fever has lasted 5 or more days",
       symptomFeverTier3Text: "Even below the high-fever threshold, a fever lasting 5+ days is worth getting checked.",
       symptomFeverTier4Text: "Temperature alone shows no emergency sign. Still, contact your doctor if your child seems unusually lethargic or won't eat/drink.",
+
+      careChokingTitle: "Choking First Aid",
+      careChokingIntro: "If the child becomes unconscious, call emergency services immediately and start CPR. This isn't a substitute for real first-aid training — consider taking an infant/child first-aid course if you can.",
+      careChokingUnder12: "Under 12 months (infant)",
+      careChokingUnder12Steps: [
+        "Lay the baby face-down along your forearm, head lower than the chest",
+        "Give 5 firm back blows between the shoulder blades with the heel of your hand",
+        "Turn the baby face-up, keeping the head lower than the chest",
+        "Place two fingers just below the nipple line, center of the chest, and give 5 chest thrusts about 4cm deep",
+        "Repeat steps 2–4 until the object comes out or the baby starts coughing/crying",
+        "If they become unconscious, lay them on a firm, flat surface and start CPR (chest compressions) right away. Before rescue breaths, only remove an object from the mouth if you can actually see it",
+      ],
+      careChokingUnder12Warning: "Never do abdominal thrusts (the Heimlich maneuver) on an infant — risk of organ injury. Don't hold them upside down by the ankles either.",
+      careChokingOver12: "12 months and older (toddler/child)",
+      careChokingOver12Steps: [
+        "Stand beside or behind the child, support their chest diagonally with one arm, and lean them forward",
+        "Give 5 firm back blows between the shoulder blades with the heel of your hand",
+        "If that doesn't help, stand the child up and wrap your arms around them from behind (kneel if they're small)",
+        "Make a fist above the navel, grasp it with your other hand, and pull sharply inward and upward 5 times (abdominal thrusts)",
+        "Repeat steps 1–4 until the object comes out or coughing/crying/voice returns",
+        "If they become unconscious, lay them on a flat surface and start CPR (chest compressions) right away. Before rescue breaths, only remove an object from the mouth if you can actually see it",
+      ],
+      careChokingOver12Warning: "Don't hold them upside down by the ankles — it isn't effective and risks a fall.",
+      careChokingSourceNote: "Sources: American Red Cross, AHA's 2025 guideline update. Note: Korea's official E-GEN (Central Emergency Medical Center) guidance, as of this writing, still shows abdominal thrusts alone for ages 12 months and up, which differs from the newer international standard of combining back blows with abdominal thrusts. Both approaches are used in practice; this guide follows the more current international standard.",
+
+      careDoseTitle: "Fever Reducer Dose Calculator (reference only)",
+      careDoseDisclaimerTitle: "What this calculator does / doesn't do",
+      careDoseDisclaimer1: "This calculator <strong>doesn't replace actually giving medicine.</strong> It only shows a weight-based reference range in mg (milligrams) — always confirm the final dose with a pharmacist or doctor.",
+      careDoseDisclaimer2: "To figure out how many mL to give, convert using the <strong>mg/mL concentration printed on your specific product</strong>. Concentrations vary by product, so this tool intentionally doesn't convert to mL for you.",
+      careDoseDisclaimer3: "Ibuprofen and dexibuprofen (found in products like Maxibufen) are different drugs with different dosing. Don't apply the \"ibuprofen\" numbers here to dexibuprofen products.",
+      careDoseDisclaimer4: "Only alternate acetaminophen and ibuprofen if a doctor has given you a specific schedule to follow — the two drugs use different intervals, which makes it easy to accidentally give too much.",
+      careWeightLabel: "Current weight (kg)",
+      careWeightHint: (latest) => "Pulled in your most recent growth-log weight (" + latest + "kg). Edit it if today's weight is different.",
+      careDrugLabel: "Medicine",
+      careDrugAcetaminophen: "Acetaminophen (Tylenol, etc.)",
+      careDrugIbuprofen: "Ibuprofen (Advil/Motrin, etc. — not dexibuprofen)",
+      careNeedBirthdate: "Enter the child's birthdate above for an accurate calculation.",
+      careBlockedUnder3mo: "For a fever in an infant under 3 months old, don't give fever reducers at home on your own — see a doctor right away.",
+      careBlockedIbuprofenUnder6mo: "Ibuprofen should not be given to a child under 6 months old.",
+      careNeedWeight: "Enter a weight and the dose range will appear here.",
+      careDoseResult: (min, max) => "Dose per administration: " + min + "–" + max + "mg",
+      careIntervalResult: (interval) => "Interval: at least " + interval + " hours apart",
+      careMaxPerDayResult: (times, cap) => "Up to " + times + "x per day, no more than " + cap + "mg total per day",
+      careSourceNote: "Sources: American Academy of Pediatrics (AAP)/HealthyChildren.org, FDA pediatric labeling data, and Korea's Ministry of Food and Drug Safety (MFDS), cross-checked.",
     },
   };
 
@@ -1195,6 +1308,36 @@
       ],
     },
   ];
+
+  // Play/activity tips per age band and domain, adapted from the CDC's own
+  // "Tips and Activities" content on its milestone pages (cdc.gov/act-early/milestones),
+  // re-sorted into the 4 domains (CDC lists them as one combined list, not by domain).
+  const PLAY_TIPS = {
+    12: {
+      social: { ko: "원하는 행동을 하면 안아주거나 칭찬해서 알려주세요", en: "Let your child know when they do something you like, with a hug or praise" },
+      language: { ko: "아이가 하는 행동을 말이나 노래로 설명해주고, 아이가 시도한 말에 살을 붙여 반응해주세요", en: "Describe what your child is doing with words or a song, and build on sounds they try to say" },
+      cognitive: { ko: "트럭, 버스, 동물처럼 흥미로운 걸 손가락으로 가리켜 주의를 끌어보세요. 냄비·프라이팬으로 소리 내는 놀이도 좋아요", en: "Point out interesting things (trucks, buses, animals) to get their attention; try making sounds with pots and pans" },
+      physical: { ko: "블록처럼 손으로 쥐는 장난감을 함께 갖고 놀고, 상자나 미는 장난감을 밀며 걷는 연습을 해보세요", en: "Play together with toys that use their hands, like blocks; let them push a box or push-toy while walking" },
+    },
+    18: {
+      social: { ko: "원하는 행동에 긍정적인 말과 관심을 주고, 다른 사람의 감정을 알려주세요 (예: “슬퍼 보이네, 곰인형 갖다주자”)", en: "Give positive attention to behavior you like, and name others' feelings for them (“she looks sad, let's get her a stuffed animal”)" },
+      language: { ko: "주변에 대해 간단히 물어보고(“저게 뭐야?”), 아이가 말한 단어에 살을 붙여 말해주세요 (예: “멍멍이야, 멍멍 짖어”)", en: "Ask simple questions about your surroundings (“what's that?”), and build on words they say (“dog says woof”)" },
+      cognitive: { ko: "인형에게 숟가락으로 먹여주는 것 같은 상상놀이를 유도하고, 비눗방울처럼 순서가 있는 놀이를 함께 해보세요", en: "Encourage pretend play, like feeding a doll with a spoon; play sequenced games like blowing and popping bubbles" },
+      physical: { ko: "뚜껑 없는 컵과 숟가락으로 먹는 연습을 시키고, 밀고 당기는 장난감을 줘보세요", en: "Let them practice drinking from an open cup and using a spoon; give them push-and-pull toys" },
+    },
+    24: {
+      social: { ko: "놀이터에서 갈등이 생기면 나누기·차례 지키기를 도와주고, 식사 준비를 돕게 하며 감사를 표현해주세요", en: "Help with sharing and turn-taking when conflicts come up at the playground; have them help with meal prep and say thank you" },
+      language: { ko: "발음이 부정확해도 말을 확장해서 다시 말해주고(“바나나 원해”), “머리어깨무릎발” 같은 노래로 신체 부위를 가르쳐보세요", en: "Expand on what they say even if it's not perfectly clear (“want banana”); teach body parts with a song like “Head, Shoulders, Knees and Toes”" },
+      cognitive: { ko: "버튼을 누르면 반응하는 문제해결형 장난감이나, 모양·색·동물 퍼즐을 함께 맞춰보세요", en: "Try problem-solving toys with buttons that react, or puzzles with shapes, colors, or animals" },
+      physical: { ko: "공을 차고 굴리고 던지는 놀이, 모래놀이 도구·컵·깔때기를 갖고 노는 시간을 가져보세요", en: "Kick, roll, and throw a ball together; play with sand toys, cups, and funnels" },
+    },
+    36: {
+      social: { ko: "감정을 말로 표현하도록 돕고 심호흡 같은 진정법을 알려주며, 또래와 노는 걸 격려해주세요", en: "Help them name their feelings and learn a calming technique like deep breathing; encourage play with other children" },
+      language: { ko: "그림책을 읽으며 “다음엔 무슨 일이 있을까?” 물어보고, 짧은 문장을 더 긴 문장으로 확장해서 말해주세요", en: "Read picture books and ask “what happens next?”; expand their short sentences into longer ones" },
+      cognitive: { ko: "스스로 문제를 해결하도록 질문으로 유도하고, 계단이나 신체 부위를 세는 놀이를 해보세요", en: "Ask questions that guide them to solve problems themselves; count stairs or body parts together" },
+      physical: { ko: "지점토로 손가락 근육을 쓰는 놀이를 하고, 크레용·색칠공책이 든 '활동 상자'를 줘보세요", en: "Use play-dough for finger-strength practice; give them an “activity box” with crayons and a coloring book" },
+    },
+  };
 
   function t() {
     return STRINGS[locale];
@@ -1303,6 +1446,8 @@
     document.getElementById("txt-tab-checklist").textContent = s.tabChecklist;
     document.getElementById("txt-tab-growth").textContent = s.tabGrowth;
     document.getElementById("txt-tab-symptom").textContent = s.tabSymptom;
+    document.getElementById("txt-tab-care").textContent = s.tabCare;
+    renderCareCards();
     document.getElementById("txt-symptom-disclaimer-title").textContent = s.symptomDisclaimerTitle;
     document.getElementById("txt-symptom-disclaimer-1").innerHTML = s.symptomDisclaimer1;
     document.getElementById("txt-symptom-disclaimer-2").innerHTML = s.symptomDisclaimer2;
@@ -1432,6 +1577,32 @@
         row.appendChild(toggle);
         section.appendChild(row);
       });
+
+      const tips = PLAY_TIPS[band.month];
+      if (tips) {
+        const details = document.createElement("details");
+        details.className = "band-tips";
+        const summary = document.createElement("summary");
+        summary.textContent = s.tipsToggleLabel;
+        details.appendChild(summary);
+        Object.keys(DOMAIN_LABELS[locale]).forEach((domainKey) => {
+          const tip = tips[domainKey];
+          if (!tip) return;
+          const item = document.createElement("div");
+          item.className = "band-tips-item";
+          const tag = document.createElement("span");
+          tag.className = "item-domain";
+          tag.textContent = DOMAIN_LABELS[locale][domainKey];
+          item.appendChild(tag);
+          item.appendChild(document.createTextNode(tip[locale]));
+          details.appendChild(item);
+        });
+        const source = document.createElement("div");
+        source.className = "band-tips-source";
+        source.textContent = s.tipsSourceNote;
+        details.appendChild(source);
+        section.appendChild(details);
+      }
 
       bandsEl.appendChild(section);
     });
@@ -1569,6 +1740,7 @@
     render();
     renderGrowth();
     renderSymptomCards();
+    renderCareCards();
   });
 
   sexInput.addEventListener("change", () => {
@@ -1958,6 +2130,155 @@
     });
   }
 
+  // ---- Fever reducer dose calculator ----
+  // Reference ranges only (mg), never converted to mL — product concentrations vary
+  // and guessing one would be a real error risk. Hard age gates fail closed: if age
+  // is unknown, no dose is shown at all, rather than guessing a "probably fine" default.
+  // Sources: AAP/HealthyChildren.org, FDA pediatric labeling, Korea's MFDS — cross-checked.
+  const DRUGS = {
+    acetaminophen: { mgPerKgMin: 10, mgPerKgMax: 15, interval: "4~6", maxPerDay: 5, minAgeMonths: 3 },
+    ibuprofen: { mgPerKgMin: 5, mgPerKgMax: 10, interval: "6~8", maxPerDay: 4, minAgeMonths: 6 },
+  };
+
+  const doseState = { weight: "", drug: "acetaminophen" };
+
+  function latestGrowthWeight() {
+    const withWeight = growthEntries.filter((e) => e.weight != null);
+    if (withWeight.length === 0) return null;
+    return withWeight[withWeight.length - 1].weight;
+  }
+
+  function computeDose() {
+    const weight = parseFloat(doseState.weight);
+    if (!Number.isFinite(weight) || weight <= 0) return { state: "need-weight" };
+
+    const ageMonths = currentAgeMonthsFloat();
+    if (ageMonths === null) return { state: "need-birthdate" };
+    if (ageMonths < 3) return { state: "blocked-under3mo" };
+
+    const drug = DRUGS[doseState.drug];
+    if (doseState.drug === "ibuprofen" && ageMonths < drug.minAgeMonths) {
+      return { state: "blocked-ibuprofen-under6mo" };
+    }
+
+    const doseMin = Math.round(weight * drug.mgPerKgMin);
+    const doseMax = Math.round(weight * drug.mgPerKgMax);
+    let dailyCap;
+    if (doseState.drug === "acetaminophen") {
+      const capPerKg = ageMonths < 24 ? 60 : 75;
+      dailyCap = Math.min(Math.round(weight * capPerKg), 4000);
+    } else {
+      dailyCap = doseMax * drug.maxPerDay;
+    }
+
+    return { state: "ok", doseMin, doseMax, interval: drug.interval, maxPerDay: drug.maxPerDay, dailyCap };
+  }
+
+  function renderDoseResult() {
+    const s = t();
+    const result = computeDose();
+    if (result.state === "need-weight") {
+      return '<div class="symptom-result"><span class="symptom-result-tier">' + s.careNeedWeight + "</span></div>";
+    }
+    if (result.state === "need-birthdate") {
+      return '<div class="symptom-result tier2"><span class="symptom-result-tier">' + s.careNeedBirthdate + "</span></div>";
+    }
+    if (result.state === "blocked-under3mo") {
+      return '<div class="symptom-result tier1"><span class="symptom-result-tier">' + s.careBlockedUnder3mo + "</span></div>";
+    }
+    if (result.state === "blocked-ibuprofen-under6mo") {
+      return '<div class="symptom-result tier1"><span class="symptom-result-tier">' + s.careBlockedIbuprofenUnder6mo + "</span></div>";
+    }
+    return (
+      '<div class="symptom-result tier4">' +
+      '<div class="symptom-result-title">' + s.careDoseResult(result.doseMin, result.doseMax) + "</div>" +
+      '<div class="symptom-result-text">' +
+      s.careIntervalResult(result.interval) +
+      "<br>" +
+      s.careMaxPerDayResult(result.maxPerDay, result.dailyCap) +
+      "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderDoseCard() {
+    const s = t();
+    const latest = latestGrowthWeight();
+    const weightHint = latest !== null && doseState.weight === "" ? '<div class="symptom-age-note">' + s.careWeightHint(latest) + "</div>" : "";
+
+    let html = '<div class="symptom-card"><div class="symptom-card-head">' + s.careDoseTitle + "</div>";
+    html += '<div class="symptom-card-body">';
+    html += '<div class="symptom-disclaimer" style="margin-top:0;">';
+    html += '<div class="symptom-disclaimer-title">' + s.careDoseDisclaimerTitle + "</div>";
+    html += "<p>" + s.careDoseDisclaimer1 + "</p>";
+    html += "<p>" + s.careDoseDisclaimer2 + "</p>";
+    html += "<p>" + s.careDoseDisclaimer3 + "</p>";
+    html += "<p>" + s.careDoseDisclaimer4 + "</p>";
+    html += "</div>";
+
+    html += '<div class="symptom-numeric-row">';
+    html +=
+      '<div class="symptom-numeric-field"><label for="care-weight">' +
+      s.careWeightLabel +
+      '</label><input type="number" id="care-weight" step="0.1" min="0" max="60" value="' +
+      doseState.weight +
+      '" /></div>';
+    html += "</div>";
+    html += weightHint;
+
+    html += '<div class="symptom-group-title tier1">' + s.careDrugLabel + "</div>";
+    html +=
+      '<div class="symptom-check-row"><input type="radio" name="care-drug" id="care-drug-acetaminophen" value="acetaminophen"' +
+      (doseState.drug === "acetaminophen" ? " checked" : "") +
+      ' /><label for="care-drug-acetaminophen">' + s.careDrugAcetaminophen + "</label></div>";
+    html +=
+      '<div class="symptom-check-row"><input type="radio" name="care-drug" id="care-drug-ibuprofen" value="ibuprofen"' +
+      (doseState.drug === "ibuprofen" ? " checked" : "") +
+      ' /><label for="care-drug-ibuprofen">' + s.careDrugIbuprofen + "</label></div>";
+
+    html += '<div id="care-dose-result">' + renderDoseResult() + "</div>";
+    html += '<div class="symptom-age-note">' + s.careSourceNote + "</div>";
+    html += "</div></div>";
+    return html;
+  }
+
+  function renderChokingCard() {
+    const s = t();
+    let html = '<div class="symptom-card"><div class="symptom-card-head">' + s.careChokingTitle + "</div>";
+    html += '<div class="symptom-card-body">';
+    html += '<div class="symptom-disclaimer" style="margin-top:0;"><p>' + s.careChokingIntro + "</p></div>";
+
+    html += '<div class="symptom-group-title tier1">' + s.careChokingUnder12 + "</div>";
+    html += "<ol>" + s.careChokingUnder12Steps.map((step) => "<li>" + step + "</li>").join("") + "</ol>";
+    html += '<div class="symptom-result tier1"><span class="symptom-result-tier">' + s.careChokingUnder12Warning + "</span></div>";
+
+    html += '<div class="symptom-group-title tier1">' + s.careChokingOver12 + "</div>";
+    html += "<ol>" + s.careChokingOver12Steps.map((step) => "<li>" + step + "</li>").join("") + "</ol>";
+    html += '<div class="symptom-result tier1"><span class="symptom-result-tier">' + s.careChokingOver12Warning + "</span></div>";
+
+    html += '<div class="symptom-age-note">' + s.careChokingSourceNote + "</div>";
+    html += "</div></div>";
+    return html;
+  }
+
+  function renderCareCards() {
+    const container = document.getElementById("care-cards");
+    if (!container) return;
+    container.innerHTML = renderChokingCard() + renderDoseCard();
+
+    const weightInput = document.getElementById("care-weight");
+    weightInput.addEventListener("input", () => {
+      doseState.weight = weightInput.value;
+      document.getElementById("care-dose-result").outerHTML = '<div id="care-dose-result">' + renderDoseResult() + "</div>";
+    });
+    container.querySelectorAll('input[name="care-drug"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        doseState.drug = radio.value;
+        renderCareCards();
+      });
+    });
+  }
+
   // ---- Growth percentile reference data ----
   // LMS (Lambda-Mu-Sigma) parameters, one row per (standard, measure, sex, age in months).
   // "who" = WHO Child Growth Standards (used under 24 months, per CDC's own guidance —
@@ -2304,6 +2625,7 @@ cdc,stature,girl,36.5,0.541981,94.213357,0.042018`;
     saveGrowth();
     e.target.reset();
     renderGrowth();
+    renderCareCards();
   });
 
   document.getElementById("reset-growth-btn").addEventListener("click", () => {
@@ -2311,6 +2633,7 @@ cdc,stature,girl,36.5,0.541981,94.213357,0.042018`;
       growthEntries = [];
       localStorage.removeItem(GROWTH_KEY);
       renderGrowth();
+      renderCareCards();
     }
   });
 

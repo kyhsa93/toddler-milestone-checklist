@@ -13,6 +13,7 @@ The checklist covers four domains — social/emotional, language/communication, 
 - **Print summary**: the result card has a button to print a clean summary — meant to be brought to a pediatrician visit, not just looked at once.
 - **Share**: one footer button, defaults to sharing only the app's name, description, and URL. If you have a checked result, it asks first whether to include it — only appends it on an explicit "yes." It never reads growth entries, birthdate, or sex, so those can never leak into a share.
 - **Growth log with percentiles**: a date/height/weight log with a trend chart, plus a height/weight percentile per entry (requires entering the child's birthdate and sex). Uses the WHO Child Growth Standards under 24 months and the CDC 2000 growth charts from 24 months on — the same switch point CDC itself recommends — computed via the standard LMS method with linear interpolation between reference grid points. Only covers ages 12–36 months; entries outside that range show "out of range" instead of a number rather than extrapolating.
+- **Symptom urgency check**: for 4 common symptom categories (fever, cough/breathing difficulty, vomiting/diarrhea/dehydration, rash), a short checklist of red-flag signs that outputs an urgency level — emergency now, see a doctor today, or monitor — never a disease name. Fever thresholds are age-aware (using the child's birthdate) since the single most important pediatric fever rule is age-based. Built from published red-flag criteria (WHO IMCI chart booklet, AAP/HealthyChildren.org, NHS "when to worry" guidance), not free-written. Answers here aren't saved anywhere — it's a momentary check, not a log.
 - **Offline-capable**: installable as a home-screen app; works offline after the first visit via a service worker.
 - Built with accessibility in mind — toggle states and tabs expose `aria-pressed` / `aria-selected` for screen readers.
 
@@ -26,10 +27,12 @@ The checklist intentionally starts at 12 months, since developmental signs relev
 
 Growth percentiles are a reference calculation, not a diagnosis — official growth assessment should come from your pediatrician. WHO reference data was fetched directly from who.int (WHO copyright, but openly published for exactly this kind of reuse); CDC reference data was sourced via the CDC-DNPAO-maintained `cdcanthro` package, which mirrors CDC's own published percentile data files (US federal public domain).
 
+The symptom urgency check **never diagnoses a disease** — it only estimates urgency (ER now / same-day doctor / monitor) from red-flag signs a parent can realistically self-assess. It covers 4 common categories, not every reason to seek care. If something worries you that isn't on the list, that alone is a reason to contact a doctor. Key thresholds used: fever ≥38.0°C in an infant under 3 months is always treated as an emergency regardless of other signs (AAP/HealthyChildren.org); breathing-rate red flags follow WHO IMCI's age bands (≥60/min under 2 months, ≥50/min at 2–12 months, ≥40/min at 12 months–5 years); a non-blanching rash with fever is flagged as an emergency (classic meningococcemia warning sign, per NHS guidance) regardless of how well the child otherwise seems.
+
 ## Usage
 
 Open `index.html` in any browser, or visit the live app above. No build step, no server, no dependencies.
 
 ## Data
 
-Everything (checklist responses, growth entries, child's birthdate and sex, language choice) is stored only in the browser's `localStorage`. Nothing is sent to a server or leaves the device. There is currently no export/backup option, so data does not survive clearing site data or switching devices.
+Everything (checklist responses, growth entries, child's birthdate and sex, language choice) is stored only in the browser's `localStorage`. Nothing is sent to a server or leaves the device. There is currently no export/backup option, so data does not survive clearing site data or switching devices. The one exception is the symptom urgency check — those answers are kept in memory only and are gone on reload, by design.

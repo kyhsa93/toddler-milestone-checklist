@@ -21,6 +21,8 @@
     --sage-pale: #e2ebe1;
     --amber: #c97c2c;
     --amber-pale: #f7e9d6;
+    --critical: #b3261e;
+    --critical-pale: #fbe4e2;
     --line: #d7ded2;
     --shadow: 0 1px 2px rgba(38, 48, 41, 0.06), 0 4px 14px rgba(38, 48, 41, 0.05);
     --font-display: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
@@ -40,6 +42,8 @@
       --sage-pale: #26362b;
       --amber: #e2a15c;
       --amber-pale: #3a2e1c;
+      --critical: #ff6b5e;
+      --critical-pale: #4a2420;
       --line: #33402f;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.25);
     }
@@ -55,6 +59,8 @@
     --sage-pale: #26362b;
     --amber: #e2a15c;
     --amber-pale: #3a2e1c;
+    --critical: #ff6b5e;
+    --critical-pale: #4a2420;
     --line: #33402f;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.25);
   }
@@ -69,6 +75,8 @@
     --sage-pale: #e2ebe1;
     --amber: #c97c2c;
     --amber-pale: #f7e9d6;
+    --critical: #b3261e;
+    --critical-pale: #fbe4e2;
     --line: #d7ded2;
     --shadow: 0 1px 2px rgba(38, 48, 41, 0.06), 0 4px 14px rgba(38, 48, 41, 0.05);
   }
@@ -344,6 +352,122 @@
   .regression-toggle button:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
   .regression-toggle button.active-safe { background: var(--sage); border-color: var(--sage); color: #fff; }
   .regression-toggle button.active-concern { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+  /* Symptom check */
+  .symptom-disclaimer {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--critical);
+    border-radius: 4px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .symptom-disclaimer-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--critical);
+    margin-bottom: 8px;
+  }
+  .symptom-disclaimer p { font-size: 14px; color: var(--ink-soft); margin: 0 0 8px; }
+  .symptom-disclaimer p:last-child { margin-bottom: 0; }
+
+  .symptom-card {
+    margin-top: 24px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .symptom-card-head {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--sage-pale);
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .symptom-card-body { padding: 4px 18px 18px; }
+
+  .symptom-numeric-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 14px;
+  }
+  .symptom-numeric-field label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .symptom-numeric-field input {
+    width: 90px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .symptom-numeric-field input:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+  .symptom-age-note { font-size: 12px; color: var(--ink-faint); margin-top: 8px; }
+
+  .symptom-group-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+  .symptom-group-title.tier1 { color: var(--critical); }
+  .symptom-group-title.tier2 { color: var(--amber); }
+
+  .symptom-check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 7px 0;
+  }
+  .symptom-check-row input[type="checkbox"] {
+    margin-top: 3px;
+    width: 17px;
+    height: 17px;
+    accent-color: var(--sage);
+    flex-shrink: 0;
+  }
+  .symptom-check-row label { font-size: 14px; color: var(--ink); }
+
+  .symptom-result {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .symptom-result-tier {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+  .symptom-result-title { font-weight: 700; margin-bottom: 4px; }
+  .symptom-result-text { color: var(--ink-soft); }
+  .symptom-result.tier1 { background: var(--critical-pale); border-color: var(--critical); }
+  .symptom-result.tier1 .symptom-result-tier { color: var(--critical); }
+  .symptom-result.tier2 { background: var(--amber-pale); border-color: var(--amber); }
+  .symptom-result.tier2 .symptom-result-tier { color: var(--amber); }
+  .symptom-result.tier3 { background: var(--paper); border-color: var(--line); }
+  .symptom-result.tier3 .symptom-result-tier { color: var(--ink-soft); }
+  .symptom-result.tier4 { background: var(--sage-pale); border-color: var(--sage); }
+  .symptom-result.tier4 .symptom-result-tier { color: var(--sage-deep); }
+
+  .symptom-footer-note { font-size: 12px; color: var(--ink-faint); margin-top: 24px; }
 
   .item {
     display: flex;
@@ -653,6 +777,7 @@
   <div class="tabs" role="tablist">
     <button class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="panel-checklist" id="tab-checklist" data-tab="checklist"><span id="txt-tab-checklist"></span></button>
     <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-growth" id="tab-growth" data-tab="growth"><span id="txt-tab-growth"></span></button>
+    <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-symptom" id="tab-symptom" data-tab="symptom"><span id="txt-tab-symptom"></span></button>
   </div>
 
   <section class="tab-panel active" id="panel-checklist" role="tabpanel" aria-labelledby="tab-checklist" tabindex="0">
@@ -729,6 +854,17 @@
     <p class="growth-empty" id="growth-percentile-note"></p>
   </section>
 
+  <section class="tab-panel" id="panel-symptom" role="tabpanel" aria-labelledby="tab-symptom" tabindex="0">
+    <div class="symptom-disclaimer">
+      <div class="symptom-disclaimer-title" id="txt-symptom-disclaimer-title"></div>
+      <p id="txt-symptom-disclaimer-1"></p>
+      <p id="txt-symptom-disclaimer-2"></p>
+      <p id="txt-symptom-disclaimer-3"></p>
+    </div>
+    <div id="symptom-cards"></div>
+    <p class="symptom-footer-note" id="txt-symptom-footer-note"></p>
+  </section>
+
   <footer>
     <p id="txt-footer-note"></p>
     <div class="footer-actions">
@@ -769,6 +905,7 @@
       sensoryText: "말이 늦는 것처럼 보여도 실제로는 잘 안 들려서인 경우가 있어요. 큰 소리에도 반응이 없거나, TV·음악 소리를 유독 크게 키우거나, 사물을 아주 가까이서 보는 습관이 있다면 발달 체크와 별개로 소아과에서 청각·시각 검사를 함께 받아보는 걸 권해요.",
       tabChecklist: "발달 체크리스트",
       tabGrowth: "성장 기록",
+      tabSymptom: "증상 응급도",
       progressLabel: "응답",
       yesBtn: "네, 보여요",
       notYetBtn: "아직이요",
@@ -839,6 +976,35 @@
       printStateYes: "네",
       printStateNotYet: "아직",
       deleteEntryAria: (date) => "삭제: " + date + " 기록",
+
+      symptomDisclaimerTitle: "이 기능이 하는 일 / 하지 않는 일",
+      symptomDisclaimer1: "이 기능은 <strong>어떤 병인지 진단하지 않아요.</strong> 대신 자주 있는 증상 4가지(발열·기침/호흡곤란·구토/설사/탈수·발진)에 대해, 지금 응급실에 가야 하는지, 오늘 진료를 받아야 하는지, 지켜봐도 되는지를 참고할 수 있게 도와줘요. WHO IMCI, 미국소아과학회(AAP), 영국 NHS의 공개된 위험 신호 기준을 참고했어요.",
+      symptomDisclaimer2: "체크한 항목이 없거나 낮은 단계로 나와도, <strong>부모가 보기에 평소와 다르게 걱정된다면 그 자체로 병원에 연락할 이유예요.</strong> 이 도구는 참고용일 뿐, 실제 진료를 대신하지 않아요.",
+      symptomDisclaimer3: "여기 담긴 4가지 증상 외에도 병원에 가야 할 상황은 많아요. 목록에 없다고 안심하지 마시고, 애매하면 항상 소아과나 응급실에 문의하세요.",
+      symptomFooterNote: "이 탭의 응답은 저장되지 않아요 — 매번 새로 체크하는 그 순간만을 위한 참고용이에요.",
+
+      symptomTier1Title: "응급 신호가 있어요 — 지금 119나 응급실로 가세요",
+      symptomTier1Text: "체크한 항목은 즉시 의료진의 평가가 필요한 신호예요. 망설이지 말고 응급실을 이용하세요.",
+      symptomTier2Title: "오늘 진료를 받아보세요",
+      symptomTier2Text: "체크한 항목은 오늘 안에 소아과 진료나 전화 상담이 필요한 신호예요.",
+      symptomTier4Title: "지금은 특별한 응급 신호가 없어요",
+      symptomTier4Text: "그래도 아이 상태가 평소와 다르게 걱정된다면 언제든 병원에 문의하세요.",
+      symptomTier1Group: "즉시 응급 신호",
+      symptomTier2Group: "오늘 진료 신호",
+      symptomEmptyResult: "체온이나 항목을 입력하면 여기에 안내가 나타나요.",
+      symptomTierBadge1: "응급",
+      symptomTierBadge2: "오늘 진료",
+      symptomTierBadge3: "경과 관찰",
+      symptomTierBadge4: "안심",
+
+      symptomFeverTempLabel: "체온(°C)",
+      symptomFeverDaysLabel: "열이 며칠째인가요?",
+      symptomFeverDangerGroup: "다음 중 하나라도 있다면 응급이에요",
+      symptomFeverAgeKnown: (age) => "현재 나이(약 " + age + "개월) 기준으로 안내해요.",
+      symptomFeverAgeUnknown: "나이를 몰라 안전하게 어린 영아 기준으로 안내해요. 위쪽 '아이 생년월일'을 입력하면 더 정확한 기준을 볼 수 있어요.",
+      symptomFeverTier3Title: "닷새 이상 열이 이어지고 있어요",
+      symptomFeverTier3Text: "고열 기준 아래여도, 5일 이상 지속되는 발열은 진료를 받아보는 게 좋아요.",
+      symptomFeverTier4Text: "체온만으로는 특별한 응급 신호가 없어요. 그래도 평소와 다르게 처지거나 잘 안 먹으면 병원에 문의하세요.",
     },
     en: {
       docTitle: "Toddler Development Notebook",
@@ -859,6 +1025,7 @@
       sensoryText: "What looks like a speech delay is sometimes actually a hearing issue. If your child doesn't react to loud sounds, turns the TV or music up unusually loud, or tends to look at things very close up, it's worth getting a hearing and vision check at the pediatrician alongside this checklist.",
       tabChecklist: "Development checklist",
       tabGrowth: "Growth log",
+      tabSymptom: "Symptom urgency",
       progressLabel: "Answered",
       yesBtn: "Yes, I see it",
       notYetBtn: "Not yet",
@@ -929,6 +1096,35 @@
       printStateYes: "Yes",
       printStateNotYet: "Not yet",
       deleteEntryAria: (date) => "Delete entry: " + date,
+
+      symptomDisclaimerTitle: "What this does / doesn't do",
+      symptomDisclaimer1: "This feature does <strong>not diagnose which illness your child has.</strong> Instead, for 4 common symptom categories (fever, cough/breathing difficulty, vomiting/diarrhea/dehydration, rash), it helps you gauge whether to go to the ER now, see a doctor today, or it's okay to watch and wait — based on published red-flag criteria from WHO's IMCI guidance, the American Academy of Pediatrics (AAP), and the UK's NHS.",
+      symptomDisclaimer2: "Even if nothing is checked or the result is low-urgency, <strong>if something feels off to you as a parent, that alone is a reason to contact a doctor.</strong> This is a reference tool, not a substitute for real medical care.",
+      symptomDisclaimer3: "There are many reasons to seek care beyond these 4 categories. Don't take a clear result here as reassurance if something else is worrying you — when in doubt, contact your pediatrician or the ER.",
+      symptomFooterNote: "Answers on this tab aren't saved — it's only meant to help in the moment, each time you check.",
+
+      symptomTier1Title: "Emergency signs present — go to the ER or call emergency services now",
+      symptomTier1Text: "What you checked needs immediate medical evaluation. Don't wait — go to the ER.",
+      symptomTier2Title: "See a doctor today",
+      symptomTier2Text: "What you checked is worth a same-day pediatrician visit or phone consultation.",
+      symptomTier4Title: "No emergency signs right now",
+      symptomTier4Text: "Still, if something feels different from usual, contact your doctor any time.",
+      symptomTier1Group: "Immediate emergency signs",
+      symptomTier2Group: "See a doctor today if...",
+      symptomEmptyResult: "Enter a temperature or check an item and guidance will appear here.",
+      symptomTierBadge1: "Emergency",
+      symptomTierBadge2: "See doctor today",
+      symptomTierBadge3: "Monitor",
+      symptomTierBadge4: "Reassuring",
+
+      symptomFeverTempLabel: "Temperature (°C)",
+      symptomFeverDaysLabel: "How many days has the fever lasted?",
+      symptomFeverDangerGroup: "Any one of these means it's an emergency",
+      symptomFeverAgeKnown: (age) => "Using thresholds for the current age (about " + age + " months).",
+      symptomFeverAgeUnknown: "Age is unknown, so this defaults to the young-infant threshold to be safe. Enter the child's birthdate above for a more accurate result.",
+      symptomFeverTier3Title: "Fever has lasted 5 or more days",
+      symptomFeverTier3Text: "Even below the high-fever threshold, a fever lasting 5+ days is worth getting checked.",
+      symptomFeverTier4Text: "Temperature alone shows no emergency sign. Still, contact your doctor if your child seems unusually lethargic or won't eat/drink.",
     },
   };
 
@@ -1106,6 +1302,13 @@
     document.getElementById("txt-sensory-text").textContent = s.sensoryText;
     document.getElementById("txt-tab-checklist").textContent = s.tabChecklist;
     document.getElementById("txt-tab-growth").textContent = s.tabGrowth;
+    document.getElementById("txt-tab-symptom").textContent = s.tabSymptom;
+    document.getElementById("txt-symptom-disclaimer-title").textContent = s.symptomDisclaimerTitle;
+    document.getElementById("txt-symptom-disclaimer-1").innerHTML = s.symptomDisclaimer1;
+    document.getElementById("txt-symptom-disclaimer-2").innerHTML = s.symptomDisclaimer2;
+    document.getElementById("txt-symptom-disclaimer-3").textContent = s.symptomDisclaimer3;
+    document.getElementById("txt-symptom-footer-note").textContent = s.symptomFooterNote;
+    renderSymptomCards();
     document.getElementById("txt-progress-label").textContent = s.progressLabel;
     document.getElementById("txt-g-date-label").textContent = s.gDateLabel;
     document.getElementById("txt-g-height-label").textContent = s.gHeightLabel;
@@ -1365,6 +1568,7 @@
     updateCurrentAgeDisplay();
     render();
     renderGrowth();
+    renderSymptomCards();
   });
 
   sexInput.addEventListener("change", () => {
@@ -1475,6 +1679,284 @@
   document.getElementById("print-btn").addEventListener("click", () => {
     window.print();
   });
+
+  // ---- Symptom urgency check ----
+  // Deliberately NOT persisted to localStorage — this is a momentary,
+  // situational check, not a longitudinal record like the checklist/growth log.
+  // Sources: WHO IMCI chart booklet, AAP/HealthyChildren.org, NHS "when to worry"
+  // guidance — see README for the specific thresholds and citations.
+  const CATEGORY_TITLES = {
+    cough: { ko: "기침·호흡곤란", en: "Cough / Breathing difficulty" },
+    vomit: { ko: "구토·설사·탈수", en: "Vomiting / Diarrhea / Dehydration" },
+    rash: { ko: "발진", en: "Rash" },
+  };
+
+  const FEVER_DANGER_SIGNS = [
+    { ko: "목이 뻣뻣하거나, 대천문(정수리 숨구멍)이 부풀어 있어요", en: "Stiff neck, or a bulging soft spot on the head" },
+    { ko: "경련(발작)을 했어요", en: "Had a seizure/convulsion" },
+    { ko: "무기력하거나 깨워도 잘 안 일어나요", en: "Lethargic or hard to wake" },
+    { ko: "숨쉬기 힘들어해요", en: "Struggling to breathe" },
+    { ko: "잘 못 마시거나 안 먹으려 해요", en: "Barely drinking/eating or refusing to" },
+    { ko: "피부에 눌러도 안 사라지는 자반/반점이 있어요", en: "A rash that doesn't fade when pressed" },
+  ];
+
+  const SYMPTOM_CATEGORIES = [
+    {
+      key: "cough",
+      tier1: [
+        { ko: "숨 쉴 때마다 끙끙거리는 소리가 나요", en: "Grunts with every breath" },
+        { ko: "코가 벌렁거려요", en: "Nostrils flare with breathing" },
+        { ko: "숨 쉴 때 갈비뼈 사이나 가슴 아래가 움푹 들어가요", en: "Skin sucks in between the ribs or below the chest with each breath" },
+        { ko: "입술이나 얼굴이 파랗거나 창백해요", en: "Lips or face look blue or grey" },
+        { ko: "가만히 있어도 쌕쌕거리거나 그렁거리는 소리가 들려요", en: "Makes a wheezing or harsh sound (stridor) even at rest" },
+        { ko: "숨이 차서 울거나 말을 못해요", en: "Too breathless to cry or talk" },
+        { ko: "축 늘어지고 반응이 없어요", en: "Limp or unresponsive" },
+        { ko: "평소보다 숨을 매우 빠르게 쉬어요 (참고: 2개월 미만 분당 60회 이상, 2~12개월 분당 50회 이상, 12개월~5세 분당 40회 이상)", en: "Breathing much faster than usual (reference: 60+/min under 2 months, 50+/min at 2–12 months, 40+/min at 12 months–5 years)" },
+      ],
+      tier2: [
+        { ko: "평소보다 숨을 가빠해요", en: "More breathless than usual" },
+        { ko: "물이나 젖을 마실 때 평소보다 힘들어해요", en: "Struggling more than usual while drinking" },
+        { ko: "청진기 없이도 쌕쌕거리는 소리가 들려요", en: "Wheezing audible without a stethoscope" },
+      ],
+    },
+    {
+      key: "vomit",
+      tier1: [
+        { ko: "구토물이 초록색/담즙색이에요", en: "Vomit is green or bile-colored" },
+        { ko: "구토물이나 대변에 피가 섞여 있어요", en: "Blood in vomit or stool" },
+        { ko: "다리를 웅크리며 간헐적으로 심하게 울어요", en: "Episodes of severe crying while drawing knees up to the chest" },
+        { ko: "눈이 심하게 꺼지거나(영아는 정수리 숨구멍도), 만져도 반응이 둔해요", en: "Eyes look very sunken (or the soft spot in infants), or barely responds to touch" },
+        { ko: "축 늘어지고 반응이 없어요", en: "Limp or unresponsive" },
+        { ko: "거의 마시지 못하거나 마시려 하지 않아요", en: "Barely able or unwilling to drink anything" },
+        { ko: "8시간 넘게 소변을 안 봐요", en: "No urination for 8+ hours" },
+        { ko: "손발이 차갑고 얼룩덜룩해요", en: "Hands and feet feel cold and look mottled" },
+      ],
+      tier2: [
+        { ko: "24시간 동안 소변을 6회 미만으로 봐요", en: "Fewer than 6 wet diapers in 24 hours" },
+        { ko: "울어도 눈물이 안 나요", en: "No tears when crying" },
+        { ko: "입 안이 바싹 말라 있어요", en: "Mouth looks dry" },
+        { ko: "평소보다 축 처지거나 보채요", en: "More lethargic or irritable than usual" },
+        { ko: "계속 토해서 수분을 못 채워요", en: "Vomiting repeatedly, unable to keep fluids down" },
+        { ko: "고열이나 심한 복통이 같이 있어요", en: "Accompanied by high fever or severe abdominal pain" },
+      ],
+    },
+    {
+      key: "rash",
+      tier1: [
+        { ko: "발진을 유리컵 등으로 눌러도 색이 안 사라져요 (열이 있으면 특히 위험)", en: "The rash doesn't fade when you press a clear glass against it (especially concerning with fever)" },
+        { ko: "발진과 함께 숨쉬기 힘들어하거나 입술·얼굴이 부어요", en: "Rash with difficulty breathing, or swelling of the lips/face" },
+        { ko: "발진과 함께 목이 뻣뻣하거나, 대천문이 부풀어 있거나, 심하게 처져요", en: "Rash with a stiff neck, a bulging soft spot, or severe lethargy" },
+      ],
+      tier2: [
+        { ko: "5일 이상 고열이 이어지면서, 충혈된 눈·갈라진 입술이나 딸기 같은 혀·손발이 붓고 빨개짐·목 림프절 부음 중 여러 개가 같이 나타나요", en: "Fever lasting 5+ days along with several of: red/bloodshot eyes, cracked lips or a strawberry-red tongue, swollen and red hands/feet, a swollen neck lymph node" },
+      ],
+    },
+  ];
+
+  const symptomState = {
+    fever: { temp: "", days: "", danger: {} },
+    cough: { tier1: {}, tier2: {} },
+    vomit: { tier1: {}, tier2: {} },
+    rash: { tier1: {}, tier2: {} },
+  };
+
+  function symptomTierBadge(tier) {
+    const s = t();
+    return [s.symptomTierBadge1, s.symptomTierBadge2, s.symptomTierBadge3, s.symptomTierBadge4][tier - 1];
+  }
+
+  function renderResultBlock(result) {
+    const s = t();
+    if (!result) {
+      return '<div class="symptom-result"><span class="symptom-result-tier">' + s.symptomEmptyResult + "</span></div>";
+    }
+    return (
+      '<div class="symptom-result tier' + result.tier + '">' +
+      '<span class="symptom-result-tier">' + symptomTierBadge(result.tier) + "</span>" +
+      '<div class="symptom-result-title">' + result.title + "</div>" +
+      '<div class="symptom-result-text">' + result.text + "</div>" +
+      "</div>"
+    );
+  }
+
+  function computeFeverResult() {
+    const s = t();
+    const fs = symptomState.fever;
+    const temp = parseFloat(fs.temp);
+    const days = parseFloat(fs.days);
+    const hasTemp = Number.isFinite(temp) && temp > 0;
+    const anyDanger = Object.values(fs.danger).some(Boolean);
+    const ageMonths = currentAgeMonthsFloat();
+
+    if (!hasTemp && !anyDanger) return null;
+    if (anyDanger) return { tier: 1, title: s.symptomTier1Title, text: s.symptomTier1Text };
+    if (hasTemp && temp > 40.6) return { tier: 1, title: s.symptomTier1Title, text: s.symptomTier1Text };
+
+    if (ageMonths === null) {
+      if (hasTemp && temp >= 38.0) return { tier: 1, title: s.symptomTier1Title, text: s.symptomTier1Text };
+    } else if (ageMonths < 3) {
+      if (hasTemp && temp >= 38.0) return { tier: 1, title: s.symptomTier1Title, text: s.symptomTier1Text };
+    } else if (ageMonths < 6) {
+      if (hasTemp && temp >= 38.3) return { tier: 2, title: s.symptomTier2Title, text: s.symptomTier2Text };
+    } else {
+      if (hasTemp && temp >= 39.4) return { tier: 2, title: s.symptomTier2Title, text: s.symptomTier2Text };
+    }
+
+    if (hasTemp && Number.isFinite(days) && days >= 5) {
+      return { tier: 3, title: s.symptomFeverTier3Title, text: s.symptomFeverTier3Text };
+    }
+    if (hasTemp) return { tier: 4, title: s.symptomTier4Title, text: s.symptomFeverTier4Text };
+    return null;
+  }
+
+  function computeCategoryResult(cat) {
+    const s = t();
+    const st = symptomState[cat.key];
+    const anyTier1 = cat.tier1.some((_, idx) => st.tier1[idx]);
+    const anyTier2 = cat.tier2.some((_, idx) => st.tier2[idx]);
+    if (anyTier1) return { tier: 1, title: s.symptomTier1Title, text: s.symptomTier1Text };
+    if (anyTier2) return { tier: 2, title: s.symptomTier2Title, text: s.symptomTier2Text };
+    return { tier: 4, title: s.symptomTier4Title, text: s.symptomTier4Text };
+  }
+
+  function renderFeverCard() {
+    const s = t();
+    const fs = symptomState.fever;
+    const ageMonths = currentAgeMonthsFloat();
+    const ageNote = ageMonths !== null ? s.symptomFeverAgeKnown(Math.floor(ageMonths)) : s.symptomFeverAgeUnknown;
+
+    let html = '<div class="symptom-card"><div class="symptom-card-head">' + (locale === "ko" ? "발열" : "Fever") + "</div>";
+    html += '<div class="symptom-card-body">';
+    html += '<div class="symptom-numeric-row">';
+    html +=
+      '<div class="symptom-numeric-field"><label for="symptom-fever-temp">' +
+      s.symptomFeverTempLabel +
+      '</label><input type="number" id="symptom-fever-temp" step="0.1" min="30" max="43" value="' +
+      fs.temp +
+      '" /></div>';
+    html +=
+      '<div class="symptom-numeric-field"><label for="symptom-fever-days">' +
+      s.symptomFeverDaysLabel +
+      '</label><input type="number" id="symptom-fever-days" min="0" max="30" value="' +
+      fs.days +
+      '" /></div>';
+    html += "</div>";
+    html += '<div class="symptom-age-note">' + ageNote + "</div>";
+    html += '<div class="symptom-group-title tier1">' + s.symptomFeverDangerGroup + "</div>";
+    FEVER_DANGER_SIGNS.forEach((item, idx) => {
+      const id = "symptom-fever-danger-" + idx;
+      const checked = fs.danger[idx] ? " checked" : "";
+      html +=
+        '<div class="symptom-check-row"><input type="checkbox" id="' +
+        id +
+        '" data-idx="' +
+        idx +
+        '"' +
+        checked +
+        ' /><label for="' +
+        id +
+        '">' +
+        item[locale] +
+        "</label></div>";
+    });
+    html += '<div id="symptom-fever-result">' + renderResultBlock(computeFeverResult()) + "</div>";
+    html += "</div></div>";
+    return html;
+  }
+
+  function renderCategoryCard(cat) {
+    const s = t();
+    const st = symptomState[cat.key];
+    let html = '<div class="symptom-card"><div class="symptom-card-head">' + CATEGORY_TITLES[cat.key][locale] + "</div>";
+    html += '<div class="symptom-card-body">';
+
+    html += '<div class="symptom-group-title tier1">' + s.symptomTier1Group + "</div>";
+    cat.tier1.forEach((item, idx) => {
+      const id = "symptom-" + cat.key + "-tier1-" + idx;
+      const checked = st.tier1[idx] ? " checked" : "";
+      html +=
+        '<div class="symptom-check-row"><input type="checkbox" id="' +
+        id +
+        '" data-cat="' +
+        cat.key +
+        '" data-tier="tier1" data-idx="' +
+        idx +
+        '"' +
+        checked +
+        ' /><label for="' +
+        id +
+        '">' +
+        item[locale] +
+        "</label></div>";
+    });
+
+    html += '<div class="symptom-group-title tier2">' + s.symptomTier2Group + "</div>";
+    cat.tier2.forEach((item, idx) => {
+      const id = "symptom-" + cat.key + "-tier2-" + idx;
+      const checked = st.tier2[idx] ? " checked" : "";
+      html +=
+        '<div class="symptom-check-row"><input type="checkbox" id="' +
+        id +
+        '" data-cat="' +
+        cat.key +
+        '" data-tier="tier2" data-idx="' +
+        idx +
+        '"' +
+        checked +
+        ' /><label for="' +
+        id +
+        '">' +
+        item[locale] +
+        "</label></div>";
+    });
+
+    html += renderResultBlock(computeCategoryResult(cat));
+    html += "</div></div>";
+    return html;
+  }
+
+  function renderSymptomCards() {
+    const container = document.getElementById("symptom-cards");
+    if (!container) return;
+    let html = renderFeverCard();
+    SYMPTOM_CATEGORIES.forEach((cat) => {
+      html += renderCategoryCard(cat);
+    });
+    container.innerHTML = html;
+
+    const feverTemp = document.getElementById("symptom-fever-temp");
+    const feverDays = document.getElementById("symptom-fever-days");
+    function updateFeverResultOnly() {
+      document.getElementById("symptom-fever-result").outerHTML =
+        '<div id="symptom-fever-result">' + renderResultBlock(computeFeverResult()) + "</div>";
+    }
+    feverTemp.addEventListener("input", () => {
+      symptomState.fever.temp = feverTemp.value;
+      updateFeverResultOnly();
+    });
+    feverDays.addEventListener("input", () => {
+      symptomState.fever.days = feverDays.value;
+      updateFeverResultOnly();
+    });
+
+    container.querySelectorAll('input[type="checkbox"][data-cat]').forEach((box) => {
+      box.addEventListener("change", () => {
+        const cat = box.dataset.cat;
+        const tier = box.dataset.tier;
+        const idx = box.dataset.idx;
+        symptomState[cat][tier][idx] = box.checked;
+        renderSymptomCards();
+      });
+    });
+
+    FEVER_DANGER_SIGNS.forEach((_, idx) => {
+      const box = document.getElementById("symptom-fever-danger-" + idx);
+      box.addEventListener("change", () => {
+        symptomState.fever.danger[idx] = box.checked;
+        renderSymptomCards();
+      });
+    });
+  }
 
   // ---- Growth percentile reference data ----
   // LMS (Lambda-Mu-Sigma) parameters, one row per (standard, measure, sex, age in months).

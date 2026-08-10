@@ -1,7 +1,15 @@
+<!doctype html>
+<html lang="ko">
+<head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Toddler Development Notebook</title>
+<title>영유아 발달 관찰 수첩</title>
 <meta name="description" content="12~36개월 영유아 발달 지연 관찰 체크리스트와 성장 백분위 기록 (진단 도구 아님)" />
+<meta name="keywords" content="영유아 발달, 발달 체크리스트, 발달 지연, 성장 백분위, 아기 발달 단계, CDC 발달 이정표" />
+<meta name="author" content="영유아 발달 관찰 수첩" />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://kyhsa93.github.io/toddler-milestone-checklist/" />
+<link rel="alternate" hreflang="ko" href="https://kyhsa93.github.io/toddler-milestone-checklist/" />
 <link rel="manifest" href="manifest.webmanifest" />
 <meta name="theme-color" content="#5c7a64" />
 <link rel="icon" href="icons/icon-192.png" />
@@ -9,6 +17,32 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="발달수첩" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ko_KR" />
+<meta property="og:site_name" content="영유아 발달 관찰 수첩" />
+<meta property="og:title" content="영유아 발달 관찰 수첩" />
+<meta property="og:description" content="12~36개월 영유아 발달 지연 관찰 체크리스트와 성장 백분위 기록 (진단 도구 아님)" />
+<meta property="og:url" content="https://kyhsa93.github.io/toddler-milestone-checklist/" />
+<meta property="og:image" content="https://kyhsa93.github.io/toddler-milestone-checklist/icons/icon-512.png" />
+<meta property="og:image:width" content="512" />
+<meta property="og:image:height" content="512" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="영유아 발달 관찰 수첩" />
+<meta name="twitter:description" content="12~36개월 영유아 발달 지연 관찰 체크리스트와 성장 백분위 기록 (진단 도구 아님)" />
+<meta name="twitter:image" content="https://kyhsa93.github.io/toddler-milestone-checklist/icons/icon-512.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "영유아 발달 관찰 수첩",
+  "url": "https://kyhsa93.github.io/toddler-milestone-checklist/",
+  "inLanguage": "ko-KR",
+  "operatingSystem": "Web",
+  "applicationCategory": "LifestyleApplication",
+  "description": "12~36개월 영유아 발달 지연 관찰 체크리스트와 성장 백분위 기록 (진단 도구 아님)",
+  "isAccessibleForFree": true
+}
+</script>
 <meta name="google-adsense-account" content="ca-pub-1195159445218373">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1195159445218373" crossorigin="anonymous"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z1LH7S1ZE5"></script>
@@ -753,6 +787,8 @@
     .band, .result, .chart-card, .stamp, .sensory-note { box-shadow: none; break-inside: avoid; }
   }
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <header class="masthead">
@@ -909,7 +945,10 @@
   const LOCALE_KEY = "lang";
   function getInitialLocale() {
     const saved = localStorage.getItem(LOCALE_KEY);
-    return saved === "en" || saved === "ko" ? saved : "en";
+    // 대상 독자가 한국어권이라 static meta(description/OG/JSON-LD)도 전부
+    // 한국어로 작성돼 있음 - 기본값을 en으로 두면 첫 방문자에게 렌더링되는
+    // <title>/lang만 영어로 바뀌어 static 태그와 어긋나므로 ko를 기본값으로 함.
+    return saved === "en" || saved === "ko" ? saved : "ko";
   }
   let locale = getInitialLocale();
 
@@ -2657,3 +2696,5 @@ cdc,stature,girl,36.5,0.541981,94.213357,0.042018`;
     });
   }
 </script>
+</body>
+</html>

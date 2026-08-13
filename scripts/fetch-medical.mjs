@@ -308,18 +308,44 @@ async function collectPharmacies() {
 }
 
 /**
- * 주소 첫 낱말로 시도를 알아낸다. 옛 표기(강원도)와 새 표기(강원특별자치도)가
- * 섞여 있어서 접두어로 맞춘다.
+ * 주소가 어느 시도인지 알아낸다.
+ *
+ * 시도명 앞 두 글자로 자르면 안 된다: "충청북도"와 "충청남도"가 똑같이 "충청"이
+ * 되어 남도가 통째로 북도 파일로 들어간다(실제로 충남·전남·경남이 전부 0건이
+ * 됐다). 공공데이터 주소는 정식 명칭과 축약형이 섞여 오므로 둘 다 적어둔다.
  */
-const REGION_BY_ADDRESS_PREFIX = REGIONS.flatMap((region) =>
-  [region.name, ...(region.alt ?? [])].map((name) => [name.slice(0, 2), region.code])
-);
+const ADDRESS_ALIASES = [
+  ["seoul", ["서울특별시", "서울시", "서울"]],
+  ["busan", ["부산광역시", "부산시", "부산"]],
+  ["daegu", ["대구광역시", "대구시", "대구"]],
+  ["incheon", ["인천광역시", "인천시", "인천"]],
+  ["gwangju", ["광주광역시", "광주시", "광주"]],
+  ["daejeon", ["대전광역시", "대전시", "대전"]],
+  ["ulsan", ["울산광역시", "울산시", "울산"]],
+  ["sejong", ["세종특별자치시", "세종시", "세종"]],
+  ["gyeonggi", ["경기도", "경기"]],
+  ["gangwon", ["강원특별자치도", "강원도", "강원"]],
+  ["chungbuk", ["충청북도", "충북"]],
+  ["chungnam", ["충청남도", "충남"]],
+  ["jeonbuk", ["전북특별자치도", "전라북도", "전북"]],
+  ["jeonnam", ["전라남도", "전남"]],
+  ["gyeongbuk", ["경상북도", "경북"]],
+  ["gyeongnam", ["경상남도", "경남"]],
+  ["jeju", ["제주특별자치도", "제주도", "제주"]],
+];
+
+// 긴 이름을 먼저 본다. "충청남도"를 "충청북도"보다 먼저 확인해야 한다는 뜻이
+// 아니라(그 둘은 서로의 접두어가 아니다), "제주도"보다 "제주특별자치도"처럼
+// 한쪽이 다른 쪽의 접두어인 경우에 긴 쪽이 이기게 하려는 것이다.
+const ADDRESS_PREFIXES = ADDRESS_ALIASES.flatMap(([code, names]) =>
+  names.map((name) => ({ name, code }))
+).sort((a, b) => b.name.length - a.name.length);
 
 function regionFromAddress(addr) {
   if (!addr) return null;
-  const head = addr.trim().slice(0, 2);
-  for (const [prefix, code] of REGION_BY_ADDRESS_PREFIX) {
-    if (head === prefix) return code;
+  const trimmed = addr.trim();
+  for (const { name, code } of ADDRESS_PREFIXES) {
+    if (trimmed.startsWith(name)) return code;
   }
   return null;
 }
@@ -333,14 +359,16 @@ async function collectEmergencyRooms() {
   const byRegion = Object.fromEntries(REGIONS.map((r) => [r.code, []]));
 
   const items = await fetchAllPages(EMERGENCY_BASE, EMERGENCY_KEY, EMERGENCY_OPERATION, {});
-  let unmatched = 0;
+  const unmatched = [];
 
   for (const item of items) {
     const normalized = normalizeEmergency(item);
     if (!normalized.name) continue;
     const code = regionFromAddress(normalized.addr);
     if (!code) {
-      unmatched += 1;
+      // 어떤 주소가 안 걸리는지 남긴다. 개수만 세면 표기 하나 때문인지
+      // 주소가 아예 비어 있는 건지 알 수 없어 진단이 한 번 더 왕복한다.
+      unmatched.push(`${normalized.name}: ${JSON.stringify(normalized.addr)}`);
       continue;
     }
     byRegion[code].push(normalized);
@@ -353,8 +381,19 @@ async function collectEmergencyRooms() {
   const total = Object.values(byRegion).reduce((a, l) => a + l.length, 0);
   console.log(
     `[fetch-medical] 응급실: 전체 ${items.length} → 시도 분류 ${total}` +
-      (unmatched ? ` (주소로 시도를 못 찾음 ${unmatched}건)` : "")
+      (unmatched.length ? ` (주소로 시도를 못 찾음 ${unmatched.length}건)` : "")
   );
+  for (const sample of unmatched.slice(0, 10)) {
+    console.warn(`[fetch-medical]   분류 실패: ${sample}`);
+  }
+
+  // 응급실이 한 곳도 없는 시도는 정상이 아니다(가장 작은 세종도 두 곳은 있다).
+  // 분류 규칙이 깨졌을 때 조용히 빈 파일을 배포하지 않도록 경고를 남긴다.
+  const empty = REGIONS.filter((r) => byRegion[r.code].length === 0).map((r) => r.code);
+  if (empty.length) {
+    console.warn(`[fetch-medical]   응급실이 0건인 시도: ${empty.join(", ")} - 분류 규칙 확인 필요`);
+  }
+
   for (const region of REGIONS) {
     console.log(`[fetch-medical]   응급실 ${region.code}: ${byRegion[region.code].length}`);
   }

@@ -241,6 +241,42 @@ test("응급의료기관은 한 번만 받아 주소로 시도를 나눈다", as
   }
 });
 
+test("남도와 북도를 섞지 않고, 축약 표기 주소도 제 시도로 보낸다", async () => {
+  // 시도명 앞 두 글자로 자르면 "충청북도"와 "충청남도"가 똑같이 "충청"이 되어
+  // 남도가 통째로 북도로 들어간다. 실제로 충남·전남·경남이 0건이 됐던 버그다.
+  const stub = await startStub(({ operation }) => {
+    if (operation === "getParmacyListInfoInqire") return { xml: itemsXml([]) };
+    return {
+      xml: itemsXml([
+        { hpid: "1", dutyName: "충북병원", dutyAddr: "충청북도 청주시 1" },
+        { hpid: "2", dutyName: "충남병원", dutyAddr: "충청남도 천안시 2" },
+        { hpid: "3", dutyName: "전남병원", dutyAddr: "전라남도 순천시 3" },
+        { hpid: "4", dutyName: "경남병원", dutyAddr: "경상남도 창원시 4" },
+        { hpid: "5", dutyName: "축약충남병원", dutyAddr: "충남 아산시 5" },
+        { hpid: "6", dutyName: "광주병원", dutyAddr: "광주광역시 동구 6" },
+        { hpid: "7", dutyName: "경기광주병원", dutyAddr: "경기도 광주시 7" },
+      ]),
+    };
+  });
+  const outDir = await tempDir();
+
+  try {
+    await run(stub.base, stub.base, outDir);
+    const names = async (code) =>
+      (await readJson(outDir, "emergency", `${code}.json`)).map((e) => e.name).sort();
+
+    assert.deepEqual(await names("chungbuk"), ["충북병원"]);
+    assert.deepEqual(await names("chungnam"), ["축약충남병원", "충남병원"]);
+    assert.deepEqual(await names("jeonnam"), ["전남병원"]);
+    assert.deepEqual(await names("gyeongnam"), ["경남병원"]);
+    // 광주광역시와 경기도 광주시가 섞이면 안 된다.
+    assert.deepEqual(await names("gwangju"), ["광주병원"]);
+    assert.deepEqual(await names("gyeonggi"), ["경기광주병원"]);
+  } finally {
+    await stub.close();
+  }
+});
+
 test("일시적인 연결 실패는 재시도로 넘긴다", async () => {
   // 러너에서 apis.data.go.kr 연결이 간헐적으로 타임아웃된다. 한 번 끊겼다고
   // 하루치 수집을 통째로 버리면 안 된다.

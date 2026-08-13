@@ -16,9 +16,10 @@ const dataDir = process.env.MEDICAL_OUT_DIR
   : path.join(rootDir, "data");
 
 const PHARMACY_KEY = process.env.PHARMACY_API_KEY;
-const PHARMACY_BASE = process.env.PHARMACY_API_ENDPOINT;
 const EMERGENCY_KEY = process.env.EMERGENCY_API_KEY;
-const EMERGENCY_BASE = process.env.EMERGENCY_API_ENDPOINT;
+// main()에서 형식을 검증하고 뒤쪽 슬래시를 떼면서 다시 대입한다.
+let PHARMACY_BASE = process.env.PHARMACY_API_ENDPOINT;
+let EMERGENCY_BASE = process.env.EMERGENCY_API_ENDPOINT;
 
 // 시크릿에는 서비스 URL까지만 넣고 오퍼레이션은 코드가 붙인다. 오퍼레이션까지
 // 시크릿에 박아두면 같은 서비스의 다른 기능(약국 위치정보, 응급실 실시간
@@ -89,6 +90,24 @@ function readTag(xml, tag) {
 
 // ---- 호출 -----------------------------------------------------------------
 
+/**
+ * 시크릿에 담긴 서비스 URL을 검증한다. 오타나 프로토콜 누락이면 fetch가
+ * "fetch failed" 한 줄만 던지고 끝나서 원인을 알 수 없기 때문에, 먼저 걸러낸다.
+ */
+function normalizeBase(name, value) {
+  const trimmed = (value ?? "").trim().replace(/\/+$/, "");
+  let url;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error(`${name}이 URL 형식이 아닙니다: ${JSON.stringify(value)}`);
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new Error(`${name}의 프로토콜이 http(s)가 아닙니다: ${url.protocol}`);
+  }
+  return trimmed;
+}
+
 async function fetchPage(base, key, operation, params) {
   // serviceKey는 URLSearchParams에 넣으면 안 된다. 공공데이터포털이 주는 키에는
   // 이미 %2B 같은 인코딩이 들어 있어서 한 번 더 인코딩되면 서명이 깨진다.
@@ -96,7 +115,16 @@ async function fetchPage(base, key, operation, params) {
   const query = new URLSearchParams({ numOfRows: String(NUM_OF_ROWS), ...params });
   const url = `${base}/${operation}?serviceKey=${key}&${query.toString()}`;
 
-  const res = await fetch(url, { headers: { "User-Agent": "toddler-milestone-checklist/1.0" } });
+  let res;
+  try {
+    res = await fetch(url, { headers: { "User-Agent": "toddler-milestone-checklist/1.0" } });
+  } catch (err) {
+    // undici는 DNS 실패든 TLS 오류든 "fetch failed" 한 줄만 던진다. 실제 원인은
+    // cause에 들어 있어서 그것까지 붙여줘야 진단이 한 번에 끝난다.
+    // 인증키가 섞이지 않도록 URL은 호스트+경로까지만 남긴다.
+    const cause = err.cause?.message ?? err.cause?.code ?? "원인 불명";
+    throw new Error(`${base}/${operation} 요청 실패: ${err.message} (${cause})`);
+  }
   const text = await res.text();
 
   // 인증 오류는 HTTP 403 + OpenAPI_ServiceResponse 형태로 오고, 정상 응답과
@@ -293,6 +321,13 @@ async function main() {
     .filter(([, value]) => !value)
     .map(([name]) => name);
   if (missing.length) throw new Error(`환경변수가 필요합니다: ${missing.join(", ")}`);
+
+  // 시크릿에 들어온 값이 어떤 호스트를 가리키는지 남긴다(키는 찍지 않는다).
+  // 엔드포인트 오타는 로그만 봐서는 절대 드러나지 않는 종류의 실패다.
+  PHARMACY_BASE = normalizeBase("PHARMACY_API_ENDPOINT", PHARMACY_BASE);
+  EMERGENCY_BASE = normalizeBase("EMERGENCY_API_ENDPOINT", EMERGENCY_BASE);
+  console.log(`[fetch-medical] 약국 API: ${PHARMACY_BASE}`);
+  console.log(`[fetch-medical] 응급의료 API: ${EMERGENCY_BASE}`);
 
   const pharmacies = await collectPharmacies();
   const emergencyRooms = await collectEmergencyRooms();

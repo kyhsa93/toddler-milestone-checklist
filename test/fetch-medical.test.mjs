@@ -255,6 +255,19 @@ test("시도별 건수를 담은 메타 파일을 남긴다", async () => {
   }
 });
 
+test("엔드포인트가 URL 형식이 아니면 무엇이 잘못됐는지 알려주고 멈춘다", async () => {
+  // 시크릿에 오타가 나면 fetch는 "fetch failed" 한 줄만 남기고 끝나서
+  // 로그만 보고는 원인을 알 수 없다.
+  const outDir = await tempDir();
+  await assert.rejects(
+    () => run("apis.data.go.kr/B552657/ErmctInsttInfoInqireService", "https://example.com", outDir),
+    (err) => {
+      assert.match(err.stderr ?? "", /PHARMACY_API_ENDPOINT/);
+      return true;
+    }
+  );
+});
+
 test("환경변수가 없으면 즉시 실패한다", async () => {
   await assert.rejects(() =>
     execFileAsync("node", [scriptPath], {

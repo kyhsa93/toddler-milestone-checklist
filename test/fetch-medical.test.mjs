@@ -241,6 +241,47 @@ test("응급의료기관은 한 번만 받아 주소로 시도를 나눈다", as
   }
 });
 
+test("일시적인 연결 실패는 재시도로 넘긴다", async () => {
+  // 러너에서 apis.data.go.kr 연결이 간헐적으로 타임아웃된다. 한 번 끊겼다고
+  // 하루치 수집을 통째로 버리면 안 된다.
+  let attempts = 0;
+  const stub = await startStub(({ operation }) => {
+    if (operation !== "getParmacyListInfoInqire") return { xml: itemsXml([]) };
+    attempts += 1;
+    if (attempts === 1) return { status: 500, xml: "<html>gateway</html>" };
+    return { xml: itemsXml([pharmacy("재시도약국", { 7: ["1000", "1700"] })]) };
+  });
+  const outDir = await tempDir();
+
+  try {
+    await run(stub.base, stub.base, outDir);
+    const list = await readJson(outDir, "pharmacy", "seoul.json");
+    assert.ok(attempts >= 2, "재시도가 일어나야 한다");
+    assert.equal(list.length, 1);
+  } finally {
+    await stub.close();
+  }
+});
+
+test("인증 오류는 재시도하지 않고 즉시 멈춘다", async () => {
+  let calls = 0;
+  const stub = await startStub(() => {
+    calls += 1;
+    return {
+      status: 403,
+      xml: `<?xml version="1.0"?><OpenAPI_ServiceResponse><cmmMsgHeader><returnAuthMsg>SERVICE_KEY_IS_NOT_REGISTERED_ERROR</returnAuthMsg></cmmMsgHeader></OpenAPI_ServiceResponse>`,
+    };
+  });
+  const outDir = await tempDir();
+
+  try {
+    await assert.rejects(() => run(stub.base, stub.base, outDir));
+    assert.equal(calls, 1, "인증 오류는 다시 불러도 같은 답이라 한 번만 호출해야 한다");
+  } finally {
+    await stub.close();
+  }
+});
+
 test("인증 오류 응답을 빈 목록으로 착각하지 않는다", async () => {
   const stub = await startStub(() => ({
     status: 403,

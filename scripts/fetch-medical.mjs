@@ -130,15 +130,47 @@ async function fetchPage(base, key, operation, params) {
   // 인증 오류는 HTTP 403 + OpenAPI_ServiceResponse 형태로 오고, 정상 응답과
   // 껍데기가 아예 다르다. 빈 목록으로 착각하지 않도록 여기서 걸러낸다.
   const authError = readTag(text, "returnAuthMsg") ?? readTag(text, "errMsg");
-  if (authError) throw new Error(`인증/요청 오류: ${authError}`);
+  if (authError) throw fatal(new Error(`인증/요청 오류: ${authError}`));
   if (!res.ok) throw new Error(`http ${res.status}`);
 
   const resultCode = readTag(text, "resultCode");
   if (resultCode && resultCode !== "00") {
-    throw new Error(`API 오류 ${resultCode}: ${readTag(text, "resultMsg") ?? ""}`.trim());
+    throw fatal(new Error(`API 오류 ${resultCode}: ${readTag(text, "resultMsg") ?? ""}`.trim()));
   }
 
   return { items: parseItems(text), totalCount: Number(readTag(text, "totalCount") ?? 0) };
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** 다시 시도해도 결과가 같은 실패로 표시한다(인증 오류 등). */
+function fatal(err) {
+  err.fatal = true;
+  return err;
+}
+
+/**
+ * 해외(GitHub Actions 러너)에서 apis.data.go.kr로 붙을 때 간헐적으로 연결이
+ * 10초 안에 성립하지 않는다("Connect Timeout Error"). 실제로 같은 스크립트가
+ * 한 번은 통째로 실패하고 다음 실행은 25,000건을 다 받아왔다. undici의 연결
+ * 타임아웃은 외부 패키지 없이 늘릴 수 없어서 재시도로 넘긴다.
+ */
+async function withRetry(label, fn, attempts = 4) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      // 인증키가 틀렸거나 API가 오류 코드를 준 경우는 다시 불러도 같은 답이 온다.
+      if (err.fatal) throw err;
+      if (attempt === attempts) break;
+      const wait = attempt * 3000;
+      console.warn(`[fetch-medical] ${label} 실패(${attempt}/${attempts}), ${wait}ms 후 재시도: ${err.message}`);
+      await sleep(wait);
+    }
+  }
+  throw lastError;
 }
 
 async function fetchAllPages(base, key, operation, params) {
@@ -147,10 +179,10 @@ async function fetchAllPages(base, key, operation, params) {
   let totalCount = null;
 
   while (pageNo <= MAX_PAGES) {
-    const { items, totalCount: total } = await fetchPage(base, key, operation, {
-      ...params,
-      pageNo: String(pageNo),
-    });
+    const label = `${operation} ${params.Q0 ?? params.STAGE1 ?? "전국"} p${pageNo}`;
+    const { items, totalCount: total } = await withRetry(label, () =>
+      fetchPage(base, key, operation, { ...params, pageNo: String(pageNo) })
+    );
     totalCount ??= total;
     collected.push(...items);
 

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-13T16:50:50.188Z",
+  "updatedAt": "2026-08-13T16:55:10.065Z",
   "regions": [
     {
       "code": "seoul",
@@ -65,13 +65,13 @@
       "code": "chungbuk",
       "name": "충청북도",
       "pharmacy": 329,
-      "emergency": 42
+      "emergency": 21
     },
     {
       "code": "chungnam",
       "name": "충청남도",
       "pharmacy": 437,
-      "emergency": 0
+      "emergency": 21
     },
     {
       "code": "jeonbuk",
@@ -83,19 +83,19 @@
       "code": "jeonnam",
       "name": "전라남도",
       "pharmacy": 262,
-      "emergency": 0
+      "emergency": 72
     },
     {
       "code": "gyeongbuk",
       "name": "경상북도",
       "pharmacy": 450,
-      "emergency": 85
+      "emergency": 36
     },
     {
       "code": "gyeongnam",
       "name": "경상남도",
       "pharmacy": 539,
-      "emergency": 0
+      "emergency": 49
     },
     {
       "code": "jeju",

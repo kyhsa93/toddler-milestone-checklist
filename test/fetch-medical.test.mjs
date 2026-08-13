@@ -241,6 +241,36 @@ test("응급의료기관은 한 번만 받아 주소로 시도를 나눈다", as
   }
 });
 
+test("전남광주통합특별시 주소를 옛 광주와 옛 전남으로 가른다", async () => {
+  // 2026-07-01 전남·광주가 통합되면서 응급의료 데이터 주소가 통합 명칭으로
+  // 바뀌었다. 그대로 두면 "전남"으로 시작하니 광주 병원이 전부 전남으로 가고
+  // 광주 지역 사용자에게는 빈 목록이 나간다.
+  const stub = await startStub(({ operation }) => {
+    if (operation === "getParmacyListInfoInqire") return { xml: itemsXml([]) };
+    return {
+      xml: itemsXml([
+        { hpid: "1", dutyName: "광주기독병원", dutyAddr: "전남광주통합특별시 남구 양림로 37" },
+        { hpid: "2", dutyName: "광주병원", dutyAddr: "전남광주통합특별시 북구 면앙로139번길 51" },
+        { hpid: "3", dutyName: "광산병원", dutyAddr: "전남광주통합특별시 광산구 어딘가 1" },
+        { hpid: "4", dutyName: "곡성사랑병원", dutyAddr: "전남광주통합특별시 곡성군 곡성읍 곡성로 761" },
+        { hpid: "5", dutyName: "광양사랑병원", dutyAddr: "전남광주통합특별시 광양시 공영로 71" },
+      ]),
+    };
+  });
+  const outDir = await tempDir();
+
+  try {
+    await run(stub.base, stub.base, outDir);
+    const names = async (code) =>
+      (await readJson(outDir, "emergency", `${code}.json`)).map((e) => e.name).sort();
+
+    assert.deepEqual(await names("gwangju"), ["광산병원", "광주기독병원", "광주병원"]);
+    assert.deepEqual(await names("jeonnam"), ["곡성사랑병원", "광양사랑병원"]);
+  } finally {
+    await stub.close();
+  }
+});
+
 test("남도와 북도를 섞지 않고, 축약 표기 주소도 제 시도로 보낸다", async () => {
   // 시도명 앞 두 글자로 자르면 "충청북도"와 "충청남도"가 똑같이 "충청"이 되어
   // 남도가 통째로 북도로 들어간다. 실제로 충남·전남·경남이 0건이 됐던 버그다.

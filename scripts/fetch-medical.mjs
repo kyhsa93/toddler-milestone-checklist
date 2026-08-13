@@ -341,9 +341,24 @@ const ADDRESS_PREFIXES = ADDRESS_ALIASES.flatMap(([code, names]) =>
   names.map((name) => ({ name, code }))
 ).sort((a, b) => b.name.length - a.name.length);
 
+// 2026년 7월 1일 전라남도와 광주광역시가 폐지되고 전남광주통합특별시가 출범했다.
+// 응급의료 데이터 주소는 이미 통합 명칭을 쓰는데(그래서 광주가 0건이 됐다) 약국
+// API는 아직 "광주광역시"/"전라남도"로 조회된다. 두 소스의 지역 구분을 맞추고,
+// 밤에 약국을 찾는 사람이 통합시 전체 목록을 훑지 않도록 자치구로 갈라 둔다.
+const MERGED_JEONNAM_GWANGJU = "전남광주통합특별시";
+const GWANGJU_DISTRICTS = ["동구", "서구", "남구", "북구", "광산구"];
+
 function regionFromAddress(addr) {
   if (!addr) return null;
   const trimmed = addr.trim();
+
+  if (trimmed.startsWith(MERGED_JEONNAM_GWANGJU)) {
+    const rest = trimmed.slice(MERGED_JEONNAM_GWANGJU.length).trim();
+    const first = rest.split(/\s+/)[0] ?? "";
+    // 옛 광주광역시는 자치구 5곳으로만 이뤄져 있고, 옛 전남 시군에는 구가 없다.
+    return GWANGJU_DISTRICTS.includes(first) ? "gwangju" : "jeonnam";
+  }
+
   for (const { name, code } of ADDRESS_PREFIXES) {
     if (trimmed.startsWith(name)) return code;
   }

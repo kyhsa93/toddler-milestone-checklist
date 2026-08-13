@@ -1,0 +1,75 @@
+name: Update medical data
+
+# 약국·응급의료기관 데이터를 하루 한 번 받아 커밋한다. 두 API 모두 개발계정
+# 트래픽이 하루 1,000건뿐이라 브라우저에서 직접 부를 수 없어서(키 노출 + 한도),
+# 여기서 미리 받아 정적 JSON으로 떨군다. 실제 사용량은 하루 70건 남짓이다.
+on:
+  schedule:
+    - cron: "17 20 * * *" # 05:17 KST (정각은 스케줄 트리거가 몰려 지연이 크다)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# static.yml(푸시 배포)과 같은 그룹을 써서 Pages 배포가 겹치지 않게 한다.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 데이터 수집
+        run: node scripts/fetch-medical.mjs
+        env:
+          PHARMACY_API_KEY: ${{ secrets.PHARMACY_API_KEY }}
+          PHARMACY_API_ENDPOINT: ${{ secrets.PHARMACY_API_ENDPOINT }}
+          EMERGENCY_API_KEY: ${{ secrets.EMERGENCY_API_KEY }}
+          EMERGENCY_API_ENDPOINT: ${{ secrets.EMERGENCY_API_ENDPOINT }}
+
+      - name: 변경사항 커밋 및 푸시
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- data; then
+            echo "변경사항 없음, 커밋 생략"
+            exit 0
+          fi
+          git add data
+          git commit -m "chore: 약국·응급의료기관 데이터 갱신 $(TZ=Asia/Seoul date +%Y-%m-%d)"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "push 실패($i), rebase 후 재시도"
+            git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)"
+            sleep $((i * 3))
+          done
+          echo "push 재시도 모두 실패"
+          exit 1
+
+      # GITHUB_TOKEN으로 푸시한 커밋은 다른 워크플로를 트리거하지 않는다.
+      # 그래서 static.yml(푸시 배포)에 맡기지 않고 여기서 직접 배포한다.
+      - name: Pages 설정
+        uses: actions/configure-pages@v5
+
+      - name: Pages 아티팩트 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Pages에 배포
+        id: deployment
+        uses: actions/deploy-pages@v4

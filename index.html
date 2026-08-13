@@ -526,6 +526,62 @@
 
   .symptom-footer-note { font-size: 12px; color: var(--ink-faint); margin-top: 24px; }
 
+  /* ---- 야간·휴일 약국 / 응급실 ---- */
+  .nearby-intro { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; }
+  .nearby-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .nearby-control-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .nearby-control-row label { font-size: 13px; color: var(--ink-soft); }
+  .nearby-control-row select,
+  .nearby-control-row input[type="search"] {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+  .nearby-check { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .nearby-locate-btn {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--sage-deep);
+    background: var(--sage-pale);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .nearby-locate-btn[aria-pressed="true"] { background: var(--sage); color: #fff; }
+  .nearby-status { font-size: 13px; color: var(--ink-soft); margin: 0 0 12px; }
+  .nearby-item {
+    padding: 14px 16px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+  }
+  .nearby-item-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .nearby-item-name { font-weight: 600; font-size: 15px; }
+  .nearby-badge {
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--sage-pale);
+    color: var(--sage-deep);
+  }
+  .nearby-badge.closed { background: var(--line); color: var(--ink-faint); }
+  .nearby-badge.distance { background: var(--amber-pale); color: var(--amber); }
+  .nearby-item-addr { font-size: 13px; color: var(--ink-soft); margin-top: 4px; }
+  .nearby-item-hours { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
+  .nearby-item-actions { margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .nearby-item-actions a { font-size: 13px; color: var(--sage-deep); }
+  .nearby-empty { font-size: 13px; color: var(--ink-faint); padding: 20px 0; }
+
   .item {
     display: flex;
     align-items: center;
@@ -838,6 +894,7 @@
     <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-growth" id="tab-growth" data-tab="growth"><span id="txt-tab-growth"></span></button>
     <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-symptom" id="tab-symptom" data-tab="symptom"><span id="txt-tab-symptom"></span></button>
     <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-care" id="tab-care" data-tab="care"><span id="txt-tab-care"></span></button>
+    <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-nearby" id="tab-nearby" data-tab="nearby"><span id="txt-tab-nearby"></span></button>
   </div>
 
   <section class="tab-panel active" id="panel-checklist" role="tabpanel" aria-labelledby="tab-checklist" tabindex="0">
@@ -929,6 +986,38 @@
     <div id="care-cards"></div>
   </section>
 
+  <section class="tab-panel" id="panel-nearby" role="tabpanel" aria-labelledby="tab-nearby" tabindex="0">
+    <p class="nearby-intro" id="txt-nearby-intro"></p>
+
+    <div class="nearby-controls">
+      <div class="nearby-control-row">
+        <label for="nearby-kind" id="txt-nearby-kind-label"></label>
+        <select id="nearby-kind">
+          <option value="pharmacy" id="txt-nearby-kind-pharmacy"></option>
+          <option value="emergency" id="txt-nearby-kind-emergency"></option>
+        </select>
+      </div>
+      <div class="nearby-control-row">
+        <label for="nearby-region" id="txt-nearby-region-label"></label>
+        <select id="nearby-region"></select>
+      </div>
+      <div class="nearby-control-row" id="nearby-open-row">
+        <label class="nearby-check">
+          <input type="checkbox" id="nearby-open-now">
+          <span id="txt-nearby-open-now"></span>
+        </label>
+      </div>
+      <div class="nearby-control-row">
+        <input type="search" id="nearby-search" autocomplete="off">
+        <button class="nearby-locate-btn" type="button" id="nearby-locate-btn"></button>
+      </div>
+    </div>
+
+    <p class="nearby-status" id="nearby-status"></p>
+    <div id="nearby-list"></div>
+    <p class="symptom-footer-note" id="txt-nearby-footer-note"></p>
+  </section>
+
   <footer>
     <p id="txt-footer-note"></p>
     <div class="footer-actions">
@@ -974,6 +1063,34 @@
       tabGrowth: "성장 기록",
       tabSymptom: "증상 응급도",
       tabCare: "응급처치·투약",
+      tabNearby: "약국·응급실",
+      nearbyIntro:
+        "밤이나 주말에 문 여는 약국과, 응급실이 있는 의료기관을 지역별로 찾아봅니다. 낮에만 여는 약국은 목록에 없습니다.",
+      nearbyKindLabel: "종류",
+      nearbyKindPharmacy: "야간·휴일 약국",
+      nearbyKindEmergency: "응급실",
+      nearbyRegionLabel: "지역",
+      nearbyOpenNow: "지금 문 연 곳만",
+      nearbySearchPlaceholder: "이름·주소 검색",
+      nearbyLocate: "가까운 순",
+      nearbyLoading: "불러오는 중...",
+      nearbyError: "목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      nearbyCount: (n) => `${n}곳`,
+      nearbyCountWithUpdated: (n, d) => `${n}곳 · ${d} 기준`,
+      nearbyEmpty: "조건에 맞는 곳이 없습니다. 지역을 바꾸거나 '지금 문 연 곳만'을 꺼보세요.",
+      nearbyOpenBadge: "영업 중",
+      nearbyClosedBadge: "영업 종료",
+      nearbyHolidayBadge: "공휴일 운영",
+      nearbyTodayHours: (s, e) => `오늘 ${s}~${e}`,
+      nearbyNoTodayHours: "오늘 운영 정보 없음",
+      nearbyCall: "전화하기",
+      nearbyMap: "지도에서 보기",
+      nearbyDistance: (km) => `${km}km`,
+      nearbyLocateDenied: "위치 권한이 없어 가까운 순으로 정렬할 수 없습니다.",
+      nearbyLocateUnsupported: "이 브라우저에서는 위치를 쓸 수 없습니다.",
+      nearbyLocating: "위치를 확인하는 중...",
+      nearbyFooterNote:
+        "국립중앙의료원 응급의료정보(E-Gen) 공개 데이터를 하루 한 번 받아 보여줍니다. 운영시간은 사정에 따라 달라질 수 있으니 방문 전 전화로 확인하세요. 응급 상황이면 119에 먼저 연락하세요.",
       progressLabel: "응답",
       yesBtn: "네, 보여요",
       notYetBtn: "아직이요",
@@ -1141,6 +1258,34 @@
       tabGrowth: "Growth log",
       tabSymptom: "Symptom urgency",
       tabCare: "First Aid & Dosing",
+      tabNearby: "Pharmacy & ER",
+      nearbyIntro:
+        "Finds pharmacies open at night or on weekends, and hospitals with an emergency room, by region. Pharmacies that only open during the day are not listed.",
+      nearbyKindLabel: "Type",
+      nearbyKindPharmacy: "Night & weekend pharmacy",
+      nearbyKindEmergency: "Emergency room",
+      nearbyRegionLabel: "Region",
+      nearbyOpenNow: "Open right now only",
+      nearbySearchPlaceholder: "Search name or address",
+      nearbyLocate: "Nearest first",
+      nearbyLoading: "Loading...",
+      nearbyError: "Could not load the list. Please try again in a moment.",
+      nearbyCount: (n) => (n === 1 ? "1 place" : `${n} places`),
+      nearbyCountWithUpdated: (n, d) => `${n === 1 ? "1 place" : `${n} places`} · as of ${d}`,
+      nearbyEmpty: "Nothing matches. Try another region, or turn off “Open right now only”.",
+      nearbyOpenBadge: "Open now",
+      nearbyClosedBadge: "Closed",
+      nearbyHolidayBadge: "Open on holidays",
+      nearbyTodayHours: (s, e) => `Today ${s}-${e}`,
+      nearbyNoTodayHours: "No hours listed for today",
+      nearbyCall: "Call",
+      nearbyMap: "View on map",
+      nearbyDistance: (km) => `${km} km`,
+      nearbyLocateDenied: "Location permission denied, so it can't sort by distance.",
+      nearbyLocateUnsupported: "This browser can't use location.",
+      nearbyLocating: "Getting your location...",
+      nearbyFooterNote:
+        "Sourced once a day from Korea's National Emergency Medical Center (E-Gen) open data. Hours can change without notice — call before you go. In an emergency, call 119 first.",
       progressLabel: "Answered",
       yesBtn: "Yes, I see it",
       notYetBtn: "Not yet",
@@ -1495,6 +1640,16 @@
     document.getElementById("txt-tab-growth").textContent = s.tabGrowth;
     document.getElementById("txt-tab-symptom").textContent = s.tabSymptom;
     document.getElementById("txt-tab-care").textContent = s.tabCare;
+    document.getElementById("txt-tab-nearby").textContent = s.tabNearby;
+    document.getElementById("txt-nearby-intro").textContent = s.nearbyIntro;
+    document.getElementById("txt-nearby-kind-label").textContent = s.nearbyKindLabel;
+    document.getElementById("txt-nearby-kind-pharmacy").textContent = s.nearbyKindPharmacy;
+    document.getElementById("txt-nearby-kind-emergency").textContent = s.nearbyKindEmergency;
+    document.getElementById("txt-nearby-region-label").textContent = s.nearbyRegionLabel;
+    document.getElementById("txt-nearby-open-now").textContent = s.nearbyOpenNow;
+    document.getElementById("nearby-search").placeholder = s.nearbySearchPlaceholder;
+    document.getElementById("nearby-locate-btn").textContent = s.nearbyLocate;
+    document.getElementById("txt-nearby-footer-note").textContent = s.nearbyFooterNote;
     renderCareCards();
     document.getElementById("txt-symptom-disclaimer-title").textContent = s.symptomDisclaimerTitle;
     document.getElementById("txt-symptom-disclaimer-1").innerHTML = s.symptomDisclaimer1;
@@ -1853,7 +2008,299 @@
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
       document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+      // 약국·응급실 목록은 이 탭을 처음 열 때만 받는다(첫 화면 로딩을 늦추지 않도록).
+      if (btn.dataset.tab === "nearby") initNearby();
     });
+  });
+
+  // 목록은 공공데이터에서 온 문자열(약국명·주소)을 그대로 넣기 때문에
+  // innerHTML에 붙이기 전에 반드시 이스케이프한다.
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // ---- 야간·휴일 약국 / 응급실 ----
+  // 데이터는 GitHub Actions가 하루 한 번 받아 data/ 아래 시도별 JSON으로 넣어둔다
+  // (API 트래픽이 하루 1,000건뿐이라 브라우저에서 직접 부를 수 없다).
+  // 이 탭을 처음 열 때만 메타를 읽고, 목록은 지역을 고를 때마다 그 지역 파일만 받는다.
+  const NEARBY_REGION_KEY = "nearbyRegion";
+  const REGION_LABELS_EN = {
+    seoul: "Seoul", busan: "Busan", daegu: "Daegu", incheon: "Incheon",
+    gwangju: "Gwangju", daejeon: "Daejeon", ulsan: "Ulsan", sejong: "Sejong",
+    gyeonggi: "Gyeonggi", gangwon: "Gangwon", chungbuk: "North Chungcheong",
+    chungnam: "South Chungcheong", jeonbuk: "North Jeolla", jeonnam: "South Jeolla",
+    gyeongbuk: "North Gyeongsang", gyeongnam: "South Gyeongsang", jeju: "Jeju",
+  };
+
+  const nearbyState = {
+    kind: "pharmacy",
+    region: localStorage.getItem(NEARBY_REGION_KEY) || "seoul",
+    openNow: false,
+    query: "",
+    coords: null,
+  };
+  const nearbyCache = new Map();
+  let nearbyMeta = null;
+  let nearbyLoaded = false;
+
+  function nearbyRegionLabel(region) {
+    return locale === "en" ? REGION_LABELS_EN[region.code] ?? region.name : region.name;
+  }
+
+  async function loadNearbyJson(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${url} ${res.status}`);
+    return res.json();
+  }
+
+  async function nearbyList() {
+    const key = `${nearbyState.kind}:${nearbyState.region}`;
+    if (!nearbyCache.has(key)) {
+      nearbyCache.set(key, await loadNearbyJson(`./data/${nearbyState.kind}/${nearbyState.region}.json`));
+    }
+    return nearbyCache.get(key);
+  }
+
+  /** 요일 번호를 API 표기(1=월 … 7=일)로 맞춘다. Date.getDay()는 0=일이다. */
+  function todayDutyDay() {
+    const day = new Date().getDay();
+    return day === 0 ? 7 : day;
+  }
+
+  function minutesNow() {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+
+  function fmtMinutes(total) {
+    // 새벽까지 여는 곳은 종료 시각이 2400을 넘겨서 온다(25:30 등).
+    const wrapped = total % (24 * 60);
+    const h = String(Math.floor(wrapped / 60)).padStart(2, "0");
+    const m = String(wrapped % 60).padStart(2, "0");
+    return `${h}:${m}`;
+  }
+
+  function todayHours(item) {
+    return item.hours?.[String(todayDutyDay())] ?? null;
+  }
+
+  function isOpenNow(item) {
+    const range = todayHours(item);
+    if (!range) return false;
+    const [open, close] = range;
+    const now = minutesNow();
+    // 자정을 넘겨 닫는 경우 "열림" 구간이 하루를 걸친다.
+    if (close > 24 * 60) return now >= open || now <= close - 24 * 60;
+    return now >= open && now <= close;
+  }
+
+  function distanceKm(a, b) {
+    const toRad = (v) => (v * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(b.lat - a.lat);
+    const dLon = toRad(b.lon - a.lon);
+    const lat1 = toRad(a.lat);
+    const lat2 = toRad(b.lat);
+    const h =
+      Math.sin(dLat / 2) ** 2 + Math.sin(dLon / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function nearbyMapUrl(item) {
+    if (item.lat && item.lon) {
+      return `https://map.kakao.com/link/map/${encodeURIComponent(item.name)},${item.lat},${item.lon}`;
+    }
+    return `https://map.kakao.com/link/search/${encodeURIComponent(item.addr ?? item.name ?? "")}`;
+  }
+
+  function nearbyItemHtml(item, s) {
+    const badges = [];
+    if (nearbyState.kind === "pharmacy") {
+      badges.push(
+        isOpenNow(item)
+          ? `<span class="nearby-badge">${escapeHtml(s.nearbyOpenBadge)}</span>`
+          : `<span class="nearby-badge closed">${escapeHtml(s.nearbyClosedBadge)}</span>`
+      );
+      if (item.hours?.["8"]) {
+        badges.push(`<span class="nearby-badge">${escapeHtml(s.nearbyHolidayBadge)}</span>`);
+      }
+    }
+    if (item._distance !== undefined) {
+      badges.push(
+        `<span class="nearby-badge distance">${escapeHtml(
+          s.nearbyDistance(item._distance < 10 ? item._distance.toFixed(1) : Math.round(item._distance))
+        )}</span>`
+      );
+    }
+
+    let hoursLine = "";
+    if (nearbyState.kind === "pharmacy") {
+      const range = todayHours(item);
+      hoursLine = `<div class="nearby-item-hours">${escapeHtml(
+        range ? s.nearbyTodayHours(fmtMinutes(range[0]), fmtMinutes(range[1])) : s.nearbyNoTodayHours
+      )}</div>`;
+    }
+
+    const actions = [];
+    if (item.tel) {
+      actions.push(
+        `<a href="tel:${encodeURIComponent(item.tel)}">${escapeHtml(s.nearbyCall)} ${escapeHtml(item.tel)}</a>`
+      );
+    }
+    actions.push(
+      `<a href="${nearbyMapUrl(item)}" target="_blank" rel="noopener">${escapeHtml(s.nearbyMap)}</a>`
+    );
+
+    return `<div class="nearby-item">
+      <div class="nearby-item-head">
+        <span class="nearby-item-name">${escapeHtml(item.name ?? "")}</span>
+        ${badges.join("")}
+      </div>
+      <div class="nearby-item-addr">${escapeHtml(item.addr ?? "")}</div>
+      ${hoursLine}
+      <div class="nearby-item-actions">${actions.join("")}</div>
+    </div>`;
+  }
+
+  async function renderNearby() {
+    const s = STRINGS[locale];
+    const statusEl = document.getElementById("nearby-status");
+    const listEl = document.getElementById("nearby-list");
+
+    // 응급실은 24시간 운영이라 "지금 문 연 곳" 필터가 의미 없다.
+    document.getElementById("nearby-open-row").hidden = nearbyState.kind !== "pharmacy";
+
+    let items;
+    try {
+      items = await nearbyList();
+    } catch (err) {
+      console.error("[nearby]", err.message);
+      statusEl.textContent = s.nearbyError;
+      listEl.innerHTML = "";
+      return;
+    }
+
+    const query = nearbyState.query.trim().toLowerCase();
+    let filtered = items.filter((item) => {
+      if (nearbyState.kind === "pharmacy" && nearbyState.openNow && !isOpenNow(item)) return false;
+      if (!query) return true;
+      return `${item.name ?? ""} ${item.addr ?? ""}`.toLowerCase().includes(query);
+    });
+
+    if (nearbyState.coords) {
+      filtered = filtered
+        .map((item) => ({
+          ...item,
+          _distance:
+            item.lat && item.lon ? distanceKm(nearbyState.coords, { lat: item.lat, lon: item.lon }) : undefined,
+        }))
+        .sort((a, b) => (a._distance ?? Infinity) - (b._distance ?? Infinity));
+    }
+
+    const updated = nearbyMeta?.updatedAt
+      ? new Date(nearbyMeta.updatedAt).toLocaleDateString(locale === "ko" ? "ko-KR" : "en-US", {
+          timeZone: "Asia/Seoul",
+          dateStyle: "medium",
+        })
+      : null;
+    statusEl.textContent = updated
+      ? s.nearbyCountWithUpdated(filtered.length, updated)
+      : s.nearbyCount(filtered.length);
+
+    listEl.innerHTML = filtered.length
+      ? filtered.map((item) => nearbyItemHtml(item, s)).join("")
+      : `<p class="nearby-empty">${escapeHtml(s.nearbyEmpty)}</p>`;
+  }
+
+  function renderNearbyRegionOptions() {
+    const select = document.getElementById("nearby-region");
+    const regions = nearbyMeta?.regions ?? [];
+    select.innerHTML = regions
+      .map(
+        (region) =>
+          `<option value="${region.code}" ${
+            region.code === nearbyState.region ? "selected" : ""
+          }>${escapeHtml(nearbyRegionLabel(region))}</option>`
+      )
+      .join("");
+  }
+
+  async function initNearby() {
+    if (nearbyLoaded) return;
+    nearbyLoaded = true;
+    const s = STRINGS[locale];
+    const statusEl = document.getElementById("nearby-status");
+    statusEl.textContent = s.nearbyLoading;
+
+    try {
+      nearbyMeta = await loadNearbyJson("./data/medical-meta.json");
+    } catch (err) {
+      console.error("[nearby] meta", err.message);
+      statusEl.textContent = s.nearbyError;
+      nearbyLoaded = false; // 다음에 탭을 다시 열면 재시도
+      return;
+    }
+
+    if (!nearbyMeta.regions?.some((r) => r.code === nearbyState.region)) {
+      nearbyState.region = nearbyMeta.regions?.[0]?.code ?? "seoul";
+    }
+    renderNearbyRegionOptions();
+    await renderNearby();
+  }
+
+  document.getElementById("nearby-kind").addEventListener("change", (e) => {
+    nearbyState.kind = e.target.value;
+    renderNearby();
+  });
+
+  document.getElementById("nearby-region").addEventListener("change", (e) => {
+    nearbyState.region = e.target.value;
+    localStorage.setItem(NEARBY_REGION_KEY, nearbyState.region);
+    renderNearby();
+  });
+
+  document.getElementById("nearby-open-now").addEventListener("change", (e) => {
+    nearbyState.openNow = e.target.checked;
+    renderNearby();
+  });
+
+  document.getElementById("nearby-search").addEventListener("input", (e) => {
+    nearbyState.query = e.target.value;
+    renderNearby();
+  });
+
+  document.getElementById("nearby-locate-btn").addEventListener("click", (e) => {
+    const s = STRINGS[locale];
+    const button = e.currentTarget;
+    const statusEl = document.getElementById("nearby-status");
+
+    // 이미 켜져 있으면 끈다(이름순으로 되돌림).
+    if (nearbyState.coords) {
+      nearbyState.coords = null;
+      button.setAttribute("aria-pressed", "false");
+      renderNearby();
+      return;
+    }
+    if (!navigator.geolocation) {
+      statusEl.textContent = s.nearbyLocateUnsupported;
+      return;
+    }
+    statusEl.textContent = s.nearbyLocating;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        nearbyState.coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        button.setAttribute("aria-pressed", "true");
+        renderNearby();
+      },
+      () => {
+        statusEl.textContent = s.nearbyLocateDenied;
+      },
+      { timeout: 10000 }
+    );
   });
 
   // ---- Language toggle ----
@@ -1864,6 +2311,11 @@
     render();
     renderRegression();
     renderGrowth();
+    // 지역명과 배지 문구가 언어를 타므로 이미 열어본 적 있으면 다시 그린다.
+    if (nearbyLoaded && nearbyMeta) {
+      renderNearbyRegionOptions();
+      renderNearby();
+    }
   });
 
   // ---- Print & share ----

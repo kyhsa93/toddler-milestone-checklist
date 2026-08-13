@@ -17,6 +17,7 @@ The checklist covers four domains — social/emotional, language/communication, 
 - **Choking first aid reference**: age-split (under/over 12 months) step-by-step guidance, since infants and toddlers need different techniques. Sourced from the American Red Cross and AHA's 2025 guideline update; explicitly notes where Korea's official E-GEN guidance still shows the older method.
 - **Fever reducer dose calculator**: a weight- and age-aware reference range (mg, not mL) for acetaminophen and ibuprofen, with hard safety gates — no dose is ever shown for an infant under 3 months (always directs to a doctor instead), and ibuprofen is blocked under 6 months. Deliberately never converts to mL, since that requires knowing your specific product's concentration; the tool tells you to check that on the label instead of guessing.
 - **Play tips tied to the checklist**: each age band has a collapsible "play ideas" section with one activity per domain, drawn from the CDC's own published tips for that age (not invented) — so the checklist doubles as something to act on, not just observe.
+- **Night & weekend pharmacy / ER finder**: pharmacies that actually stay open late (weekdays past 21:00), on Saturday evenings, Sundays, or public holidays — plus hospitals with an emergency room — searchable by region, with a "open right now" filter and optional nearest-first sorting. Pharmacies that only open during the day are deliberately excluded: they're everywhere, and listing them buries the ones you need at 9pm. Data comes from Korea's National Emergency Medical Center (E-Gen) open data, refreshed once a day by a GitHub Actions workflow — the API allows only 1,000 calls a day, so the app reads pre-built static JSON instead of calling it from the browser.
 - **Offline-capable**: installable as a home-screen app; works offline after the first visit via a service worker.
 - Built with accessibility in mind — toggle states and tabs expose `aria-pressed` / `aria-selected` for screen readers.
 
@@ -41,3 +42,20 @@ Open `index.html` in any browser, or visit the live app above. No build step, no
 ## Data
 
 Everything (checklist responses, growth entries, child's birthdate and sex, language choice) is stored only in the browser's `localStorage`. Nothing is sent to a server or leaves the device. There is currently no export/backup option, so data does not survive clearing site data or switching devices. The symptom urgency check and dose calculator are exceptions — those answers are kept in memory only and are gone on reload, by design.
+
+The pharmacy/ER finder is the one feature that reads a file from the network: `data/pharmacy/<region>.json` and `data/emergency/<region>.json`, built daily by `scripts/fetch-medical.mjs` and committed to this repo. Only the region you pick is downloaded. If you use "nearest first," your coordinates stay in the page — the sorting happens locally and the position is never sent anywhere.
+
+### Refreshing the medical data
+
+`.github/workflows/update-medical.yml` runs daily at 05:17 KST and needs four repository secrets:
+
+| Secret | Value |
+| --- | --- |
+| `PHARMACY_API_KEY` | data.go.kr service key (Decoding) |
+| `PHARMACY_API_ENDPOINT` | `https://apis.data.go.kr/B552657/ErmctInsttInfoInqireService` |
+| `EMERGENCY_API_KEY` | data.go.kr service key (Decoding) |
+| `EMERGENCY_API_ENDPOINT` | `https://apis.data.go.kr/B552657/ErmctInfoInqireService` |
+
+The endpoints stop at the service URL on purpose — the operation (`getParmacyListInfoInqire`, `getEgytListInfoInqire`) is appended in code, so adding another operation from the same service later doesn't mean editing secrets.
+
+Run `node --test "test/*.test.mjs"` to exercise the collector against a stub server; it needs no API key.

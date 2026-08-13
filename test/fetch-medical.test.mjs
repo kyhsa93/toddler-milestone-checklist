@@ -89,12 +89,15 @@ async function tempDir() {
   return mkdtemp(path.join(tmpdir(), "medical-test-"));
 }
 
-/** 서울에만 데이터를 주고 나머지 시도는 빈 응답을 주는 스텁을 만든다. */
+/**
+ * 약국은 서울에만 데이터를 주고 나머지 시도는 빈 응답을 준다.
+ * 응급의료기관은 실제 API처럼 지역 파라미터와 무관하게 전국 목록을 돌려준다.
+ */
 function seoulOnlyStub(seoulItems, emergencyItems = []) {
   return startStub(({ operation, region }) => {
+    if (operation !== "getParmacyListInfoInqire") return { xml: itemsXml(emergencyItems) };
     if (region !== "서울특별시") return { xml: itemsXml([]) };
-    if (operation === "getParmacyListInfoInqire") return { xml: itemsXml(seoulItems) };
-    return { xml: itemsXml(emergencyItems) };
+    return { xml: itemsXml(seoulItems) };
   });
 }
 
@@ -177,23 +180,20 @@ test("시도 표기가 바뀐 지역은 대체 표기로 다시 조회한다", a
 });
 
 test("응급의료기관은 운영시간 필터 없이 전부 담고 응급실 직통번호를 쓴다", async () => {
-  const stub = await startStub(({ operation, region }) => {
-    if (region !== "서울특별시") return { xml: itemsXml([]) };
-    if (operation === "getParmacyListInfoInqire") return { xml: itemsXml([]) };
-    return {
-      xml: itemsXml([
-        {
-          hpid: "E1",
-          dutyName: "서울응급센터",
-          dutyAddr: "서울특별시 종로구 1",
-          dutyTel1: "02-111-1111",
-          dutyTel3: "02-222-2222",
-          wgs84Lat: "37.57",
-          wgs84Lon: "126.97",
-        },
-      ]),
-    };
-  });
+  const stub = await seoulOnlyStub(
+    [],
+    [
+      {
+        hpid: "E1",
+        dutyName: "서울응급센터",
+        dutyAddr: "서울특별시 종로구 1",
+        dutyTel1: "02-111-1111",
+        dutyTel3: "02-222-2222",
+        wgs84Lat: "37.57",
+        wgs84Lon: "126.97",
+      },
+    ]
+  );
   const outDir = await tempDir();
 
   try {
@@ -201,6 +201,41 @@ test("응급의료기관은 운영시간 필터 없이 전부 담고 응급실 �
     const [item] = await readJson(outDir, "emergency", "seoul.json");
     assert.equal(item.name, "서울응급센터");
     assert.equal(item.tel, "02-222-2222", "응급실 직통(dutyTel3)을 우선해야 한다");
+  } finally {
+    await stub.close();
+  }
+});
+
+test("응급의료기관은 한 번만 받아 주소로 시도를 나눈다", async () => {
+  // 실제 API는 STAGE1(시도)을 줘도 전국 목록을 그대로 돌려준다. 지역별로
+  // 부르면 17개 시도 파일에 전국 목록이 똑같이 들어가는 사고가 난다.
+  let emergencyCalls = 0;
+  const stub = await startStub(({ operation }) => {
+    if (operation === "getParmacyListInfoInqire") return { xml: itemsXml([]) };
+    emergencyCalls += 1;
+    return {
+      xml: itemsXml([
+        { hpid: "E1", dutyName: "서울병원", dutyAddr: "서울특별시 종로구 1", dutyTel3: "02-1" },
+        { hpid: "E2", dutyName: "부산병원", dutyAddr: "부산광역시 해운대구 2", dutyTel3: "051-1" },
+        { hpid: "E3", dutyName: "강원병원", dutyAddr: "강원특별자치도 춘천시 3", dutyTel3: "033-1" },
+        { hpid: "E4", dutyName: "옛강원병원", dutyAddr: "강원도 원주시 4", dutyTel3: "033-2" },
+      ]),
+    };
+  });
+  const outDir = await tempDir();
+
+  try {
+    await run(stub.base, stub.base, outDir);
+    assert.equal(emergencyCalls, 1, "응급의료기관은 한 번만 호출해야 한다");
+
+    assert.deepEqual((await readJson(outDir, "emergency", "seoul.json")).map((e) => e.name), ["서울병원"]);
+    assert.deepEqual((await readJson(outDir, "emergency", "busan.json")).map((e) => e.name), ["부산병원"]);
+    // 신·구 표기가 섞여 있어도 같은 시도로 모여야 한다.
+    assert.deepEqual(
+      (await readJson(outDir, "emergency", "gangwon.json")).map((e) => e.name).sort(),
+      ["강원병원", "옛강원병원"]
+    );
+    assert.deepEqual(await readJson(outDir, "emergency", "jeju.json"), []);
   } finally {
     await stub.close();
   }

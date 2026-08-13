@@ -43,11 +43,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet -- data; then
+          # git diff는 아직 추적되지 않는 파일을 보지 못한다. data/가 처음
+          # 생기는 실행에서는 "변경사항 없음"으로 잘못 판단하므로, 먼저 add한 뒤
+          # 인덱스와 HEAD를 비교해야 한다.
+          git add data
+          if git diff --cached --quiet; then
             echo "변경사항 없음, 커밋 생략"
             exit 0
           fi
-          git add data
           git commit -m "chore: 약국·응급의료기관 데이터 갱신 $(TZ=Asia/Seoul date +%Y-%m-%d)"
           for i in 1 2 3 4 5; do
             if git push; then

@@ -275,28 +275,57 @@ async function collectPharmacies() {
   return byRegion;
 }
 
-async function collectEmergencyRooms() {
-  const byRegion = {};
-  let total = 0;
+/**
+ * 주소 첫 낱말로 시도를 알아낸다. 옛 표기(강원도)와 새 표기(강원특별자치도)가
+ * 섞여 있어서 접두어로 맞춘다.
+ */
+const REGION_BY_ADDRESS_PREFIX = REGIONS.flatMap((region) =>
+  [region.name, ...(region.alt ?? [])].map((name) => [name.slice(0, 2), region.code])
+);
 
-  for (const region of REGIONS) {
-    const items = await fetchRegion(
-      EMERGENCY_BASE,
-      EMERGENCY_KEY,
-      EMERGENCY_OPERATION,
-      "STAGE1",
-      region
-    );
-    const list = items
-      .map(normalizeEmergency)
-      .filter((e) => e.name)
-      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "", "ko"));
-    total += list.length;
-    byRegion[region.code] = list;
-    console.log(`[fetch-medical] 응급실 ${region.code}: ${list.length}`);
+function regionFromAddress(addr) {
+  if (!addr) return null;
+  const head = addr.trim().slice(0, 2);
+  for (const [prefix, code] of REGION_BY_ADDRESS_PREFIX) {
+    if (head === prefix) return code;
+  }
+  return null;
+}
+
+/**
+ * 응급의료기관은 STAGE1(시도)을 넣어도 전국 목록이 그대로 돌아온다. 실제로
+ * 17개 시도 모두 같은 533건이 나왔다. 그래서 지역별로 부르지 않고 한 번만
+ * 받아서 주소로 나눈다 - 호출도 17회에서 1회로 줄고 결과도 정확해진다.
+ */
+async function collectEmergencyRooms() {
+  const byRegion = Object.fromEntries(REGIONS.map((r) => [r.code, []]));
+
+  const items = await fetchAllPages(EMERGENCY_BASE, EMERGENCY_KEY, EMERGENCY_OPERATION, {});
+  let unmatched = 0;
+
+  for (const item of items) {
+    const normalized = normalizeEmergency(item);
+    if (!normalized.name) continue;
+    const code = regionFromAddress(normalized.addr);
+    if (!code) {
+      unmatched += 1;
+      continue;
+    }
+    byRegion[code].push(normalized);
   }
 
-  console.log(`[fetch-medical] 응급실 합계: ${total}`);
+  for (const list of Object.values(byRegion)) {
+    list.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "", "ko"));
+  }
+
+  const total = Object.values(byRegion).reduce((a, l) => a + l.length, 0);
+  console.log(
+    `[fetch-medical] 응급실: 전체 ${items.length} → 시도 분류 ${total}` +
+      (unmatched ? ` (주소로 시도를 못 찾음 ${unmatched}건)` : "")
+  );
+  for (const region of REGIONS) {
+    console.log(`[fetch-medical]   응급실 ${region.code}: ${byRegion[region.code].length}`);
+  }
   return byRegion;
 }
 

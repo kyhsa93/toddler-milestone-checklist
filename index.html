@@ -581,6 +581,19 @@
   .nearby-item-actions { margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; }
   .nearby-item-actions a { font-size: 13px; color: var(--sage-deep); }
   .nearby-empty { font-size: 13px; color: var(--ink-faint); padding: 20px 0; }
+  .nearby-more-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--sage-deep);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .nearby-more-btn:hover { background: var(--sage-pale); }
 
   .item {
     display: flex;
@@ -1000,6 +1013,8 @@
       <div class="nearby-control-row">
         <label for="nearby-region" id="txt-nearby-region-label"></label>
         <select id="nearby-region"></select>
+        <label for="nearby-sigungu" id="txt-nearby-sigungu-label"></label>
+        <select id="nearby-sigungu"></select>
       </div>
       <div class="nearby-control-row" id="nearby-open-row">
         <label class="nearby-check">
@@ -1015,6 +1030,7 @@
 
     <p class="nearby-status" id="nearby-status"></p>
     <div id="nearby-list"></div>
+    <button class="nearby-more-btn" type="button" id="nearby-more" hidden></button>
     <p class="symptom-footer-note" id="txt-nearby-footer-note"></p>
   </section>
 
@@ -1070,7 +1086,11 @@
       nearbyKindPharmacy: "야간·휴일 약국",
       nearbyKindEmergency: "응급실",
       nearbyRegionLabel: "지역",
+      nearbySigunguLabel: "시·군·구",
+      nearbyAllSigungu: "전체",
       nearbyOpenNow: "지금 문 연 곳만",
+      nearbyMore: (n) => `${n}곳 더 보기`,
+      nearbyShowing: (shown, total) => `${total}곳 중 ${shown}곳`,
       nearbySearchPlaceholder: "이름·주소 검색",
       nearbyLocate: "가까운 순",
       nearbyLoading: "불러오는 중...",
@@ -1265,7 +1285,11 @@
       nearbyKindPharmacy: "Night & weekend pharmacy",
       nearbyKindEmergency: "Emergency room",
       nearbyRegionLabel: "Region",
+      nearbySigunguLabel: "District",
+      nearbyAllSigungu: "All",
       nearbyOpenNow: "Open right now only",
+      nearbyMore: (n) => `Show ${n} more`,
+      nearbyShowing: (shown, total) => `${shown} of ${total}`,
       nearbySearchPlaceholder: "Search name or address",
       nearbyLocate: "Nearest first",
       nearbyLoading: "Loading...",
@@ -1646,6 +1670,7 @@
     document.getElementById("txt-nearby-kind-pharmacy").textContent = s.nearbyKindPharmacy;
     document.getElementById("txt-nearby-kind-emergency").textContent = s.nearbyKindEmergency;
     document.getElementById("txt-nearby-region-label").textContent = s.nearbyRegionLabel;
+    document.getElementById("txt-nearby-sigungu-label").textContent = s.nearbySigunguLabel;
     document.getElementById("txt-nearby-open-now").textContent = s.nearbyOpenNow;
     document.getElementById("nearby-search").placeholder = s.nearbySearchPlaceholder;
     document.getElementById("nearby-locate-btn").textContent = s.nearbyLocate;
@@ -2036,12 +2061,19 @@
     gyeongbuk: "North Gyeongsang", gyeongnam: "South Gyeongsang", jeju: "Jeju",
   };
 
+  // 한 시도의 야간 약국이 서울 2,400곳, 경기 2,672곳이다. 전부 그리면 화면이
+  // 끝없이 길어져서 쓸 수가 없다. 시·군·구로 한 번 더 좁히고, 그러고도 남는
+  // 목록은 끊어서 보여준다.
+  const NEARBY_PAGE_SIZE = 20;
+
   const nearbyState = {
     kind: "pharmacy",
     region: localStorage.getItem(NEARBY_REGION_KEY) || "seoul",
+    sigungu: "",
     openNow: false,
     query: "",
     coords: null,
+    visibleCount: NEARBY_PAGE_SIZE,
   };
   const nearbyCache = new Map();
   let nearbyMeta = null;
@@ -2063,6 +2095,17 @@
       nearbyCache.set(key, await loadNearbyJson(`./data/${nearbyState.kind}/${nearbyState.region}.json`));
     }
     return nearbyCache.get(key);
+  }
+
+  /**
+   * 주소에서 시·군·구를 뽑는다. 공공데이터 주소는 "시도 시군구 도로명 …" 순서라
+   * 두 번째 낱말을 보면 되는데, 세종처럼 시군구가 없는 곳은 바로 도로명이 온다.
+   * 그래서 구/시/군으로 끝날 때만 인정한다("경기도 안양시 만안구"는 안양시로 묶인다).
+   */
+  function sigunguOf(item) {
+    const parts = (item.addr ?? "").trim().split(/\s+/);
+    const second = parts[1] ?? "";
+    return /[구시군]$/.test(second) ? second : "";
   }
 
   /** 요일 번호를 API 표기(1=월 … 7=일)로 맞춘다. Date.getDay()는 0=일이다. */
@@ -2184,9 +2227,12 @@
       return;
     }
 
+    renderSigunguOptions(items);
+
     const query = nearbyState.query.trim().toLowerCase();
     let filtered = items.filter((item) => {
       if (nearbyState.kind === "pharmacy" && nearbyState.openNow && !isOpenNow(item)) return false;
+      if (nearbyState.sigungu && sigunguOf(item) !== nearbyState.sigungu) return false;
       if (!query) return true;
       return `${item.name ?? ""} ${item.addr ?? ""}`.toLowerCase().includes(query);
     });
@@ -2207,13 +2253,54 @@
           dateStyle: "medium",
         })
       : null;
-    statusEl.textContent = updated
-      ? s.nearbyCountWithUpdated(filtered.length, updated)
-      : s.nearbyCount(filtered.length);
 
-    listEl.innerHTML = filtered.length
-      ? filtered.map((item) => nearbyItemHtml(item, s)).join("")
+    // 화면에 실제로 그리는 건 앞에서부터 일부뿐이다. 수천 개를 한 번에 그리면
+    // 스크롤이 감당이 안 되고, 어차피 필요한 건 가까운 몇 곳이다.
+    const shown = filtered.slice(0, nearbyState.visibleCount);
+    const countText =
+      filtered.length > shown.length
+        ? s.nearbyShowing(shown.length, filtered.length)
+        : updated
+          ? s.nearbyCountWithUpdated(filtered.length, updated)
+          : s.nearbyCount(filtered.length);
+    statusEl.textContent = countText;
+
+    listEl.innerHTML = shown.length
+      ? shown.map((item) => nearbyItemHtml(item, s)).join("")
       : `<p class="nearby-empty">${escapeHtml(s.nearbyEmpty)}</p>`;
+
+    const moreButton = document.getElementById("nearby-more");
+    const remaining = filtered.length - shown.length;
+    moreButton.hidden = remaining <= 0;
+    if (remaining > 0) {
+      moreButton.textContent = s.nearbyMore(Math.min(remaining, NEARBY_PAGE_SIZE));
+    }
+  }
+
+  /** 지금 지역의 목록에 실제로 존재하는 시·군·구만 고른다. */
+  function renderSigunguOptions(items) {
+    const select = document.getElementById("nearby-sigungu");
+    const values = [...new Set(items.map(sigunguOf).filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b, "ko")
+    );
+
+    // 지역을 바꿨는데 이전 시군구가 남아 있으면 결과가 0건이 된다.
+    if (nearbyState.sigungu && !values.includes(nearbyState.sigungu)) nearbyState.sigungu = "";
+
+    const options = [
+      `<option value="">${escapeHtml(STRINGS[locale].nearbyAllSigungu)}</option>`,
+      ...values.map(
+        (value) =>
+          `<option value="${escapeHtml(value)}" ${
+            value === nearbyState.sigungu ? "selected" : ""
+          }>${escapeHtml(value)}</option>`
+      ),
+    ].join("");
+
+    // 세종처럼 시군구가 없는 지역에서는 선택 자체를 감춘다.
+    select.hidden = values.length === 0;
+    document.getElementById("txt-nearby-sigungu-label").hidden = values.length === 0;
+    select.innerHTML = options;
   }
 
   function renderNearbyRegionOptions() {
@@ -2252,24 +2339,43 @@
     await renderNearby();
   }
 
+  /** 조건이 바뀌면 늘려놓은 표시 개수를 처음으로 되돌린다. */
+  function renderNearbyFromTop() {
+    nearbyState.visibleCount = NEARBY_PAGE_SIZE;
+    renderNearby();
+  }
+
   document.getElementById("nearby-kind").addEventListener("change", (e) => {
     nearbyState.kind = e.target.value;
-    renderNearby();
+    // 약국과 응급실은 시군구 구성이 달라서 이전 선택을 유지하면 0건이 되기 쉽다.
+    nearbyState.sigungu = "";
+    renderNearbyFromTop();
   });
 
   document.getElementById("nearby-region").addEventListener("change", (e) => {
     nearbyState.region = e.target.value;
+    nearbyState.sigungu = "";
     localStorage.setItem(NEARBY_REGION_KEY, nearbyState.region);
-    renderNearby();
+    renderNearbyFromTop();
+  });
+
+  document.getElementById("nearby-sigungu").addEventListener("change", (e) => {
+    nearbyState.sigungu = e.target.value;
+    renderNearbyFromTop();
   });
 
   document.getElementById("nearby-open-now").addEventListener("change", (e) => {
     nearbyState.openNow = e.target.checked;
-    renderNearby();
+    renderNearbyFromTop();
   });
 
   document.getElementById("nearby-search").addEventListener("input", (e) => {
     nearbyState.query = e.target.value;
+    renderNearbyFromTop();
+  });
+
+  document.getElementById("nearby-more").addEventListener("click", () => {
+    nearbyState.visibleCount += NEARBY_PAGE_SIZE;
     renderNearby();
   });
 
@@ -2282,7 +2388,7 @@
     if (nearbyState.coords) {
       nearbyState.coords = null;
       button.setAttribute("aria-pressed", "false");
-      renderNearby();
+      renderNearbyFromTop();
       return;
     }
     if (!navigator.geolocation) {
@@ -2294,7 +2400,7 @@
       (pos) => {
         nearbyState.coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         button.setAttribute("aria-pressed", "true");
-        renderNearby();
+        renderNearbyFromTop();
       },
       () => {
         statusEl.textContent = s.nearbyLocateDenied;

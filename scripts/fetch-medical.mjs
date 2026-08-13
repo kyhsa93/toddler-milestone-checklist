@@ -7,7 +7,7 @@
 // 의존성을 쓰지 않는다: 이 저장소는 빌드도 node_modules도 없는 정적 사이트라
 // 그 성격을 유지한다. 응답이 XML이라 아래에 작은 파서를 직접 두었다.
 
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
 const rootDir = path.resolve(import.meta.dirname, "..");
@@ -155,7 +155,7 @@ function fatal(err) {
  * 한 번은 통째로 실패하고 다음 실행은 25,000건을 다 받아왔다. undici의 연결
  * 타임아웃은 외부 패키지 없이 늘릴 수 없어서 재시도로 넘긴다.
  */
-async function withRetry(label, fn, attempts = 4) {
+async function withRetry(label, fn, attempts = 5) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -165,7 +165,8 @@ async function withRetry(label, fn, attempts = 4) {
       // 인증키가 틀렸거나 API가 오류 코드를 준 경우는 다시 불러도 같은 답이 온다.
       if (err.fatal) throw err;
       if (attempt === attempts) break;
-      const wait = attempt * 3000;
+      // 테스트가 실제 백오프를 다 기다리면 한 케이스에 1분이 걸린다.
+      const wait = attempt * Number(process.env.RETRY_BACKOFF_MS ?? 5000);
       console.warn(`[fetch-medical] ${label} 실패(${attempt}/${attempts}), ${wait}ms 후 재시도: ${err.message}`);
       await sleep(wait);
     }
@@ -284,27 +285,59 @@ function normalizeEmergency(item) {
 
 // ---- 수집 -----------------------------------------------------------------
 
+/** 이미 저장돼 있는 지역 파일을 읽는다(수집 실패 시 그대로 두기 위함). */
+async function readExisting(kind, code) {
+  try {
+    const parsed = JSON.parse(await readFile(path.join(dataDir, kind, `${code}.json`), "utf-8"));
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 async function collectPharmacies() {
   const byRegion = {};
+  const failedRegions = [];
   let total = 0;
   let kept = 0;
 
   for (const region of REGIONS) {
-    const items = await fetchRegion(PHARMACY_BASE, PHARMACY_KEY, PHARMACY_OPERATION, "Q0", region);
-    total += items.length;
+    try {
+      const items = await fetchRegion(PHARMACY_BASE, PHARMACY_KEY, PHARMACY_OPERATION, "Q0", region);
+      total += items.length;
 
-    const list = items
-      .map(normalizePharmacy)
-      .filter((p) => p.name && isAfterHours(p.hours))
-      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "", "ko"));
+      const list = items
+        .map(normalizePharmacy)
+        .filter((p) => p.name && isAfterHours(p.hours))
+        .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "", "ko"));
 
-    kept += list.length;
-    byRegion[region.code] = list;
-    console.log(`[fetch-medical] 약국 ${region.code}: 전체 ${items.length} → 야간·휴일 ${list.length}`);
+      kept += list.length;
+      byRegion[region.code] = list;
+      console.log(`[fetch-medical] 약국 ${region.code}: 전체 ${items.length} → 야간·휴일 ${list.length}`);
+    } catch (err) {
+      // 인증키가 틀린 것 같은 실패는 남은 16개 지역에서도 똑같이 날 테니 즉시 멈춘다.
+      if (err.fatal) throw err;
+
+      // 한 지역이 안 된다고 하루치를 통째로 버리지 않는다. apis.data.go.kr은
+      // 러너에서 몇 분씩 연결이 안 되는 구간이 있어서, 그럴 때 어제 목록이라도
+      // 남아 있는 편이 빈 화면보다 낫다.
+      const previous = await readExisting("pharmacy", region.code);
+      byRegion[region.code] = previous ?? [];
+      failedRegions.push(region.code);
+      console.error(
+        `[fetch-medical] 약국 ${region.code} 수집 실패: ${err.message} (기존 ${previous?.length ?? 0}건 유지)`
+      );
+    }
   }
 
-  console.log(`[fetch-medical] 약국 합계: 전체 ${total} → 저장 ${kept}`);
-  return byRegion;
+  if (failedRegions.length === REGIONS.length) {
+    throw new Error("약국을 한 지역도 받지 못했습니다");
+  }
+  console.log(
+    `[fetch-medical] 약국 합계: 전체 ${total} → 저장 ${kept}` +
+      (failedRegions.length ? ` (실패 ${failedRegions.length}개 지역: ${failedRegions.join(", ")})` : "")
+  );
+  return { byRegion, failedRegions };
 }
 
 /**
@@ -373,7 +406,20 @@ function regionFromAddress(addr) {
 async function collectEmergencyRooms() {
   const byRegion = Object.fromEntries(REGIONS.map((r) => [r.code, []]));
 
-  const items = await fetchAllPages(EMERGENCY_BASE, EMERGENCY_KEY, EMERGENCY_OPERATION, {});
+  let items;
+  try {
+    items = await fetchAllPages(EMERGENCY_BASE, EMERGENCY_KEY, EMERGENCY_OPERATION, {});
+  } catch (err) {
+    if (err.fatal) throw err;
+    // 약국과 같은 이유로, 실패하면 이미 저장된 목록을 그대로 둔다.
+    console.error(`[fetch-medical] 응급실 수집 실패: ${err.message} (기존 목록 유지)`);
+    for (const region of REGIONS) {
+      byRegion[region.code] = (await readExisting("emergency", region.code)) ?? [];
+    }
+    const keptTotal = Object.values(byRegion).reduce((a, l) => a + l.length, 0);
+    return { byRegion, failed: true, keptTotal };
+  }
+
   const unmatched = [];
 
   for (const item of items) {
@@ -412,7 +458,7 @@ async function collectEmergencyRooms() {
   for (const region of REGIONS) {
     console.log(`[fetch-medical]   응급실 ${region.code}: ${byRegion[region.code].length}`);
   }
-  return byRegion;
+  return { byRegion, failed: false };
 }
 
 // ---- 저장 -----------------------------------------------------------------
@@ -444,8 +490,8 @@ async function main() {
   console.log(`[fetch-medical] 약국 API: ${PHARMACY_BASE}`);
   console.log(`[fetch-medical] 응급의료 API: ${EMERGENCY_BASE}`);
 
-  const pharmacies = await collectPharmacies();
-  const emergencyRooms = await collectEmergencyRooms();
+  const { byRegion: pharmacies, failedRegions } = await collectPharmacies();
+  const { byRegion: emergencyRooms, failed: emergencyFailed } = await collectEmergencyRooms();
 
   const pharmacyCount = Object.values(pharmacies).reduce((a, l) => a + l.length, 0);
   const emergencyCount = Object.values(emergencyRooms).reduce((a, l) => a + l.length, 0);
@@ -459,6 +505,10 @@ async function main() {
 
   const meta = {
     updatedAt: new Date().toISOString(),
+    // 이번 실행에서 못 받아 예전 값을 그대로 둔 지역. 화면에 쓰지는 않지만,
+    // 며칠째 같은 지역이 실패하고 있는지 파일만 보고 알 수 있어야 한다.
+    staleRegions: failedRegions,
+    emergencyStale: emergencyFailed,
     regions: REGIONS.map(({ code, name }) => ({
       code,
       name,

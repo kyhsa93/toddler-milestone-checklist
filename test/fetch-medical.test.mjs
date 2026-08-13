@@ -77,6 +77,7 @@ async function run(pharmacyBase, emergencyBase, outDir) {
       PHARMACY_API_ENDPOINT: pharmacyBase,
       EMERGENCY_API_KEY: "TESTKEY",
       EMERGENCY_API_ENDPOINT: emergencyBase,
+      RETRY_BACKOFF_MS: "10", // 실제 백오프를 다 기다리면 테스트가 분 단위로 길어진다
     },
   });
 }
@@ -326,6 +327,40 @@ test("일시적인 연결 실패는 재시도로 넘긴다", async () => {
     assert.equal(list.length, 1);
   } finally {
     await stub.close();
+  }
+});
+
+test("한 지역이 계속 실패해도 나머지는 갱신하고 그 지역은 기존 목록을 남긴다", async () => {
+  // apis.data.go.kr은 러너에서 몇 분씩 연결이 안 되는 구간이 있다. 지역 하나
+  // 때문에 하루치를 통째로 버리면 안 된다.
+  const outDir = await tempDir();
+  const okStub = await seoulOnlyStub([pharmacy("서울약국", { 7: ["1000", "1700"] })]);
+  try {
+    await run(okStub.base, okStub.base, outDir);
+    assert.equal((await readJson(outDir, "pharmacy", "seoul.json")).length, 1);
+  } finally {
+    await okStub.close();
+  }
+
+  // 이제 서울만 계속 실패하고 부산은 새 데이터를 준다.
+  const flakyStub = await startStub(({ operation, region }) => {
+    if (operation !== "getParmacyListInfoInqire") return { xml: itemsXml([]) };
+    if (region === "서울특별시") return { status: 500, xml: "<html>gateway</html>" };
+    if (region === "부산광역시") return { xml: itemsXml([pharmacy("부산약국", { 7: ["1000", "1700"] })]) };
+    return { xml: itemsXml([]) };
+  });
+
+  try {
+    await run(flakyStub.base, flakyStub.base, outDir);
+    // 실패한 서울은 기존 목록 유지
+    assert.deepEqual((await readJson(outDir, "pharmacy", "seoul.json")).map((p) => p.name), ["서울약국"]);
+    // 성공한 부산은 갱신
+    assert.deepEqual((await readJson(outDir, "pharmacy", "busan.json")).map((p) => p.name), ["부산약국"]);
+
+    const meta = await readJson(outDir, "medical-meta.json");
+    assert.deepEqual(meta.staleRegions, ["seoul"]);
+  } finally {
+    await flakyStub.close();
   }
 });
 

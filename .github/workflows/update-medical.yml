@@ -31,6 +31,13 @@ jobs:
         with:
           node-version: "20"
 
+      # 이 워크플로의 커밋은 GITHUB_TOKEN으로 올라가서 test.yml을 트리거하지 않고,
+      # 배포까지 여기서 직접 한다. 테스트를 여기서 돌리지 않으면 데이터 갱신 경로는
+      # 검증을 한 번도 거치지 않는다. 수집 전에 두는 건 커밋된 데이터를 덮어쓰기
+      # 전에 멈추기 위해서다.
+      - name: 테스트
+        run: npm test
+
       - name: 데이터 수집
         run: node scripts/fetch-medical.mjs
         env:

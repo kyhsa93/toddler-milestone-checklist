@@ -285,6 +285,19 @@
     color: var(--ink);
   }
   .age-setting input:focus-visible, .age-setting select:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
+  .profile-btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    /* 44px 터치 영역을 채우려고 세로 패딩을 키운다 — 아이 전환은 손이 급할 때 누른다. */
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .profile-btn:hover { background: var(--paper-raised); }
+  .profile-btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 1px; }
   .age-setting-hint { font-size: 12px; color: var(--ink-faint); flex-basis: 100%; }
   .age-setting-hint.current-age { color: var(--sage-deep); font-weight: 600; }
 
@@ -889,6 +902,13 @@
     <p id="txt-sensory-text"></p>
   </div>
 
+  <div class="age-setting" id="profile-bar" hidden>
+    <label for="profile-select" id="txt-profile-label"></label>
+    <select id="profile-select"></select>
+    <button type="button" class="profile-btn" id="profile-rename-btn"></button>
+    <button type="button" class="profile-btn" id="profile-delete-btn"></button>
+  </div>
+
   <div class="age-setting">
     <label for="child-birthdate-input" id="txt-birthdate-label"></label>
     <input type="date" id="child-birthdate-input" />
@@ -898,6 +918,7 @@
       <option value="boy" id="txt-sex-boy-option"></option>
       <option value="girl" id="txt-sex-girl-option"></option>
     </select>
+    <button type="button" class="profile-btn" id="profile-add-btn"></button>
     <span class="age-setting-hint" id="txt-current-age-display"></span>
     <span class="age-setting-hint" id="txt-age-setting-hint"></span>
   </div>
@@ -1045,6 +1066,14 @@
   </footer>
 </div>
 
+<!--
+  The two calculations whose output a parent might act on -- growth percentiles and
+  fever-reducer doses -- live in their own files so they can be run under `node --test`
+  instead of only inside a browser. They are plain scripts (no build step, same as the
+  rest of this app) that attach one global each.
+-->
+<script src="lib/growth.js"></script>
+<script src="lib/dosing.js"></script>
 <script>
   // ---- i18n ----
   const LOCALE_KEY = "lang";
@@ -1143,6 +1172,7 @@
       percentileCell: (h, w) => "키 " + h + " · 몸무게 " + w,
       percentileNoData: "-",
       percentileOutOfRange: "범위 밖(0~36개월만)",
+      percentileGap: "만 2세 전후(23~24.5개월)는 기준표 사이 구간이라 계산할 수 없어요",
       percentileNeedSex: "성별 입력 필요",
       percentileImplausible: "⚠ 확인 필요",
       percentileNote: "성장 백분위는 WHO(24개월 미만)·CDC(24개월 이상) 공식 기준을 따르며, 두 기준은 이어붙이지 않고 각 연령대의 공식 자료를 그대로 써요. 이 값도 진단이 아니라 참고용이에요 — 정확한 평가는 소아과 검진에서 확인해주세요.",
@@ -1175,6 +1205,15 @@
       sexGirlOption: "여아",
       currentAgeDisplay: (months) => "현재 약 " + months + "개월이에요",
       ageSettingHint: "생년월일과 성별을 입력하면 체크리스트 연령 잠금과 성장 백분위 계산에 쓰여요. (선택 입력, 기기에만 저장돼요)",
+      profileLabel: "아이",
+      profileDefaultName: (n) => "아이 " + n,
+      profileAdd: "+ 아이 추가",
+      profileRename: "이름 변경",
+      profileDelete: "삭제",
+      profileNamePrompt: "아이 이름(또는 별명)을 입력하세요. 기기에만 저장돼요.",
+      profileDeleteConfirm: (name) =>
+        "'" + name + "'의 체크리스트·성장 기록·생년월일을 모두 지울까요? 되돌릴 수 없어요.",
+      profileDeleteLastAlert: "아이가 한 명뿐일 때는 삭제할 수 없어요.",
       bandLockedNote: (age) => "아직 이 시기가 아니에요 (현재 " + age + "개월) · 이 구간은 결과 집계에서 제외돼요",
       printBtn: "결과 인쇄하기",
       shareTitle: "영유아 발달 관찰 결과",
@@ -1342,6 +1381,7 @@
       percentileCell: (h, w) => "Height " + h + " · Weight " + w,
       percentileNoData: "-",
       percentileOutOfRange: "Out of range (0-36mo only)",
+      percentileGap: "Not calculable around age 2 (23-24.5mo): between the two reference tables",
       percentileNeedSex: "Enter sex to see this",
       percentileImplausible: "⚠ please double-check",
       percentileNote: "Growth percentiles follow the official WHO (under 24 months) and CDC (24 months and up) standards, using each age range's own official data rather than blending them. This is a reference value, not a diagnosis — ask your pediatrician for an official assessment.",
@@ -1374,6 +1414,15 @@
       sexGirlOption: "Girl",
       currentAgeDisplay: (months) => "Currently about " + months + " months old",
       ageSettingHint: "Birthdate and sex are used for the checklist's age lock and for growth percentile calculation. (Optional, stored on this device only)",
+      profileLabel: "Child",
+      profileDefaultName: (n) => "Child " + n,
+      profileAdd: "+ Add child",
+      profileRename: "Rename",
+      profileDelete: "Delete",
+      profileNamePrompt: "Enter a name (or nickname) for this child. Stored on this device only.",
+      profileDeleteConfirm: (name) =>
+        "Delete " + name + "'s checklist, growth log and birthdate? This can't be undone.",
+      profileDeleteLastAlert: "You can't delete the only child.",
       bandLockedNote: (age) => "Not this stage yet (currently " + age + " months) · excluded from the result",
       printBtn: "Print summary",
       shareTitle: "Toddler Development Observation Summary",
@@ -1730,14 +1779,104 @@
 
   const APP_URL = "https://kyhsa93.github.io/toddler-milestone-checklist/";
 
-  const CHILD_BIRTHDATE_KEY = "dev-child-birthdate";
-  const CHILD_SEX_KEY = "dev-child-sex";
   const LEGACY_CHILD_AGE_KEY = "dev-child-age-months";
   const DAYS_PER_MONTH = 30.4375;
 
-  let childBirthdate = localStorage.getItem(CHILD_BIRTHDATE_KEY);
-  let childSex = localStorage.getItem(CHILD_SEX_KEY);
-  if (childSex !== "boy" && childSex !== "girl") childSex = null;
+  // ---- Child profiles ----
+  // Everything the app records is about one particular child, so all of it hangs off
+  // the active profile: birthdate, sex, checklist answers, the regression flag, and
+  // the growth log. Language and the pharmacy region are about the device, not the
+  // child, and stay outside this.
+  //
+  // Keys are namespaced per profile ("dev-p<id>-..."). The app used to store one
+  // child under un-namespaced keys, so those are migrated into the first profile on
+  // the first run rather than being left behind -- an existing user opens the app and
+  // finds their child already there, named by the default label.
+  const PROFILES_KEY = "dev-profiles-v1";
+  const ACTIVE_PROFILE_KEY = "dev-active-profile-v1";
+  const PROFILE_SEQ_KEY = "dev-profile-seq-v1";
+  const LEGACY_CHILD_KEYS = {
+    "child-birthdate": "dev-child-birthdate",
+    "child-sex": "dev-child-sex",
+    "regression-flag": "dev-regression-flag",
+    "checklist-responses-v3": "dev-checklist-responses-v3",
+    "growth-log-v1": "dev-growth-log-v1",
+  };
+
+  let profiles = [];
+  try {
+    profiles = JSON.parse(localStorage.getItem(PROFILES_KEY)) || [];
+  } catch (e) {
+    profiles = [];
+  }
+  if (!Array.isArray(profiles)) profiles = [];
+  profiles = profiles.filter((p) => p && typeof p.id === "string");
+
+  let activeProfileId = localStorage.getItem(ACTIVE_PROFILE_KEY);
+
+  function saveProfiles() {
+    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+    localStorage.setItem(ACTIVE_PROFILE_KEY, activeProfileId);
+  }
+
+  // Kept outside the profile list on purpose. Deriving the next id from the list would
+  // hand a deleted child's id straight back to the next one added, and with it any
+  // per-child key that deletion missed -- so the counter has to remember ids that no
+  // longer appear anywhere.
+  function newProfileId() {
+    const stored = parseInt(localStorage.getItem(PROFILE_SEQ_KEY), 10);
+    const fromList = profiles.map((p) => parseInt(p.id, 10)).filter(Number.isFinite);
+    const highest = Math.max(Number.isFinite(stored) ? stored : 0, ...fromList, 0);
+    const next = highest + 1;
+    localStorage.setItem(PROFILE_SEQ_KEY, String(next));
+    return String(next);
+  }
+
+  function childKey(name) {
+    return "dev-p" + activeProfileId + "-" + name;
+  }
+
+  const childStore = {
+    get: (name) => localStorage.getItem(childKey(name)),
+    set: (name, value) => localStorage.setItem(childKey(name), value),
+    remove: (name) => localStorage.removeItem(childKey(name)),
+  };
+
+  if (profiles.length === 0) {
+    activeProfileId = "1";
+    profiles = [{ id: activeProfileId, name: "" }];
+    // childKey() now resolves, so the old single-child keys can be moved in place.
+    Object.entries(LEGACY_CHILD_KEYS).forEach(([name, legacyKey]) => {
+      const value = localStorage.getItem(legacyKey);
+      if (value !== null) {
+        childStore.set(name, value);
+        localStorage.removeItem(legacyKey);
+      }
+    });
+    saveProfiles();
+  }
+  if (!profiles.some((p) => p.id === activeProfileId)) {
+    activeProfileId = profiles[0].id;
+    saveProfiles();
+  }
+
+  function activeProfile() {
+    return profiles.find((p) => p.id === activeProfileId) || profiles[0];
+  }
+
+  function profileLabel(profile, index) {
+    return profile.name || t().profileDefaultName(index + 1);
+  }
+
+  let childBirthdate = null;
+  let childSex = null;
+
+  function loadChildIdentity() {
+    childBirthdate = childStore.get("child-birthdate");
+    childSex = childStore.get("child-sex");
+    if (childSex !== "boy" && childSex !== "girl") childSex = null;
+  }
+  loadChildIdentity();
 
   // One-time migration from the old "current age in months" input to a
   // birthdate, so age keeps computing correctly instead of going stale.
@@ -1747,7 +1886,7 @@
     if (Number.isFinite(legacyMonths) && legacyMonths >= 0) {
       const approx = new Date(Date.now() - legacyMonths * DAYS_PER_MONTH * 86400000);
       childBirthdate = approx.toISOString().slice(0, 10);
-      localStorage.setItem(CHILD_BIRTHDATE_KEY, childBirthdate);
+      childStore.set("child-birthdate", childBirthdate);
     }
   }
   localStorage.removeItem(LEGACY_CHILD_AGE_KEY);
@@ -1787,9 +1926,8 @@
     }
   }
 
-  const REGRESSION_KEY = "dev-regression-flag";
   function getInitialRegressionFlag() {
-    const saved = localStorage.getItem(REGRESSION_KEY);
+    const saved = childStore.get("regression-flag");
     return saved === "yes" || saved === "no" ? saved : null;
   }
   let regressionFlag = getInitialRegressionFlag();
@@ -1808,8 +1946,8 @@
 
   function setRegressionFlag(value) {
     regressionFlag = regressionFlag === value ? null : value;
-    if (regressionFlag === null) localStorage.removeItem(REGRESSION_KEY);
-    else localStorage.setItem(REGRESSION_KEY, regressionFlag);
+    if (regressionFlag === null) childStore.remove("regression-flag");
+    else childStore.set("regression-flag", regressionFlag);
     renderRegression();
     updateResult();
   }
@@ -1877,6 +2015,11 @@
     document.getElementById("txt-sex-boy-option").textContent = s.sexBoyOption;
     document.getElementById("txt-sex-girl-option").textContent = s.sexGirlOption;
     document.getElementById("txt-age-setting-hint").textContent = s.ageSettingHint;
+    document.getElementById("txt-profile-label").textContent = s.profileLabel;
+    document.getElementById("profile-add-btn").textContent = s.profileAdd;
+    document.getElementById("profile-rename-btn").textContent = s.profileRename;
+    document.getElementById("profile-delete-btn").textContent = s.profileDelete;
+    renderProfileBar();
     updateCurrentAgeDisplay();
     document.getElementById("print-btn").textContent = s.printBtn;
     document.getElementById("txt-regression-title").textContent = s.regressionTitle;
@@ -1886,13 +2029,15 @@
     document.getElementById("txt-breakdown-label").textContent = s.breakdownLabel;
   }
 
-  const STORAGE_KEY = "dev-checklist-responses-v3";
   let responses = {};
-  try {
-    responses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch (e) {
-    responses = {};
+  function loadResponses() {
+    try {
+      responses = JSON.parse(childStore.get("checklist-responses-v3")) || {};
+    } catch (e) {
+      responses = {};
+    }
   }
+  loadResponses();
 
   const bandsEl = document.getElementById("bands");
 
@@ -2013,7 +2158,7 @@
     } else {
       responses[key] = value;
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+    childStore.set("checklist-responses-v3", JSON.stringify(responses));
     render();
   }
 
@@ -2130,8 +2275,8 @@
   birthdateInput.addEventListener("change", () => {
     const raw = birthdateInput.value;
     childBirthdate = raw || null;
-    if (childBirthdate) localStorage.setItem(CHILD_BIRTHDATE_KEY, childBirthdate);
-    else localStorage.removeItem(CHILD_BIRTHDATE_KEY);
+    if (childBirthdate) childStore.set("child-birthdate", childBirthdate);
+    else childStore.remove("child-birthdate");
     updateCurrentAgeDisplay();
     render();
     renderGrowth();
@@ -2142,9 +2287,99 @@
   sexInput.addEventListener("change", () => {
     const raw = sexInput.value;
     childSex = raw === "boy" || raw === "girl" ? raw : null;
-    if (childSex) localStorage.setItem(CHILD_SEX_KEY, childSex);
-    else localStorage.removeItem(CHILD_SEX_KEY);
+    if (childSex) childStore.set("child-sex", childSex);
+    else childStore.remove("child-sex");
     renderGrowth();
+  });
+
+  // ---- Profile switching ----
+  // The switcher only appears once there's a second child. A family with one child
+  // shouldn't have to look at a control that does nothing for them, and the "add"
+  // button next to the birthdate is enough to discover it.
+  function renderProfileBar() {
+    const s = t();
+    const bar = document.getElementById("profile-bar");
+    bar.hidden = profiles.length < 2;
+    const select = document.getElementById("profile-select");
+    select.innerHTML = "";
+    profiles.forEach((profile, index) => {
+      const option = document.createElement("option");
+      option.value = profile.id;
+      option.textContent = profileLabel(profile, index);
+      select.appendChild(option);
+    });
+    select.value = activeProfileId;
+    document.getElementById("profile-delete-btn").disabled = profiles.length < 2;
+  }
+
+  // Every piece of per-child state is read straight back out of storage rather than
+  // being carried across. Anything left over from the previous child here would show
+  // up as that child's data under this child's name.
+  function reloadActiveProfile() {
+    loadChildIdentity();
+    regressionFlag = getInitialRegressionFlag();
+    loadResponses();
+    loadGrowthEntries();
+
+    birthdateInput.value = childBirthdate || "";
+    sexInput.value = childSex || "";
+
+    renderProfileBar();
+    updateCurrentAgeDisplay();
+    render();
+    renderRegression();
+    renderGrowth();
+    renderSymptomCards();
+    renderCareCards();
+  }
+
+  document.getElementById("profile-select").addEventListener("change", (e) => {
+    const next = e.target.value;
+    if (!profiles.some((p) => p.id === next)) return;
+    activeProfileId = next;
+    saveProfiles();
+    reloadActiveProfile();
+  });
+
+  document.getElementById("profile-add-btn").addEventListener("click", () => {
+    const s = t();
+    const name = (prompt(s.profileNamePrompt, "") || "").trim();
+    // Cancelling the name prompt still adds the child — the name is optional
+    // everywhere else, so it shouldn't be the thing that blocks adding one.
+    const profile = { id: newProfileId(), name };
+    profiles.push(profile);
+    activeProfileId = profile.id;
+    saveProfiles();
+    reloadActiveProfile();
+    birthdateInput.focus();
+  });
+
+  document.getElementById("profile-rename-btn").addEventListener("click", () => {
+    const s = t();
+    const profile = activeProfile();
+    const index = profiles.indexOf(profile);
+    const next = prompt(s.profileNamePrompt, profile.name || profileLabel(profile, index));
+    if (next === null) return;
+    profile.name = next.trim();
+    saveProfiles();
+    renderProfileBar();
+  });
+
+  document.getElementById("profile-delete-btn").addEventListener("click", () => {
+    const s = t();
+    if (profiles.length < 2) {
+      alert(s.profileDeleteLastAlert);
+      return;
+    }
+    const profile = activeProfile();
+    const index = profiles.indexOf(profile);
+    if (!confirm(s.profileDeleteConfirm(profileLabel(profile, index)))) return;
+
+    Object.keys(LEGACY_CHILD_KEYS).forEach((name) => childStore.remove(name));
+    profiles = profiles.filter((p) => p.id !== profile.id);
+    activeProfileId = profiles[0].id;
+    saveProfiles();
+    reloadActiveProfile();
   });
 
   // Shares the app's name/description/URL by default — reads `responses`/
@@ -2185,7 +2420,7 @@
   document.getElementById("reset-checklist-btn").addEventListener("click", () => {
     if (confirm(t().resetChecklistConfirm)) {
       responses = {};
-      localStorage.removeItem(STORAGE_KEY);
+      childStore.remove("checklist-responses-v3");
       render();
     }
   });
@@ -2905,14 +3140,8 @@
   }
 
   // ---- Fever reducer dose calculator ----
-  // Reference ranges only (mg), never converted to mL — product concentrations vary
-  // and guessing one would be a real error risk. Hard age gates fail closed: if age
-  // is unknown, no dose is shown at all, rather than guessing a "probably fine" default.
-  // Sources: AAP/HealthyChildren.org, FDA pediatric labeling, Korea's MFDS — cross-checked.
-  const DRUGS = {
-    acetaminophen: { mgPerKgMin: 10, mgPerKgMax: 15, interval: "4~6", maxPerDay: 5, minAgeMonths: 3 },
-    ibuprofen: { mgPerKgMin: 5, mgPerKgMax: 10, interval: "6~8", maxPerDay: 4, minAgeMonths: 6 },
-  };
+  // The dose ranges and the safety gates around them live in lib/dosing.js so they can
+  // be tested outside the browser -- see test/dosing.test.mjs.
 
   const doseState = { weight: "", drug: "acetaminophen" };
 
@@ -2923,29 +3152,11 @@
   }
 
   function computeDose() {
-    const weight = parseFloat(doseState.weight);
-    if (!Number.isFinite(weight) || weight <= 0) return { state: "need-weight" };
-
-    const ageMonths = currentAgeMonthsFloat();
-    if (ageMonths === null) return { state: "need-birthdate" };
-    if (ageMonths < 3) return { state: "blocked-under3mo" };
-
-    const drug = DRUGS[doseState.drug];
-    if (doseState.drug === "ibuprofen" && ageMonths < drug.minAgeMonths) {
-      return { state: "blocked-ibuprofen-under6mo" };
-    }
-
-    const doseMin = Math.round(weight * drug.mgPerKgMin);
-    const doseMax = Math.round(weight * drug.mgPerKgMax);
-    let dailyCap;
-    if (doseState.drug === "acetaminophen") {
-      const capPerKg = ageMonths < 24 ? 60 : 75;
-      dailyCap = Math.min(Math.round(weight * capPerKg), 4000);
-    } else {
-      dailyCap = doseMax * drug.maxPerDay;
-    }
-
-    return { state: "ok", doseMin, doseMax, interval: drug.interval, maxPerDay: drug.maxPerDay, dailyCap };
+    return ToddlerDosing.computeDose({
+      weight: doseState.weight,
+      ageMonths: currentAgeMonthsFloat(),
+      drug: doseState.drug,
+    });
   }
 
   function renderDoseResult() {
@@ -3053,233 +3264,23 @@
     });
   }
 
-  // ---- Growth percentile reference data ----
-  // LMS (Lambda-Mu-Sigma) parameters, one row per (standard, measure, sex, age in months).
-  // "who" = WHO Child Growth Standards (used under 24 months, per CDC's own guidance —
-  //   MMWR RR-59/9), sourced from cdn.who.int's own published tables — weight-for-age
-  //   from the birth-to-5-years z-score tables, length-for-age from the birth-to-2-years
-  //   expandable tables — one row per whole month 0-23.
-  // "cdc" = CDC 2000 growth charts (used from 24 months up), sourced from CDC's own
-  //   published percentile data files (via the CDC-DNPAO `cdcanthro` package, which
-  //   mirrors cdc.gov/growthcharts/percentile_data_files.htm), at their native
-  //   half-month grid, 24.5-36.5.
-  // "weight"/"length" (WHO, <24mo) vs "weight"/"stature" (CDC, >=24mo) intentionally use
-  // different measurement methods (recumbent length vs standing height), matching how
-  // each standard expects the child to be measured at that age.
-  const GROWTH_REF_CSV = `who,weight,boy,0,0.34870,3.3464,0.14602
-who,weight,boy,1,0.22970,4.4709,0.13395
-who,weight,boy,2,0.19700,5.5675,0.12385
-who,weight,boy,3,0.17380,6.3762,0.11727
-who,weight,boy,4,0.15530,7.0023,0.11316
-who,weight,boy,5,0.13950,7.5105,0.11080
-who,weight,boy,6,0.12570,7.9340,0.10958
-who,weight,boy,7,0.11340,8.2970,0.10902
-who,weight,boy,8,0.10210,8.6151,0.10882
-who,weight,boy,9,0.09170,8.9014,0.10881
-who,weight,boy,10,0.08200,9.1649,0.10891
-who,weight,boy,11,0.07300,9.4122,0.10906
-who,weight,girl,0,0.38090,3.2322,0.14171
-who,weight,girl,1,0.17140,4.1873,0.13724
-who,weight,girl,2,0.09620,5.1282,0.13000
-who,weight,girl,3,0.04020,5.8458,0.12619
-who,weight,girl,4,-0.00500,6.4237,0.12402
-who,weight,girl,5,-0.04300,6.8985,0.12274
-who,weight,girl,6,-0.07560,7.2970,0.12204
-who,weight,girl,7,-0.10390,7.6422,0.12178
-who,weight,girl,8,-0.12880,7.9487,0.12181
-who,weight,girl,9,-0.15070,8.2254,0.12199
-who,weight,girl,10,-0.17000,8.4800,0.12223
-who,weight,girl,11,-0.18720,8.7192,0.12247
-who,length,boy,0,1.00000,49.8842,0.03795
-who,length,boy,1,1.00000,54.7244,0.03557
-who,length,boy,2,1.00000,58.4249,0.03424
-who,length,boy,3,1.00000,61.4292,0.03328
-who,length,boy,4,1.00000,63.8860,0.03257
-who,length,boy,5,1.00000,65.9026,0.03204
-who,length,boy,6,1.00000,67.6236,0.03165
-who,length,boy,7,1.00000,69.1645,0.03139
-who,length,boy,8,1.00000,70.5994,0.03124
-who,length,boy,9,1.00000,71.9687,0.03117
-who,length,boy,10,1.00000,73.2812,0.03118
-who,length,boy,11,1.00000,74.5388,0.03125
-who,length,girl,0,1.00000,49.1477,0.03790
-who,length,girl,1,1.00000,53.6872,0.03640
-who,length,girl,2,1.00000,57.0673,0.03568
-who,length,girl,3,1.00000,59.8029,0.03520
-who,length,girl,4,1.00000,62.0899,0.03486
-who,length,girl,5,1.00000,64.0301,0.03463
-who,length,girl,6,1.00000,65.7311,0.03448
-who,length,girl,7,1.00000,67.2873,0.03441
-who,length,girl,8,1.00000,68.7498,0.03440
-who,length,girl,9,1.00000,70.1435,0.03444
-who,length,girl,10,1.00000,71.4818,0.03452
-who,length,girl,11,1.00000,72.7710,0.03464
-who,weight,boy,12,0.06450,9.6460,0.10925
-who,weight,boy,13,0.05630,9.8772,0.10949
-who,weight,boy,14,0.04870,10.0944,0.10976
-who,weight,boy,15,0.04120,10.3139,0.11008
-who,weight,boy,16,0.03430,10.5228,0.11041
-who,weight,boy,17,0.02760,10.7289,0.11078
-who,weight,boy,18,0.02100,10.9393,0.11120
-who,weight,boy,19,0.01490,11.1409,0.11163
-who,weight,boy,20,0.00870,11.3478,0.11212
-who,weight,boy,21,0.00290,11.5474,0.11261
-who,weight,boy,22,-0.00290,11.7528,0.11315
-who,weight,boy,23,-0.00830,11.9510,0.11369
-who,weight,girl,12,-0.20220,8.9462,0.12267
-who,weight,girl,13,-0.21600,9.1722,0.12283
-who,weight,girl,14,-0.22770,9.3861,0.12294
-who,weight,girl,15,-0.23850,9.6038,0.12299
-who,weight,girl,16,-0.24780,9.8124,0.12303
-who,weight,girl,17,-0.25610,10.0196,0.12305
-who,weight,girl,18,-0.26370,10.2324,0.12309
-who,weight,girl,19,-0.27020,10.4372,0.12315
-who,weight,girl,20,-0.27630,10.6481,0.12324
-who,weight,girl,21,-0.28140,10.8521,0.12335
-who,weight,girl,22,-0.28620,11.0633,0.12351
-who,weight,girl,23,-0.29030,11.2684,0.12369
-who,length,boy,12,1.00000,75.7391,0.03137
-who,length,boy,13,1.00000,76.9304,0.03154
-who,length,boy,14,1.00000,78.0451,0.03174
-who,length,boy,15,1.00000,79.1613,0.03197
-who,length,boy,16,1.00000,80.2113,0.03222
-who,length,boy,17,1.00000,81.2340,0.03249
-who,length,boy,18,1.00000,82.2628,0.03279
-who,length,boy,19,1.00000,83.2318,0.03310
-who,length,boy,20,1.00000,84.2074,0.03342
-who,length,boy,21,1.00000,85.1291,0.03375
-who,length,boy,22,1.00000,86.0589,0.03410
-who,length,boy,23,1.00000,86.9392,0.03445
-who,length,girl,12,1.00000,74.0049,0.03479
-who,length,girl,13,1.00000,75.2297,0.03496
-who,length,girl,14,1.00000,76.3770,0.03514
-who,length,girl,15,1.00000,77.5258,0.03534
-who,length,girl,16,1.00000,78.6055,0.03555
-who,length,girl,17,1.00000,79.6559,0.03576
-who,length,girl,18,1.00000,80.7121,0.03598
-who,length,girl,19,1.00000,81.7080,0.03620
-who,length,girl,20,1.00000,82.7116,0.03643
-who,length,girl,21,1.00000,83.6595,0.03665
-who,length,girl,22,1.00000,84.6154,0.03689
-who,length,girl,23,1.00000,85.5184,0.03711
-cdc,weight,boy,24.5,-0.216501,12.741544,0.108166
-cdc,stature,boy,24.5,1.007208,86.861609,0.040396
-cdc,weight,girl,24.5,-0.752207,12.134555,0.107740
-cdc,stature,girl,24.5,1.051273,85.397317,0.040860
-cdc,weight,boy,25.5,-0.239790,12.881023,0.108275
-cdc,stature,boy,25.5,0.837251,87.652473,0.040578
-cdc,weight,girl,25.5,-0.784234,12.291025,0.108477
-cdc,stature,girl,25.5,1.041951,86.290263,0.041142
-cdc,weight,boy,26.5,-0.266316,13.018424,0.108421
-cdc,stature,boy,26.5,0.681493,88.423264,0.040723
-cdc,weight,girl,26.5,-0.814096,12.444693,0.109281
-cdc,stature,girl,26.5,1.012592,87.157142,0.041349
-cdc,weight,boy,27.5,-0.295755,13.154497,0.108605
-cdc,stature,boy,27.5,0.538780,89.175492,0.040833
-cdc,weight,girl,27.5,-0.841936,12.596223,0.110144
-cdc,stature,girl,27.5,0.970542,87.996018,0.041500
-cdc,weight,boy,28.5,-0.327729,13.289897,0.108826
-cdc,stature,boy,28.5,0.407697,89.910409,0.040909
-cdc,weight,girl,28.5,-0.867889,12.746209,0.111061
-cdc,stature,girl,28.5,0.921130,88.805511,0.041611
-cdc,weight,boy,29.5,-0.361817,13.425194,0.109083
-cdc,stature,boy,29.5,0.286762,90.629078,0.040952
-cdc,weight,girl,29.5,-0.892103,12.895172,0.112023
-cdc,stature,girl,29.5,0.868221,89.584767,0.041692
-cdc,weight,boy,30.5,-0.397568,13.560881,0.109378
-cdc,stature,boy,30.5,0.174489,91.332424,0.040965
-cdc,weight,girl,30.5,-0.914719,13.043572,0.113023
-cdc,stature,girl,30.5,0.814544,90.333417,0.041754
-cdc,weight,boy,31.5,-0.434520,13.697379,0.109708
-cdc,stature,boy,31.5,0.069445,92.021272,0.040950
-cdc,weight,girl,31.5,-0.935877,13.191809,0.114056
-cdc,stature,girl,31.5,0.761958,91.051544,0.041804
-cdc,weight,boy,32.5,-0.472189,13.835046,0.110073
-cdc,stature,boy,32.5,-0.029721,92.696379,0.040909
-cdc,weight,girl,32.5,-0.955723,13.340229,0.115115
-cdc,stature,girl,32.5,0.711660,91.739635,0.041847
-cdc,weight,boy,33.5,-0.510117,13.974183,0.110473
-cdc,stature,boy,33.5,-0.124252,93.358465,0.040844
-cdc,weight,girl,33.5,-0.974383,13.489133,0.116193
-cdc,stature,girl,33.5,0.664323,92.398544,0.041888
-cdc,weight,boy,34.5,-0.547886,14.115032,0.110907
-cdc,stature,boy,34.5,-0.215288,94.008229,0.040758
-cdc,weight,girl,34.5,-0.991981,13.638774,0.117286
-cdc,stature,girl,34.5,0.620285,93.029454,0.041929
-cdc,weight,boy,35.5,-0.585070,14.257796,0.111375
-cdc,stature,boy,35.5,-0.303854,94.646370,0.040654
-cdc,weight,girl,35.5,-1.008641,13.789365,0.118387
-cdc,stature,girl,35.5,0.579556,93.633823,0.041972
-cdc,weight,boy,36.5,-0.621320,14.402627,0.111875
-cdc,stature,boy,36.5,-0.390918,95.273591,0.040534
-cdc,weight,girl,36.5,-1.024471,13.941083,0.119492
-cdc,stature,girl,36.5,0.541981,94.213357,0.042018`;
-
-  const GROWTH_REF = {};
-  GROWTH_REF_CSV.trim().split("\n").forEach((line) => {
-    const [standard, measure, sex, months, L, M, S] = line.split(",");
-    const key = standard + "-" + measure + "-" + sex;
-    if (!GROWTH_REF[key]) GROWTH_REF[key] = [];
-    GROWTH_REF[key].push({ months: parseFloat(months), L: parseFloat(L), M: parseFloat(M), S: parseFloat(S) });
-  });
-  Object.values(GROWTH_REF).forEach((rows) => rows.sort((a, b) => a.months - b.months));
-
-  // measureKind: "weight" always; "height" maps to WHO "length" under 24mo, CDC "stature" from 24mo.
-  function lookupLMS(ageMonths, measureKind, sex) {
-    const standard = ageMonths < 24 ? "who" : "cdc";
-    const measure = measureKind === "height" ? (standard === "who" ? "length" : "stature") : "weight";
-    const rows = GROWTH_REF[standard + "-" + measure + "-" + sex];
-    if (!rows || rows.length === 0) return null;
-    if (ageMonths < rows[0].months || ageMonths > rows[rows.length - 1].months) return null;
-
-    let lo = rows[0], hi = rows[rows.length - 1];
-    for (let i = 0; i < rows.length - 1; i++) {
-      if (ageMonths >= rows[i].months && ageMonths <= rows[i + 1].months) {
-        lo = rows[i];
-        hi = rows[i + 1];
-        break;
-      }
-    }
-    if (lo === hi || hi.months === lo.months) return lo;
-    const frac = (ageMonths - lo.months) / (hi.months - lo.months);
-    return {
-      L: lo.L + (hi.L - lo.L) * frac,
-      M: lo.M + (hi.M - lo.M) * frac,
-      S: lo.S + (hi.S - lo.S) * frac,
-    };
-  }
-
-  // Standard normal CDF via the Abramowitz-Stegun erf approximation (~1e-7 accuracy).
-  function normalCDF(z) {
-    const t = 1 / (1 + 0.2316419 * Math.abs(z));
-    const d = 0.3989423 * Math.exp((-z * z) / 2);
-    let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-    if (z > 0) p = 1 - p;
-    return p;
-  }
-
-  // Returns { z, percentile } or null if out of the supported age range (0-36.5mo)
-  // or the reference data for that sex isn't available.
-  function calcPercentile(value, ageMonths, measureKind, sex) {
-    if (!Number.isFinite(value) || value <= 0 || !sex) return null;
-    const lms = lookupLMS(ageMonths, measureKind, sex);
-    if (!lms) return null;
-    const { L, M, S } = lms;
-    const z = Math.abs(L) < 1e-9 ? Math.log(value / M) / S : (Math.pow(value / M, L) - 1) / (L * S);
-    return { z, percentile: normalCDF(z) * 100 };
-  }
+  // Growth-percentile reference data and the LMS math live in lib/growth.js so they
+  // can be tested outside the browser -- see test/growth.test.mjs.
+  const { calcPercentile } = ToddlerGrowth;
 
   // ---- Growth log ----
-  const GROWTH_KEY = "dev-growth-log-v1";
   let growthEntries = [];
-  try {
-    growthEntries = JSON.parse(localStorage.getItem(GROWTH_KEY)) || [];
-  } catch (e) {
-    growthEntries = [];
+  function loadGrowthEntries() {
+    try {
+      growthEntries = JSON.parse(childStore.get("growth-log-v1")) || [];
+    } catch (e) {
+      growthEntries = [];
+    }
   }
+  loadGrowthEntries();
 
   function saveGrowth() {
-    localStorage.setItem(GROWTH_KEY, JSON.stringify(growthEntries));
+    childStore.set("growth-log-v1", JSON.stringify(growthEntries));
   }
 
   function formatPercentileValue(result) {
@@ -3296,8 +3297,13 @@ cdc,stature,girl,36.5,0.541981,94.213357,0.042018`;
 
     const heightResult = entry.height != null ? calcPercentile(entry.height, ageAt, "height", childSex) : null;
     const weightResult = entry.weight != null ? calcPercentile(entry.weight, ageAt, "weight", childSex) : null;
-    const hText = entry.height == null ? s.percentileNoData : heightResult ? formatPercentileValue(heightResult) : s.percentileOutOfRange;
-    const wText = entry.weight == null ? s.percentileNoData : weightResult ? formatPercentileValue(weightResult) : s.percentileOutOfRange;
+    // A missing number is either an age the standards don't cover or an age the
+    // bundled tables happen not to reach (they don't quite meet around 24 months).
+    // Telling a 23-month-old's parent "out of range, 0-36 months only" would be
+    // flatly wrong, so the two are worded differently.
+    const missing = ToddlerGrowth.coverage(ageAt) === "gap" ? s.percentileGap : s.percentileOutOfRange;
+    const hText = entry.height == null ? s.percentileNoData : heightResult ? formatPercentileValue(heightResult) : missing;
+    const wText = entry.weight == null ? s.percentileNoData : weightResult ? formatPercentileValue(weightResult) : missing;
     return s.percentileCell(hText, wText);
   }
 
@@ -3454,7 +3460,7 @@ cdc,stature,girl,36.5,0.541981,94.213357,0.042018`;
   document.getElementById("reset-growth-btn").addEventListener("click", () => {
     if (confirm(t().resetGrowthConfirm)) {
       growthEntries = [];
-      localStorage.removeItem(GROWTH_KEY);
+      childStore.remove("growth-log-v1");
       renderGrowth();
       renderCareCards();
     }

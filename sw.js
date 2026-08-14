@@ -1,7 +1,12 @@
-const CACHE_NAME = "dev-checklist-v13";
+const CACHE_NAME = "dev-checklist-v14";
 const ASSETS = [
   "./",
   "./index.html",
+  // index.html은 이 둘이 없으면 성장 백분위·해열제 용량 계산이 통째로 죽는다.
+  // 스크립트를 새로 나눌 때 여기 추가하는 걸 빠뜨리면 온라인에서는 멀쩡하고
+  // 오프라인에서만 깨진다.
+  "./lib/growth.js",
+  "./lib/dosing.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

@@ -1662,11 +1662,41 @@
   // "Tips and Activities" content on its milestone pages (cdc.gov/act-early/milestones),
   // re-sorted into the 4 domains (CDC lists them as one combined list, not by domain).
   const PLAY_TIPS = {
+    2: {
+      social: { ko: "안아주고 품어주는 시간을 가지세요. 안아준다고 버릇이 나빠지지 않아요 — 오히려 안전하다고 느끼게 됩니다", en: "Spend time cuddling and holding your baby; you will not spoil your baby by holding or responding to him" },
+      language: { ko: "말을 걸고, 책을 읽어주고, 노래를 불러주세요. 언어를 익히는 바탕이 됩니다", en: "Talk, read, and sing to your baby to help her develop and understand language" },
+      cognitive: { ko: "자고 먹는 시간을 일정하게 해주세요. 다음에 무엇이 올지 예상하는 법을 배우기 시작합니다", en: "Have routines for sleeping and feeding — this will help your baby begin to learn what to expect" },
+      physical: { ko: "깨어 있을 때 엎드려 놓고 눈높이에 장난감을 두세요. 고개 드는 연습이 됩니다 (혼자 두지 마세요)", en: "Lay your baby on his tummy when awake and put toys at eye level to practice lifting his head — don't leave him alone" },
+    },
+    4: {
+      social: { ko: "아이가 소리를 내면 반갑게 반응해주세요. 번갈아 “대화”하는 법을 배웁니다", en: "Respond positively when he makes sounds — this teaches him to take turns “talking” back and forth" },
+      language: { ko: "말을 걸고, 읽어주고, 노래해주세요. 나중에 말하고 이해하는 데 도움이 됩니다", en: "Talk, read, and sing to your baby to help her learn to speak and understand words later" },
+      cognitive: { ko: "눕힌 채로 밝은 색 장난감을 좌우·위아래로 천천히 움직여 눈으로 좇는지 보세요", en: "Show her a bright-colored toy and move it slowly left to right and up and down to see if she watches it" },
+      physical: { ko: "장난감에 손을 뻗고 발로 차볼 수 있게 해주세요 (담요 위에 안전한 장난감을 두는 식으로)", en: "Provide safe chances to reach for toys and kick at them, like putting her on a blanket with safe toys" },
+    },
+    6: {
+      social: { ko: "주고받는 놀이를 해보세요. 아이가 웃으면 같이 웃고, 소리를 내면 따라 해주세요", en: "Use “back and forth” play — when your baby smiles, you smile; when he makes sounds, copy them" },
+      language: { ko: "매일 그림책이나 잡지의 알록달록한 그림을 함께 보며 이야기해주세요. 옹알이에도 대답해주세요", en: "“Read” every day by looking at colorful pictures and talking about them, and respond when she babbles" },
+      cognitive: { ko: "새로운 것을 가리키며 이름을 알려주세요 (산책하며 자동차, 나무, 동물 등)", en: "Point out new things and name them, like cars, trees, and animals on a walk" },
+      physical: { ko: "엎드리거나 누운 자세에서 손이 닿을락 말락 한 곳에 장난감을 두고 뒤집어 가도록 해보세요", en: "Put toys just out of reach and encourage her to roll over to get them" },
+    },
+    9: {
+      social: { ko: "“내 차례, 네 차례” 같은 놀이를 해보세요. 장난감을 주고받으면 됩니다", en: "Play games like my turn, your turn — try passing a toy back and forth" },
+      language: { ko: "아이가 내는 소리를 따라 하고 그 소리로 된 단어를 말해주세요 (“바바바” 하면 따라 한 뒤 “바나나”)", en: "Repeat your baby's sounds and say simple words using them — if he says “bababa,” repeat it, then say “book”" },
+      cognitive: { ko: "통에 든 블록을 쏟았다가 다시 담는 놀이를 함께 해보세요", en: "Play by dumping blocks from a container and putting them back in together" },
+      physical: { ko: "손이 조금 닿지 않는 곳에 장난감을 두고 기어가거나 굴러가서 잡도록 격려해주세요", en: "Place toys a little out of reach and encourage him to crawl, scoot, or roll to get them" },
+    },
     12: {
       social: { ko: "원하는 행동을 하면 안아주거나 칭찬해서 알려주세요", en: "Let your child know when they do something you like, with a hug or praise" },
       language: { ko: "아이가 하는 행동을 말이나 노래로 설명해주고, 아이가 시도한 말에 살을 붙여 반응해주세요", en: "Describe what your child is doing with words or a song, and build on sounds they try to say" },
       cognitive: { ko: "트럭, 버스, 동물처럼 흥미로운 걸 손가락으로 가리켜 주의를 끌어보세요. 냄비·프라이팬으로 소리 내는 놀이도 좋아요", en: "Point out interesting things (trucks, buses, animals) to get their attention; try making sounds with pots and pans" },
       physical: { ko: "블록처럼 손으로 쥐는 장난감을 함께 갖고 놀고, 상자나 미는 장난감을 밀며 걷는 연습을 해보세요", en: "Play together with toys that use their hands, like blocks; let them push a box or push-toy while walking" },
+    },
+    15: {
+      social: { ko: "아이가 느끼는 감정을 대신 말해주세요 (슬픔, 화남, 답답함, 기쁨). 표정과 목소리도 함께 써서요", en: "Say what you think your child is feeling — sad, mad, frustrated, happy — using your face and voice too" },
+      language: { ko: "아이가 한 말을 따라 하고 살을 붙여주세요. “고”라고 하면 “그래, 공이야” 하는 식으로요", en: "Repeat and add to what he says — he may say “ba” for ball, and you can say “yes, that's a ball”" },
+      cognitive: { ko: "물건의 쓰임을 물어보세요. 모자를 들고 “모자로 뭐 하지? 머리에 쓰지” 하며 직접 써 보이고 아이에게도 씌워주세요", en: "Ask what things are for — hold up a hat and say “what do you do with a hat? You put it on your head,” then try it" },
+      physical: { ko: "뚜껑 없는 컵으로 마시고 숟가락으로 먹는 연습을 시켜주세요. 지저분해지지만 그게 배우는 과정이에요", en: "Let your child drink from an open cup and practice eating with a spoon — learning to eat and drink is messy but fun" },
     },
     18: {
       social: { ko: "원하는 행동에 긍정적인 말과 관심을 주고, 다른 사람의 감정을 알려주세요 (예: “슬퍼 보이네, 곰인형 갖다주자”)", en: "Give positive attention to behavior you like, and name others' feelings for them (“she looks sad, let's get her a stuffed animal”)" },
@@ -1679,6 +1709,12 @@
       language: { ko: "발음이 부정확해도 말을 확장해서 다시 말해주고(“바나나 원해”), “머리어깨무릎발” 같은 노래로 신체 부위를 가르쳐보세요", en: "Expand on what they say even if it's not perfectly clear (“want banana”); teach body parts with a song like “Head, Shoulders, Knees and Toes”" },
       cognitive: { ko: "버튼을 누르면 반응하는 문제해결형 장난감이나, 모양·색·동물 퍼즐을 함께 맞춰보세요", en: "Try problem-solving toys with buttons that react, or puzzles with shapes, colors, or animals" },
       physical: { ko: "공을 차고 굴리고 던지는 놀이, 모래놀이 도구·컵·깔때기를 갖고 노는 시간을 가져보세요", en: "Kick, roll, and throw a ball together; play with sand toys, cups, and funnels" },
+    },
+    30: {
+      social: { ko: "다른 아이와 노는 법을 알려주세요. 나눠 쓰기, 차례 지키기, 말로 표현하기를 옆에서 도와주면 됩니다", en: "Help your child learn how to play with other children — show him how to share, take turns, and use his words" },
+      language: { ko: "책이나 이야기에 대해 간단히 물어보세요. “누가?”, “뭐야?”, “어디?” 같은 질문이 좋아요", en: "Ask simple questions about books and stories — “who?”, “what?”, and “where?”" },
+      cognitive: { ko: "모양·색깔·동물이 있는 간단한 퍼즐을 함께 맞추고, 조각을 맞출 때마다 이름을 말해주세요", en: "Do simple puzzles with shapes, colors, or animals, naming each piece as your child puts it in place" },
+      physical: { ko: "밖에서 함께 놀아주세요. 공원에서 기구에 올라가고 안전한 곳에서 뛰어놀게 해주세요", en: "Play outside — take your child to the park to climb on equipment and run in safe areas" },
     },
     36: {
       social: { ko: "감정을 말로 표현하도록 돕고 심호흡 같은 진정법을 알려주며, 또래와 노는 걸 격려해주세요", en: "Help them name their feelings and learn a calming technique like deep breathing; encourage play with other children" },

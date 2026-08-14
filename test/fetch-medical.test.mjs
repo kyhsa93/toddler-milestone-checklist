@@ -10,8 +10,6 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const scriptPath = path.resolve(import.meta.dirname, "../scripts/fetch-medical.mjs");
 
-// 공공데이터포털 응답을 흉내내는 스텁. 실제 인증키 없이 페이지네이션·필터·
-// 오류 처리를 태워보려는 것이라, 태그 이름은 실제 응답과 맞춰둔다.
 function startStub(handler) {
   const server = createServer((req, res) => {
     const url = new URL(req.url, "http://localhost");
@@ -77,7 +75,7 @@ async function run(pharmacyBase, emergencyBase, outDir) {
       PHARMACY_API_ENDPOINT: pharmacyBase,
       EMERGENCY_API_KEY: "TESTKEY",
       EMERGENCY_API_ENDPOINT: emergencyBase,
-      RETRY_BACKOFF_MS: "10", // 실제 백오프를 다 기다리면 테스트가 분 단위로 길어진다
+      RETRY_BACKOFF_MS: "10",
     },
   });
 }
@@ -90,10 +88,6 @@ async function tempDir() {
   return mkdtemp(path.join(tmpdir(), "medical-test-"));
 }
 
-/**
- * 약국은 서울에만 데이터를 주고 나머지 시도는 빈 응답을 준다.
- * 응급의료기관은 실제 API처럼 지역 파라미터와 무관하게 전국 목록을 돌려준다.
- */
 function seoulOnlyStub(seoulItems, emergencyItems = []) {
   return startStub(({ operation, region }) => {
     if (operation !== "getParmacyListInfoInqire") return { xml: itemsXml(emergencyItems) };
@@ -129,7 +123,7 @@ test("운영시간을 요일별 분 단위로 정규화한다", async () => {
   try {
     await run(stub.base, stub.base, outDir);
     const [item] = await readJson(outDir, "pharmacy", "seoul.json");
-    assert.deepEqual(item.hours["1"], [540, 1290]); // 09:00~21:30
+    assert.deepEqual(item.hours["1"], [540, 1290]);
     assert.deepEqual(item.hours["7"], [600, 1020]);
     assert.equal(item.lat, 37.5);
     assert.equal(item.tel, "02-000-0000");
@@ -160,7 +154,6 @@ test("여러 페이지에 걸친 목록을 totalCount만큼 이어서 가져온�
 });
 
 test("시도 표기가 바뀐 지역은 대체 표기로 다시 조회한다", async () => {
-  // 강원특별자치도로는 0건이고 강원도로는 나오는 상황
   const tried = [];
   const stub = await startStub(({ operation, region }) => {
     tried.push(region);
@@ -208,8 +201,6 @@ test("응급의료기관은 운영시간 필터 없이 전부 담고 응급실 �
 });
 
 test("응급의료기관은 한 번만 받아 주소로 시도를 나눈다", async () => {
-  // 실제 API는 STAGE1(시도)을 줘도 전국 목록을 그대로 돌려준다. 지역별로
-  // 부르면 17개 시도 파일에 전국 목록이 똑같이 들어가는 사고가 난다.
   let emergencyCalls = 0;
   const stub = await startStub(({ operation }) => {
     if (operation === "getParmacyListInfoInqire") return { xml: itemsXml([]) };
@@ -231,7 +222,6 @@ test("응급의료기관은 한 번만 받아 주소로 시도를 나눈다", as
 
     assert.deepEqual((await readJson(outDir, "emergency", "seoul.json")).map((e) => e.name), ["서울병원"]);
     assert.deepEqual((await readJson(outDir, "emergency", "busan.json")).map((e) => e.name), ["부산병원"]);
-    // 신·구 표기가 섞여 있어도 같은 시도로 모여야 한다.
     assert.deepEqual(
       (await readJson(outDir, "emergency", "gangwon.json")).map((e) => e.name).sort(),
       ["강원병원", "옛강원병원"]
@@ -243,9 +233,6 @@ test("응급의료기관은 한 번만 받아 주소로 시도를 나눈다", as
 });
 
 test("전남광주통합특별시 주소를 옛 광주와 옛 전남으로 가른다", async () => {
-  // 2026-07-01 전남·광주가 통합되면서 응급의료 데이터 주소가 통합 명칭으로
-  // 바뀌었다. 그대로 두면 "전남"으로 시작하니 광주 병원이 전부 전남으로 가고
-  // 광주 지역 사용자에게는 빈 목록이 나간다.
   const stub = await startStub(({ operation }) => {
     if (operation === "getParmacyListInfoInqire") return { xml: itemsXml([]) };
     return {
@@ -273,8 +260,6 @@ test("전남광주통합특별시 주소를 옛 광주와 옛 전남으로 가�
 });
 
 test("남도와 북도를 섞지 않고, 축약 표기 주소도 제 시도로 보낸다", async () => {
-  // 시도명 앞 두 글자로 자르면 "충청북도"와 "충청남도"가 똑같이 "충청"이 되어
-  // 남도가 통째로 북도로 들어간다. 실제로 충남·전남·경남이 0건이 됐던 버그다.
   const stub = await startStub(({ operation }) => {
     if (operation === "getParmacyListInfoInqire") return { xml: itemsXml([]) };
     return {
@@ -300,7 +285,6 @@ test("남도와 북도를 섞지 않고, 축약 표기 주소도 제 시도로 �
     assert.deepEqual(await names("chungnam"), ["축약충남병원", "충남병원"]);
     assert.deepEqual(await names("jeonnam"), ["전남병원"]);
     assert.deepEqual(await names("gyeongnam"), ["경남병원"]);
-    // 광주광역시와 경기도 광주시가 섞이면 안 된다.
     assert.deepEqual(await names("gwangju"), ["광주병원"]);
     assert.deepEqual(await names("gyeonggi"), ["경기광주병원"]);
   } finally {
@@ -309,8 +293,6 @@ test("남도와 북도를 섞지 않고, 축약 표기 주소도 제 시도로 �
 });
 
 test("일시적인 연결 실패는 재시도로 넘긴다", async () => {
-  // 러너에서 apis.data.go.kr 연결이 간헐적으로 타임아웃된다. 한 번 끊겼다고
-  // 하루치 수집을 통째로 버리면 안 된다.
   let attempts = 0;
   const stub = await startStub(({ operation }) => {
     if (operation !== "getParmacyListInfoInqire") return { xml: itemsXml([]) };
@@ -331,8 +313,6 @@ test("일시적인 연결 실패는 재시도로 넘긴다", async () => {
 });
 
 test("한 지역이 계속 실패해도 나머지는 갱신하고 그 지역은 기존 목록을 남긴다", async () => {
-  // apis.data.go.kr은 러너에서 몇 분씩 연결이 안 되는 구간이 있다. 지역 하나
-  // 때문에 하루치를 통째로 버리면 안 된다.
   const outDir = await tempDir();
   const okStub = await seoulOnlyStub([pharmacy("서울약국", { 7: ["1000", "1700"] })]);
   try {
@@ -342,7 +322,6 @@ test("한 지역이 계속 실패해도 나머지는 갱신하고 그 지역은 
     await okStub.close();
   }
 
-  // 이제 서울만 계속 실패하고 부산은 새 데이터를 준다.
   const flakyStub = await startStub(({ operation, region }) => {
     if (operation !== "getParmacyListInfoInqire") return { xml: itemsXml([]) };
     if (region === "서울특별시") return { status: 500, xml: "<html>gateway</html>" };
@@ -352,9 +331,7 @@ test("한 지역이 계속 실패해도 나머지는 갱신하고 그 지역은 
 
   try {
     await run(flakyStub.base, flakyStub.base, outDir);
-    // 실패한 서울은 기존 목록 유지
     assert.deepEqual((await readJson(outDir, "pharmacy", "seoul.json")).map((p) => p.name), ["서울약국"]);
-    // 성공한 부산은 갱신
     assert.deepEqual((await readJson(outDir, "pharmacy", "busan.json")).map((p) => p.name), ["부산약국"]);
 
     const meta = await readJson(outDir, "medical-meta.json");
@@ -433,8 +410,6 @@ test("시도별 건수를 담은 메타 파일을 남긴다", async () => {
 });
 
 test("엔드포인트가 URL 형식이 아니면 무엇이 잘못됐는지 알려주고 멈춘다", async () => {
-  // 시크릿에 오타가 나면 fetch는 "fetch failed" 한 줄만 남기고 끝나서
-  // 로그만 보고는 원인을 알 수 없다.
   const outDir = await tempDir();
   await assert.rejects(
     () => run("apis.data.go.kr/B552657/ErmctInsttInfoInqireService", "https://example.com", outDir),

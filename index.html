@@ -139,7 +139,6 @@
     padding: 28px 20px 80px;
   }
 
-  /* Masthead */
   .masthead { padding: 6px 2px 22px; border-bottom: 1px solid var(--line); }
   .masthead-top {
     display: flex;
@@ -199,7 +198,6 @@
     border-radius: 3px;
   }
 
-  /* Disclaimer stamp */
   .stamp {
     margin-top: 22px;
     background: var(--paper-raised);
@@ -221,7 +219,6 @@
   .stamp li:last-child { margin-bottom: 0; }
   .stamp strong { color: var(--ink); font-weight: 600; }
 
-  /* Sensory reference note */
   .sensory-note {
     margin-top: 14px;
     border: 1px solid var(--line);
@@ -238,7 +235,6 @@
   }
   .sensory-note p { font-size: 13.5px; color: var(--ink-soft); margin: 0; }
 
-  /* Tabs */
   .tabs {
     display: flex;
     gap: 4px;
@@ -262,7 +258,6 @@
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  /* Age setting */
   .age-setting {
     margin-top: 18px;
     display: flex;
@@ -288,7 +283,6 @@
   .profile-btn {
     font-family: var(--font-body);
     font-size: 13px;
-    /* 44px 터치 영역을 채우려고 세로 패딩을 키운다 — 아이 전환은 손이 급할 때 누른다. */
     padding: 8px 12px;
     border: 1px solid var(--line);
     border-radius: 4px;
@@ -301,7 +295,6 @@
   .age-setting-hint { font-size: 12px; color: var(--ink-faint); flex-basis: 100%; }
   .age-setting-hint.current-age { color: var(--sage-deep); font-weight: 600; }
 
-  /* Sticky progress */
   .progress-bar {
     position: sticky;
     top: 0;
@@ -334,7 +327,6 @@
   }
   .progress-nums { white-space: nowrap; font-variant-numeric: tabular-nums; }
 
-  /* Age band section */
   .band {
     margin-top: 30px;
     background: var(--paper-raised);
@@ -387,7 +379,6 @@
   .band-tips-item .item-domain { margin-right: 6px; margin-bottom: 0; vertical-align: middle; }
   .band-tips-source { margin-top: 10px; font-size: 11.5px; color: var(--ink-faint); }
 
-  /* Regression check */
   .regression-check {
     margin-top: 30px;
     background: var(--paper-raised);
@@ -421,7 +412,6 @@
   .regression-toggle button.active-safe { background: var(--sage); border-color: var(--sage); color: #fff; }
   .regression-toggle button.active-concern { background: var(--amber); border-color: var(--amber); color: #fff; }
 
-  /* Symptom check */
   .symptom-disclaimer {
     background: var(--paper-raised);
     border: 1px solid var(--line);
@@ -539,7 +529,6 @@
 
   .symptom-footer-note { font-size: 12px; color: var(--ink-faint); margin-top: 24px; }
 
-  /* ---- 야간·휴일 약국 / 응급실 ---- */
   .nearby-intro { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; }
   .nearby-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
   .nearby-control-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -646,7 +635,6 @@
   .toggle button.active-yes { background: var(--sage); border-color: var(--sage); color: #fff; }
   .toggle button.active-notyet { background: var(--amber); border-color: var(--amber); color: #fff; }
 
-  /* Result stamp */
   .result {
     margin-top: 34px;
     padding: 24px 22px;
@@ -695,7 +683,6 @@
   }
   .domain-breakdown b { color: var(--ink-soft); font-weight: 600; }
 
-  /* Growth tab */
   .growth-form {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr auto;
@@ -1066,22 +1053,12 @@
   </footer>
 </div>
 
-<!--
-  The two calculations whose output a parent might act on -- growth percentiles and
-  fever-reducer doses -- live in their own files so they can be run under `node --test`
-  instead of only inside a browser. They are plain scripts (no build step, same as the
-  rest of this app) that attach one global each.
--->
 <script src="lib/growth.js"></script>
 <script src="lib/dosing.js"></script>
 <script>
-  // ---- i18n ----
   const LOCALE_KEY = "lang";
   function getInitialLocale() {
     const saved = localStorage.getItem(LOCALE_KEY);
-    // 대상 독자가 한국어권이라 static meta(description/OG/JSON-LD)도 전부
-    // 한국어로 작성돼 있음 - 기본값을 en으로 두면 첫 방문자에게 렌더링되는
-    // <title>/lang만 영어로 바뀌어 static 태그와 어긋나므로 ko를 기본값으로 함.
     return saved === "en" || saved === "ko" ? saved : "ko";
   }
   let locale = getInitialLocale();
@@ -1512,11 +1489,6 @@
     en: { social: "Social/Emotional", language: "Language/Communication", cognitive: "Cognitive", physical: "Physical/Motor" },
   };
 
-  // Items are drawn from the CDC's "Learn the Signs. Act Early." milestone
-  // checklists (2022 revision), cross-checked against two independent
-  // government mirrors of the official CDC PDF. Domain item counts follow
-  // the real checklist and are not forced to be even (CDC's own 12-month
-  // Social/Emotional list has exactly one item).
   const DATA = [
     {
       month: 2,
@@ -1707,9 +1679,6 @@
     },
   ];
 
-  // Play/activity tips per age band and domain, adapted from the CDC's own
-  // "Tips and Activities" content on its milestone pages (cdc.gov/act-early/milestones),
-  // re-sorted into the 4 domains (CDC lists them as one combined list, not by domain).
   const PLAY_TIPS = {
     2: {
       social: { ko: "안아주고 품어주는 시간을 가지세요. 안아준다고 버릇이 나빠지지 않아요 — 오히려 안전하다고 느끼게 됩니다", en: "Spend time cuddling and holding your baby; you will not spoil your baby by holding or responding to him" },
@@ -1782,16 +1751,6 @@
   const LEGACY_CHILD_AGE_KEY = "dev-child-age-months";
   const DAYS_PER_MONTH = 30.4375;
 
-  // ---- Child profiles ----
-  // Everything the app records is about one particular child, so all of it hangs off
-  // the active profile: birthdate, sex, checklist answers, the regression flag, and
-  // the growth log. Language and the pharmacy region are about the device, not the
-  // child, and stay outside this.
-  //
-  // Keys are namespaced per profile ("dev-p<id>-..."). The app used to store one
-  // child under un-namespaced keys, so those are migrated into the first profile on
-  // the first run rather than being left behind -- an existing user opens the app and
-  // finds their child already there, named by the default label.
   const PROFILES_KEY = "dev-profiles-v1";
   const ACTIVE_PROFILE_KEY = "dev-active-profile-v1";
   const PROFILE_SEQ_KEY = "dev-profile-seq-v1";
@@ -1819,10 +1778,6 @@
     localStorage.setItem(ACTIVE_PROFILE_KEY, activeProfileId);
   }
 
-  // Kept outside the profile list on purpose. Deriving the next id from the list would
-  // hand a deleted child's id straight back to the next one added, and with it any
-  // per-child key that deletion missed -- so the counter has to remember ids that no
-  // longer appear anywhere.
   function newProfileId() {
     const stored = parseInt(localStorage.getItem(PROFILE_SEQ_KEY), 10);
     const fromList = profiles.map((p) => parseInt(p.id, 10)).filter(Number.isFinite);
@@ -1845,7 +1800,6 @@
   if (profiles.length === 0) {
     activeProfileId = "1";
     profiles = [{ id: activeProfileId, name: "" }];
-    // childKey() now resolves, so the old single-child keys can be moved in place.
     Object.entries(LEGACY_CHILD_KEYS).forEach(([name, legacyKey]) => {
       const value = localStorage.getItem(legacyKey);
       if (value !== null) {
@@ -1878,8 +1832,6 @@
   }
   loadChildIdentity();
 
-  // One-time migration from the old "current age in months" input to a
-  // birthdate, so age keeps computing correctly instead of going stale.
   if (!childBirthdate) {
     const legacy = localStorage.getItem(LEGACY_CHILD_AGE_KEY);
     const legacyMonths = legacy === null ? NaN : parseInt(legacy, 10);
@@ -2292,10 +2244,6 @@
     renderGrowth();
   });
 
-  // ---- Profile switching ----
-  // The switcher only appears once there's a second child. A family with one child
-  // shouldn't have to look at a control that does nothing for them, and the "add"
-  // button next to the birthdate is enough to discover it.
   function renderProfileBar() {
     const s = t();
     const bar = document.getElementById("profile-bar");
@@ -2312,9 +2260,6 @@
     document.getElementById("profile-delete-btn").disabled = profiles.length < 2;
   }
 
-  // Every piece of per-child state is read straight back out of storage rather than
-  // being carried across. Anything left over from the previous child here would show
-  // up as that child's data under this child's name.
   function reloadActiveProfile() {
     loadChildIdentity();
     regressionFlag = getInitialRegressionFlag();
@@ -2344,8 +2289,6 @@
   document.getElementById("profile-add-btn").addEventListener("click", () => {
     const s = t();
     const name = (prompt(s.profileNamePrompt, "") || "").trim();
-    // Cancelling the name prompt still adds the child — the name is optional
-    // everywhere else, so it shouldn't be the thing that blocks adding one.
     const profile = { id: newProfileId(), name };
     profiles.push(profile);
     activeProfileId = profile.id;
@@ -2382,10 +2325,6 @@
     reloadActiveProfile();
   });
 
-  // Shares the app's name/description/URL by default — reads `responses`/
-  // `regressionFlag` ONLY to ask the user whether to append the result, and
-  // only appends it if they explicitly say yes. Never reads `growthEntries`,
-  // `childBirthdate`, or `childSex`, so growth/personal data can never leak in.
   document.getElementById("share-app-btn").addEventListener("click", async () => {
     const s = t();
     const statusEl = document.getElementById("app-share-status");
@@ -2406,7 +2345,6 @@
         await navigator.share({ title: s.shareAppTitle, text });
         return;
       } catch (e) {
-        // fall through to clipboard on cancel/failure
       }
     }
     try {
@@ -2425,7 +2363,6 @@
     }
   });
 
-  // ---- Tabs ----
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tab-btn").forEach((b) => {
@@ -2436,13 +2373,10 @@
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
       document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
-      // 약국·응급실 목록은 이 탭을 처음 열 때만 받는다(첫 화면 로딩을 늦추지 않도록).
       if (btn.dataset.tab === "nearby") initNearby();
     });
   });
 
-  // 목록은 공공데이터에서 온 문자열(약국명·주소)을 그대로 넣기 때문에
-  // innerHTML에 붙이기 전에 반드시 이스케이프한다.
   function escapeHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -2451,10 +2385,6 @@
       .replace(/"/g, "&quot;");
   }
 
-  // ---- 야간·휴일 약국 / 응급실 ----
-  // 데이터는 GitHub Actions가 하루 한 번 받아 data/ 아래 시도별 JSON으로 넣어둔다
-  // (API 트래픽이 하루 1,000건뿐이라 브라우저에서 직접 부를 수 없다).
-  // 이 탭을 처음 열 때만 메타를 읽고, 목록은 지역을 고를 때마다 그 지역 파일만 받는다.
   const NEARBY_REGION_KEY = "nearbyRegion";
   const REGION_LABELS_EN = {
     seoul: "Seoul", busan: "Busan", daegu: "Daegu", incheon: "Incheon",
@@ -2464,9 +2394,6 @@
     gyeongbuk: "North Gyeongsang", gyeongnam: "South Gyeongsang", jeju: "Jeju",
   };
 
-  // 한 시도의 야간 약국이 서울 2,400곳, 경기 2,672곳이다. 전부 그리면 화면이
-  // 끝없이 길어져서 쓸 수가 없다. 시·군·구로 한 번 더 좁히고, 그러고도 남는
-  // 목록은 끊어서 보여준다.
   const NEARBY_PAGE_SIZE = 20;
 
   const nearbyState = {
@@ -2500,18 +2427,12 @@
     return nearbyCache.get(key);
   }
 
-  /**
-   * 주소에서 시·군·구를 뽑는다. 공공데이터 주소는 "시도 시군구 도로명 …" 순서라
-   * 두 번째 낱말을 보면 되는데, 세종처럼 시군구가 없는 곳은 바로 도로명이 온다.
-   * 그래서 구/시/군으로 끝날 때만 인정한다("경기도 안양시 만안구"는 안양시로 묶인다).
-   */
   function sigunguOf(item) {
     const parts = (item.addr ?? "").trim().split(/\s+/);
     const second = parts[1] ?? "";
     return /[구시군]$/.test(second) ? second : "";
   }
 
-  /** 요일 번호를 API 표기(1=월 … 7=일)로 맞춘다. Date.getDay()는 0=일이다. */
   function todayDutyDay() {
     const day = new Date().getDay();
     return day === 0 ? 7 : day;
@@ -2523,7 +2444,6 @@
   }
 
   function fmtMinutes(total) {
-    // 새벽까지 여는 곳은 종료 시각이 2400을 넘겨서 온다(25:30 등).
     const wrapped = total % (24 * 60);
     const h = String(Math.floor(wrapped / 60)).padStart(2, "0");
     const m = String(wrapped % 60).padStart(2, "0");
@@ -2539,7 +2459,6 @@
     if (!range) return false;
     const [open, close] = range;
     const now = minutesNow();
-    // 자정을 넘겨 닫는 경우 "열림" 구간이 하루를 걸친다.
     if (close > 24 * 60) return now >= open || now <= close - 24 * 60;
     return now >= open && now <= close;
   }
@@ -2617,7 +2536,6 @@
     const statusEl = document.getElementById("nearby-status");
     const listEl = document.getElementById("nearby-list");
 
-    // 응급실은 24시간 운영이라 "지금 문 연 곳" 필터가 의미 없다.
     document.getElementById("nearby-open-row").hidden = nearbyState.kind !== "pharmacy";
 
     let items;
@@ -2657,8 +2575,6 @@
         })
       : null;
 
-    // 화면에 실제로 그리는 건 앞에서부터 일부뿐이다. 수천 개를 한 번에 그리면
-    // 스크롤이 감당이 안 되고, 어차피 필요한 건 가까운 몇 곳이다.
     const shown = filtered.slice(0, nearbyState.visibleCount);
     const countText =
       filtered.length > shown.length
@@ -2680,14 +2596,12 @@
     }
   }
 
-  /** 지금 지역의 목록에 실제로 존재하는 시·군·구만 고른다. */
   function renderSigunguOptions(items) {
     const select = document.getElementById("nearby-sigungu");
     const values = [...new Set(items.map(sigunguOf).filter(Boolean))].sort((a, b) =>
       a.localeCompare(b, "ko")
     );
 
-    // 지역을 바꿨는데 이전 시군구가 남아 있으면 결과가 0건이 된다.
     if (nearbyState.sigungu && !values.includes(nearbyState.sigungu)) nearbyState.sigungu = "";
 
     const options = [
@@ -2700,7 +2614,6 @@
       ),
     ].join("");
 
-    // 세종처럼 시군구가 없는 지역에서는 선택 자체를 감춘다.
     select.hidden = values.length === 0;
     document.getElementById("txt-nearby-sigungu-label").hidden = values.length === 0;
     select.innerHTML = options;
@@ -2731,7 +2644,7 @@
     } catch (err) {
       console.error("[nearby] meta", err.message);
       statusEl.textContent = s.nearbyError;
-      nearbyLoaded = false; // 다음에 탭을 다시 열면 재시도
+      nearbyLoaded = false;
       return;
     }
 
@@ -2742,7 +2655,6 @@
     await renderNearby();
   }
 
-  /** 조건이 바뀌면 늘려놓은 표시 개수를 처음으로 되돌린다. */
   function renderNearbyFromTop() {
     nearbyState.visibleCount = NEARBY_PAGE_SIZE;
     renderNearby();
@@ -2750,7 +2662,6 @@
 
   document.getElementById("nearby-kind").addEventListener("change", (e) => {
     nearbyState.kind = e.target.value;
-    // 약국과 응급실은 시군구 구성이 달라서 이전 선택을 유지하면 0건이 되기 쉽다.
     nearbyState.sigungu = "";
     renderNearbyFromTop();
   });
@@ -2787,7 +2698,6 @@
     const button = e.currentTarget;
     const statusEl = document.getElementById("nearby-status");
 
-    // 이미 켜져 있으면 끈다(이름순으로 되돌림).
     if (nearbyState.coords) {
       nearbyState.coords = null;
       button.setAttribute("aria-pressed", "false");
@@ -2812,7 +2722,6 @@
     );
   });
 
-  // ---- Language toggle ----
   document.getElementById("lang-toggle").addEventListener("click", () => {
     locale = locale === "en" ? "ko" : "en";
     localStorage.setItem(LOCALE_KEY, locale);
@@ -2820,16 +2729,12 @@
     render();
     renderRegression();
     renderGrowth();
-    // 지역명과 배지 문구가 언어를 타므로 이미 열어본 적 있으면 다시 그린다.
     if (nearbyLoaded && nearbyMeta) {
       renderNearbyRegionOptions();
       renderNearby();
     }
   });
 
-  // ---- Print & share ----
-  // Returns null when there's nothing to summarize yet (no checked items and
-  // no regression flag), so callers can tell "no result" apart from "empty result".
   function composeResultSummaryText() {
     const s = t();
     const unlocked = unlockedKeySet();
@@ -2861,11 +2766,6 @@
     window.print();
   });
 
-  // ---- Symptom urgency check ----
-  // Deliberately NOT persisted to localStorage — this is a momentary,
-  // situational check, not a longitudinal record like the checklist/growth log.
-  // Sources: WHO IMCI chart booklet, AAP/HealthyChildren.org, NHS "when to worry"
-  // guidance — see README for the specific thresholds and citations.
   const CATEGORY_TITLES = {
     cough: { ko: "기침·호흡곤란", en: "Cough / Breathing difficulty" },
     vomit: { ko: "구토·설사·탈수", en: "Vomiting / Diarrhea / Dehydration" },
@@ -3139,9 +3039,6 @@
     });
   }
 
-  // ---- Fever reducer dose calculator ----
-  // The dose ranges and the safety gates around them live in lib/dosing.js so they can
-  // be tested outside the browser -- see test/dosing.test.mjs.
 
   const doseState = { weight: "", drug: "acetaminophen" };
 
@@ -3264,11 +3161,8 @@
     });
   }
 
-  // Growth-percentile reference data and the LMS math live in lib/growth.js so they
-  // can be tested outside the browser -- see test/growth.test.mjs.
   const { calcPercentile } = ToddlerGrowth;
 
-  // ---- Growth log ----
   let growthEntries = [];
   function loadGrowthEntries() {
     try {
@@ -3297,10 +3191,6 @@
 
     const heightResult = entry.height != null ? calcPercentile(entry.height, ageAt, "height", childSex) : null;
     const weightResult = entry.weight != null ? calcPercentile(entry.weight, ageAt, "weight", childSex) : null;
-    // A missing number is either an age the standards don't cover or an age the
-    // bundled tables happen not to reach (they don't quite meet around 24 months).
-    // Telling a 23-month-old's parent "out of range, 0-36 months only" would be
-    // flatly wrong, so the two are worded differently.
     const missing = ToddlerGrowth.coverage(ageAt) === "gap" ? s.percentileGap : s.percentileOutOfRange;
     const hText = entry.height == null ? s.percentileNoData : heightResult ? formatPercentileValue(heightResult) : missing;
     const wText = entry.weight == null ? s.percentileNoData : weightResult ? formatPercentileValue(weightResult) : missing;

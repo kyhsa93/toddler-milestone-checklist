@@ -1,11 +1,3 @@
-// 전국 약국·응급의료기관 정보를 받아 data/ 아래 시도별 JSON으로 떨군다.
-//
-// 왜 미리 받아두는가: 두 API 모두 개발계정 트래픽이 하루 1,000건뿐이라
-// 브라우저에서 직접 부르면 인증키가 노출되는 데다 하루 만에 한도가 날아간다.
-// 그래서 하루 한 번 여기서 받아 정적 JSON으로 저장하고, 화면은 그 파일만 읽는다.
-//
-// 의존성을 쓰지 않는다: 이 저장소는 빌드도 node_modules도 없는 정적 사이트라
-// 그 성격을 유지한다. 응답이 XML이라 아래에 작은 파서를 직접 두었다.
 
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
@@ -17,24 +9,15 @@ const dataDir = process.env.MEDICAL_OUT_DIR
 
 const PHARMACY_KEY = process.env.PHARMACY_API_KEY;
 const EMERGENCY_KEY = process.env.EMERGENCY_API_KEY;
-// main()에서 형식을 검증하고 뒤쪽 슬래시를 떼면서 다시 대입한다.
 let PHARMACY_BASE = process.env.PHARMACY_API_ENDPOINT;
 let EMERGENCY_BASE = process.env.EMERGENCY_API_ENDPOINT;
 
-// 시크릿에는 서비스 URL까지만 넣고 오퍼레이션은 코드가 붙인다. 오퍼레이션까지
-// 시크릿에 박아두면 같은 서비스의 다른 기능(약국 위치정보, 응급실 실시간
-// 가용병상 등)을 쓸 때 시크릿을 다시 손대야 한다.
 const PHARMACY_OPERATION = "getParmacyListInfoInqire";
 const EMERGENCY_OPERATION = "getEgytListInfoInqire";
 
 const NUM_OF_ROWS = 1000;
-// 한 시도에서 이 페이지 수를 넘기지 않는다. total_count를 그대로 믿고 돌다가
-// 응답이 이상하면 하루치 호출 한도를 다 태울 수 있다.
 const MAX_PAGES = 12;
 
-// 약국 API의 Q0, 응급의료기관 API의 STAGE1에 그대로 들어가는 시도명.
-// 강원·전북은 특별자치도로 바뀐 뒤 표기가 갈리는 곳이라, 조회 결과가 0건이면
-// 아래 ALT 표기로 한 번 더 시도한다.
 const REGIONS = [
   { code: "seoul", name: "서울특별시" },
   { code: "busan", name: "부산광역시" },
@@ -55,9 +38,6 @@ const REGIONS = [
   { code: "jeju", name: "제주특별자치도", alt: ["제주도"] },
 ];
 
-// ---- 아주 작은 XML 리더 ---------------------------------------------------
-// 이 두 API의 응답은 <item> 안에 한 겹짜리 태그만 들어 있어서 이 정도로 충분하다.
-// 중첩 구조가 필요해지면 그때 제대로 된 파서를 붙일 것.
 
 function decodeEntities(s) {
   return s
@@ -88,12 +68,7 @@ function readTag(xml, tag) {
   return match ? decodeEntities(match[1]) : null;
 }
 
-// ---- 호출 -----------------------------------------------------------------
 
-/**
- * 시크릿에 담긴 서비스 URL을 검증한다. 오타나 프로토콜 누락이면 fetch가
- * "fetch failed" 한 줄만 던지고 끝나서 원인을 알 수 없기 때문에, 먼저 걸러낸다.
- */
 function normalizeBase(name, value) {
   const trimmed = (value ?? "").trim().replace(/\/+$/, "");
   let url;
@@ -109,9 +84,6 @@ function normalizeBase(name, value) {
 }
 
 async function fetchPage(base, key, operation, params) {
-  // serviceKey는 URLSearchParams에 넣으면 안 된다. 공공데이터포털이 주는 키에는
-  // 이미 %2B 같은 인코딩이 들어 있어서 한 번 더 인코딩되면 서명이 깨진다.
-  // 나머지 파라미터만 URLSearchParams로 만들고 키는 raw로 붙인다.
   const query = new URLSearchParams({ numOfRows: String(NUM_OF_ROWS), ...params });
   const url = `${base}/${operation}?serviceKey=${key}&${query.toString()}`;
 
@@ -119,16 +91,11 @@ async function fetchPage(base, key, operation, params) {
   try {
     res = await fetch(url, { headers: { "User-Agent": "toddler-milestone-checklist/1.0" } });
   } catch (err) {
-    // undici는 DNS 실패든 TLS 오류든 "fetch failed" 한 줄만 던진다. 실제 원인은
-    // cause에 들어 있어서 그것까지 붙여줘야 진단이 한 번에 끝난다.
-    // 인증키가 섞이지 않도록 URL은 호스트+경로까지만 남긴다.
     const cause = err.cause?.message ?? err.cause?.code ?? "원인 불명";
     throw new Error(`${base}/${operation} 요청 실패: ${err.message} (${cause})`);
   }
   const text = await res.text();
 
-  // 인증 오류는 HTTP 403 + OpenAPI_ServiceResponse 형태로 오고, 정상 응답과
-  // 껍데기가 아예 다르다. 빈 목록으로 착각하지 않도록 여기서 걸러낸다.
   const authError = readTag(text, "returnAuthMsg") ?? readTag(text, "errMsg");
   if (authError) throw fatal(new Error(`인증/요청 오류: ${authError}`));
   if (!res.ok) throw new Error(`http ${res.status}`);
@@ -143,18 +110,11 @@ async function fetchPage(base, key, operation, params) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** 다시 시도해도 결과가 같은 실패로 표시한다(인증 오류 등). */
 function fatal(err) {
   err.fatal = true;
   return err;
 }
 
-/**
- * 해외(GitHub Actions 러너)에서 apis.data.go.kr로 붙을 때 간헐적으로 연결이
- * 10초 안에 성립하지 않는다("Connect Timeout Error"). 실제로 같은 스크립트가
- * 한 번은 통째로 실패하고 다음 실행은 25,000건을 다 받아왔다. undici의 연결
- * 타임아웃은 외부 패키지 없이 늘릴 수 없어서 재시도로 넘긴다.
- */
 async function withRetry(label, fn, attempts = 5) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -162,10 +122,8 @@ async function withRetry(label, fn, attempts = 5) {
       return await fn();
     } catch (err) {
       lastError = err;
-      // 인증키가 틀렸거나 API가 오류 코드를 준 경우는 다시 불러도 같은 답이 온다.
       if (err.fatal) throw err;
       if (attempt === attempts) break;
-      // 테스트가 실제 백오프를 다 기다리면 한 케이스에 1분이 걸린다.
       const wait = attempt * Number(process.env.RETRY_BACKOFF_MS ?? 5000);
       console.warn(`[fetch-medical] ${label} 실패(${attempt}/${attempts}), ${wait}ms 후 재시도: ${err.message}`);
       await sleep(wait);
@@ -199,7 +157,6 @@ async function fetchAllPages(base, key, operation, params) {
   return collected;
 }
 
-/** 시도명 표기가 갈리는 지역(강원·전북 등)을 위해 대체 표기로 한 번 더 시도한다. */
 async function fetchRegion(base, key, operation, regionKey, region) {
   for (const name of [region.name, ...(region.alt ?? [])]) {
     const items = await fetchAllPages(base, key, operation, { [regionKey]: name });
@@ -209,9 +166,6 @@ async function fetchRegion(base, key, operation, regionKey, region) {
   return [];
 }
 
-// ---- 운영시간 -------------------------------------------------------------
-// dutyTime{N}s / dutyTime{N}c = N요일의 시작/종료 시각(HHMM 문자열).
-// N은 1=월 … 5=금, 6=토, 7=일, 8=공휴일.
 
 function parseTime(value) {
   if (!value) return null;
@@ -220,7 +174,6 @@ function parseTime(value) {
   const hour = Number(digits.slice(0, 2));
   const minute = Number(digits.slice(2));
   if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
-  // 새벽까지 여는 곳은 종료 시각이 2400을 넘겨(2530 등) 오기도 한다.
   return hour * 60 + minute;
 }
 
@@ -235,23 +188,18 @@ function readHours(item) {
   return hours;
 }
 
-/**
- * 밤이나 주말에 갈 수 있는 곳만 남긴다. 낮에 문 연 약국은 어디에나 있어서
- * 전량을 담으면 파일만 커지고(전국 2만 4천 곳) 정작 필요한 정보가 묻힌다.
- */
 function isAfterHours(hours) {
   for (let day = 1; day <= 5; day += 1) {
     const close = hours[day]?.[1];
-    if (close !== undefined && close >= 21 * 60) return true; // 평일 21시 이후까지
+    if (close !== undefined && close >= 21 * 60) return true;
   }
   const saturdayClose = hours[6]?.[1];
-  if (saturdayClose !== undefined && saturdayClose >= 18 * 60) return true; // 토요일 저녁까지
-  if (hours[7]) return true; // 일요일 운영
-  if (hours[8]) return true; // 공휴일 운영
+  if (saturdayClose !== undefined && saturdayClose >= 18 * 60) return true;
+  if (hours[7]) return true;
+  if (hours[8]) return true;
   return false;
 }
 
-// ---- 정규화 ---------------------------------------------------------------
 
 function toNumberOrNull(v) {
   const n = Number(v);
@@ -276,16 +224,13 @@ function normalizeEmergency(item) {
     id: item.hpid ?? null,
     name: item.dutyName ?? null,
     addr: item.dutyAddr ?? null,
-    // dutyTel3가 응급실 직통이다. 대표번호(dutyTel1)만 있으면 그걸 쓴다.
     tel: item.dutyTel3 ?? item.dutyTel1 ?? null,
     lat: toNumberOrNull(item.wgs84Lat),
     lon: toNumberOrNull(item.wgs84Lon),
   };
 }
 
-// ---- 수집 -----------------------------------------------------------------
 
-/** 이미 저장돼 있는 지역 파일을 읽는다(수집 실패 시 그대로 두기 위함). */
 async function readExisting(kind, code) {
   try {
     const parsed = JSON.parse(await readFile(path.join(dataDir, kind, `${code}.json`), "utf-8"));
@@ -315,12 +260,8 @@ async function collectPharmacies() {
       byRegion[region.code] = list;
       console.log(`[fetch-medical] 약국 ${region.code}: 전체 ${items.length} → 야간·휴일 ${list.length}`);
     } catch (err) {
-      // 인증키가 틀린 것 같은 실패는 남은 16개 지역에서도 똑같이 날 테니 즉시 멈춘다.
       if (err.fatal) throw err;
 
-      // 한 지역이 안 된다고 하루치를 통째로 버리지 않는다. apis.data.go.kr은
-      // 러너에서 몇 분씩 연결이 안 되는 구간이 있어서, 그럴 때 어제 목록이라도
-      // 남아 있는 편이 빈 화면보다 낫다.
       const previous = await readExisting("pharmacy", region.code);
       byRegion[region.code] = previous ?? [];
       failedRegions.push(region.code);
@@ -340,13 +281,6 @@ async function collectPharmacies() {
   return { byRegion, failedRegions };
 }
 
-/**
- * 주소가 어느 시도인지 알아낸다.
- *
- * 시도명 앞 두 글자로 자르면 안 된다: "충청북도"와 "충청남도"가 똑같이 "충청"이
- * 되어 남도가 통째로 북도 파일로 들어간다(실제로 충남·전남·경남이 전부 0건이
- * 됐다). 공공데이터 주소는 정식 명칭과 축약형이 섞여 오므로 둘 다 적어둔다.
- */
 const ADDRESS_ALIASES = [
   ["seoul", ["서울특별시", "서울시", "서울"]],
   ["busan", ["부산광역시", "부산시", "부산"]],
@@ -367,17 +301,10 @@ const ADDRESS_ALIASES = [
   ["jeju", ["제주특별자치도", "제주도", "제주"]],
 ];
 
-// 긴 이름을 먼저 본다. "충청남도"를 "충청북도"보다 먼저 확인해야 한다는 뜻이
-// 아니라(그 둘은 서로의 접두어가 아니다), "제주도"보다 "제주특별자치도"처럼
-// 한쪽이 다른 쪽의 접두어인 경우에 긴 쪽이 이기게 하려는 것이다.
 const ADDRESS_PREFIXES = ADDRESS_ALIASES.flatMap(([code, names]) =>
   names.map((name) => ({ name, code }))
 ).sort((a, b) => b.name.length - a.name.length);
 
-// 2026년 7월 1일 전라남도와 광주광역시가 폐지되고 전남광주통합특별시가 출범했다.
-// 응급의료 데이터 주소는 이미 통합 명칭을 쓰는데(그래서 광주가 0건이 됐다) 약국
-// API는 아직 "광주광역시"/"전라남도"로 조회된다. 두 소스의 지역 구분을 맞추고,
-// 밤에 약국을 찾는 사람이 통합시 전체 목록을 훑지 않도록 자치구로 갈라 둔다.
 const MERGED_JEONNAM_GWANGJU = "전남광주통합특별시";
 const GWANGJU_DISTRICTS = ["동구", "서구", "남구", "북구", "광산구"];
 
@@ -388,7 +315,6 @@ function regionFromAddress(addr) {
   if (trimmed.startsWith(MERGED_JEONNAM_GWANGJU)) {
     const rest = trimmed.slice(MERGED_JEONNAM_GWANGJU.length).trim();
     const first = rest.split(/\s+/)[0] ?? "";
-    // 옛 광주광역시는 자치구 5곳으로만 이뤄져 있고, 옛 전남 시군에는 구가 없다.
     return GWANGJU_DISTRICTS.includes(first) ? "gwangju" : "jeonnam";
   }
 
@@ -398,11 +324,6 @@ function regionFromAddress(addr) {
   return null;
 }
 
-/**
- * 응급의료기관은 STAGE1(시도)을 넣어도 전국 목록이 그대로 돌아온다. 실제로
- * 17개 시도 모두 같은 533건이 나왔다. 그래서 지역별로 부르지 않고 한 번만
- * 받아서 주소로 나눈다 - 호출도 17회에서 1회로 줄고 결과도 정확해진다.
- */
 async function collectEmergencyRooms() {
   const byRegion = Object.fromEntries(REGIONS.map((r) => [r.code, []]));
 
@@ -411,7 +332,6 @@ async function collectEmergencyRooms() {
     items = await fetchAllPages(EMERGENCY_BASE, EMERGENCY_KEY, EMERGENCY_OPERATION, {});
   } catch (err) {
     if (err.fatal) throw err;
-    // 약국과 같은 이유로, 실패하면 이미 저장된 목록을 그대로 둔다.
     console.error(`[fetch-medical] 응급실 수집 실패: ${err.message} (기존 목록 유지)`);
     for (const region of REGIONS) {
       byRegion[region.code] = (await readExisting("emergency", region.code)) ?? [];
@@ -427,8 +347,6 @@ async function collectEmergencyRooms() {
     if (!normalized.name) continue;
     const code = regionFromAddress(normalized.addr);
     if (!code) {
-      // 어떤 주소가 안 걸리는지 남긴다. 개수만 세면 표기 하나 때문인지
-      // 주소가 아예 비어 있는 건지 알 수 없어 진단이 한 번 더 왕복한다.
       unmatched.push(`${normalized.name}: ${JSON.stringify(normalized.addr)}`);
       continue;
     }
@@ -448,8 +366,6 @@ async function collectEmergencyRooms() {
     console.warn(`[fetch-medical]   분류 실패: ${sample}`);
   }
 
-  // 응급실이 한 곳도 없는 시도는 정상이 아니다(가장 작은 세종도 두 곳은 있다).
-  // 분류 규칙이 깨졌을 때 조용히 빈 파일을 배포하지 않도록 경고를 남긴다.
   const empty = REGIONS.filter((r) => byRegion[r.code].length === 0).map((r) => r.code);
   if (empty.length) {
     console.warn(`[fetch-medical]   응급실이 0건인 시도: ${empty.join(", ")} - 분류 규칙 확인 필요`);
@@ -461,13 +377,11 @@ async function collectEmergencyRooms() {
   return { byRegion, failed: false };
 }
 
-// ---- 저장 -----------------------------------------------------------------
 
 async function writeRegionFiles(kind, byRegion) {
   const dir = path.join(dataDir, kind);
   await mkdir(dir, { recursive: true });
   for (const [code, list] of Object.entries(byRegion)) {
-    // 들여쓰기 없이 쓴다. 시도별로 나눠도 수천 건이라 들여쓰기만으로 두 배가 된다.
     await writeFile(path.join(dir, `${code}.json`), JSON.stringify(list));
   }
 }
@@ -483,8 +397,6 @@ async function main() {
     .map(([name]) => name);
   if (missing.length) throw new Error(`환경변수가 필요합니다: ${missing.join(", ")}`);
 
-  // 시크릿에 들어온 값이 어떤 호스트를 가리키는지 남긴다(키는 찍지 않는다).
-  // 엔드포인트 오타는 로그만 봐서는 절대 드러나지 않는 종류의 실패다.
   PHARMACY_BASE = normalizeBase("PHARMACY_API_ENDPOINT", PHARMACY_BASE);
   EMERGENCY_BASE = normalizeBase("EMERGENCY_API_ENDPOINT", EMERGENCY_BASE);
   console.log(`[fetch-medical] 약국 API: ${PHARMACY_BASE}`);
@@ -505,8 +417,6 @@ async function main() {
 
   const meta = {
     updatedAt: new Date().toISOString(),
-    // 이번 실행에서 못 받아 예전 값을 그대로 둔 지역. 화면에 쓰지는 않지만,
-    // 며칠째 같은 지역이 실패하고 있는지 파일만 보고 알 수 있어야 한다.
     staleRegions: failedRegions,
     emergencyStale: emergencyFailed,
     regions: REGIONS.map(({ code, name }) => ({

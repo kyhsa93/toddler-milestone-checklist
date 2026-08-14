@@ -1,11 +1,8 @@
 name: Update medical data
 
-# 약국·응급의료기관 데이터를 하루 한 번 받아 커밋한다. 두 API 모두 개발계정
-# 트래픽이 하루 1,000건뿐이라 브라우저에서 직접 부를 수 없어서(키 노출 + 한도),
-# 여기서 미리 받아 정적 JSON으로 떨군다. 실제 사용량은 하루 70건 남짓이다.
 on:
   schedule:
-    - cron: "17 20 * * *" # 05:17 KST (정각은 스케줄 트리거가 몰려 지연이 크다)
+    - cron: "17 20 * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,7 +10,6 @@ permissions:
   pages: write
   id-token: write
 
-# static.yml(푸시 배포)과 같은 그룹을 써서 Pages 배포가 겹치지 않게 한다.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -31,10 +27,6 @@ jobs:
         with:
           node-version: "20"
 
-      # 이 워크플로의 커밋은 GITHUB_TOKEN으로 올라가서 test.yml을 트리거하지 않고,
-      # 배포까지 여기서 직접 한다. 테스트를 여기서 돌리지 않으면 데이터 갱신 경로는
-      # 검증을 한 번도 거치지 않는다. 수집 전에 두는 건 커밋된 데이터를 덮어쓰기
-      # 전에 멈추기 위해서다.
       - name: 테스트
         run: npm test
 
@@ -50,9 +42,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # git diff는 아직 추적되지 않는 파일을 보지 못한다. data/가 처음
-          # 생기는 실행에서는 "변경사항 없음"으로 잘못 판단하므로, 먼저 add한 뒤
-          # 인덱스와 HEAD를 비교해야 한다.
           git add data
           if git diff --cached --quiet; then
             echo "변경사항 없음, 커밋 생략"
@@ -70,8 +59,6 @@ jobs:
           echo "push 재시도 모두 실패"
           exit 1
 
-      # GITHUB_TOKEN으로 푸시한 커밋은 다른 워크플로를 트리거하지 않는다.
-      # 그래서 static.yml(푸시 배포)에 맡기지 않고 여기서 직접 배포한다.
       - name: Pages 설정
         uses: actions/configure-pages@v5
 

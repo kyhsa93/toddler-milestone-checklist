@@ -14,7 +14,6 @@ test("몸무게가 없거나 이상하면 용량을 내지 않는다", () => {
 });
 
 test("생년월일이 없으면 나이 게이트를 통과시키지 않고 멈춘다", () => {
-  // 나이를 모른 채 "아마 괜찮은" 기본값을 쓰면 아래 게이트가 전부 무의미해진다.
   assert.equal(dose({ ageMonths: null }).state, "need-birthdate");
   assert.equal(dose({ ageMonths: NaN }).state, "need-birthdate");
 });
@@ -59,9 +58,7 @@ test("아세트아미노펜 하루 한도는 24개월 전후로 60/75mg/kg", () 
 });
 
 test("아세트아미노펜 하루 한도는 체중이 커도 4000mg을 넘지 않는다", () => {
-  // 75mg/kg × 60kg = 4500이지만 성인 상한을 넘겨선 안 된다.
   assert.equal(dose({ weight: 60, ageMonths: 36 }).dailyCap, 4000);
-  // 상한에 닿기 직전은 그대로 계산값.
   assert.equal(dose({ weight: 50, ageMonths: 36 }).dailyCap, 3750);
 });
 
@@ -71,12 +68,10 @@ test("이부프로펜 하루 한도는 1회 최대 × 하루 횟수", () => {
 });
 
 test("모르는 약 이름으로는 용량이 나오지 않는다", () => {
-  // 덱시부프로펜은 이부프로펜과 다른 약이라 이 계산기의 값이 적용되지 않는다.
   assert.notEqual(dose({ drug: "dexibuprofen" }).state, "ok");
 });
 
 test("결과에 mL 값은 절대 들어 있지 않다", () => {
-  // 제품마다 농도가 달라서 mL 환산은 앱이 알 수 없는 값을 지어내는 일이 된다.
   const r = dose({ weight: 12, ageMonths: 24 });
   assert.equal(Object.keys(r).some((k) => /ml/i.test(k)), false);
 });

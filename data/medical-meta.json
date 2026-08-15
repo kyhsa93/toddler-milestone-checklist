@@ -1,12 +1,12 @@
 {
-  "updatedAt": "2026-08-14T06:07:37.052Z",
+  "updatedAt": "2026-08-15T20:38:16.729Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
     {
       "code": "seoul",
       "name": "서울특별시",
-      "pharmacy": 2400,
+      "pharmacy": 2404,
       "emergency": 74
     },
     {
@@ -18,7 +18,7 @@
     {
       "code": "daegu",
       "name": "대구광역시",
-      "pharmacy": 435,
+      "pharmacy": 429,
       "emergency": 25
     },
     {
@@ -54,7 +54,7 @@
     {
       "code": "gyeonggi",
       "name": "경기도",
-      "pharmacy": 2672,
+      "pharmacy": 2671,
       "emergency": 96
     },
     {
@@ -84,7 +84,7 @@
     {
       "code": "jeonnam",
       "name": "전라남도",
-      "pharmacy": 262,
+      "pharmacy": 260,
       "emergency": 46
     },
     {

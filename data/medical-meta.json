@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-26T23:32:05.323Z",
+  "updatedAt": "2026-08-28T04:22:48.001Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -12,7 +12,7 @@
     {
       "code": "busan",
       "name": "부산광역시",
-      "pharmacy": 627,
+      "pharmacy": 635,
       "emergency": 38
     },
     {
@@ -24,7 +24,7 @@
     {
       "code": "incheon",
       "name": "인천광역시",
-      "pharmacy": 638,
+      "pharmacy": 639,
       "emergency": 26
     },
     {
@@ -60,13 +60,13 @@
     {
       "code": "gangwon",
       "name": "강원특별자치도",
-      "pharmacy": 290,
+      "pharmacy": 302,
       "emergency": 24
     },
     {
       "code": "chungbuk",
       "name": "충청북도",
-      "pharmacy": 330,
+      "pharmacy": 331,
       "emergency": 21
     },
     {

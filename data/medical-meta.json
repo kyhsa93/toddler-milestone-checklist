@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-29T02:49:55.450Z",
+  "updatedAt": "2026-08-29T22:40:19.185Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -84,7 +84,7 @@
     {
       "code": "jeonnam",
       "name": "전라남도",
-      "pharmacy": 258,
+      "pharmacy": 241,
       "emergency": 46
     },
     {

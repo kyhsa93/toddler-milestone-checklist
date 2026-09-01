@@ -2,6 +2,7 @@
   "name": "toddler-milestone-checklist",
   "private": true,
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "noscript": "node scripts/build-noscript.mjs"
   }
 }

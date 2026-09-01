@@ -17,8 +17,6 @@ test("커밋된 noscript 본문이 지금 DATA로 만든 것과 같다", async (
 });
 
 test("체크리스트 항목이 하나도 빠지지 않는다", async () => {
-  // 이 검사가 지키는 것은 "사람에게 보이는 것과 다른 것을 크롤러에게 주지 않는다"이다.
-  // 항목을 골라 담기 시작하면 그 규칙이 조용히 깨진다.
   const html = await readIndex();
   const block = buildNoscript(html);
   const items = [...html.matchAll(/\{ domain: "\w+", ko: "((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]);
@@ -32,8 +30,6 @@ test("체크리스트 항목이 하나도 빠지지 않는다", async () => {
 });
 
 test("크롤러가 받는 본문이 빈 페이지가 아니다", async () => {
-  // 이 파일이 있는 이유 자체다. 화면을 전부 자바스크립트가 그리는 동안 크롤러가 받는
-  // 본문은 스물두 자("🌐 0 / 0 –")뿐이었고, 이 앱은 광고를 싣는다.
   const html = await readIndex();
   const block = buildNoscript(html);
   const text = block

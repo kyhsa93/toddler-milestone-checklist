@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-03T22:34:54.002Z",
+  "updatedAt": "2026-09-04T22:21:27.673Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -18,13 +18,13 @@
     {
       "code": "daegu",
       "name": "대구광역시",
-      "pharmacy": 429,
+      "pharmacy": 430,
       "emergency": 25
     },
     {
       "code": "incheon",
       "name": "인천광역시",
-      "pharmacy": 639,
+      "pharmacy": 637,
       "emergency": 26
     },
     {
@@ -96,13 +96,13 @@
     {
       "code": "gyeongnam",
       "name": "경상남도",
-      "pharmacy": 539,
+      "pharmacy": 540,
       "emergency": 49
     },
     {
       "code": "jeju",
       "name": "제주특별자치도",
-      "pharmacy": 143,
+      "pharmacy": 145,
       "emergency": 6
     }
   ]

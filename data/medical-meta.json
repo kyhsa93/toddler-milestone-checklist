@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-11T22:35:09.201Z",
+  "updatedAt": "2026-09-13T22:24:56.999Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -54,7 +54,7 @@
     {
       "code": "gyeonggi",
       "name": "경기도",
-      "pharmacy": 2678,
+      "pharmacy": 2679,
       "emergency": 96
     },
     {
@@ -78,7 +78,7 @@
     {
       "code": "jeonbuk",
       "name": "전북특별자치도",
-      "pharmacy": 279,
+      "pharmacy": 280,
       "emergency": 21
     },
     {

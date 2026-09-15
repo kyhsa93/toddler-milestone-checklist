@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-14T23:08:06.056Z",
+  "updatedAt": "2026-09-15T22:53:56.118Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -42,7 +42,7 @@
     {
       "code": "ulsan",
       "name": "울산광역시",
-      "pharmacy": 184,
+      "pharmacy": 185,
       "emergency": 12
     },
     {
@@ -54,7 +54,7 @@
     {
       "code": "gyeonggi",
       "name": "경기도",
-      "pharmacy": 2679,
+      "pharmacy": 2680,
       "emergency": 96
     },
     {

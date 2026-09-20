@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-18T22:34:43.891Z",
+  "updatedAt": "2026-09-20T22:26:27.278Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -18,7 +18,7 @@
     {
       "code": "daegu",
       "name": "대구광역시",
-      "pharmacy": 433,
+      "pharmacy": 434,
       "emergency": 25
     },
     {
@@ -30,7 +30,7 @@
     {
       "code": "gwangju",
       "name": "광주광역시",
-      "pharmacy": 283,
+      "pharmacy": 282,
       "emergency": 24
     },
     {

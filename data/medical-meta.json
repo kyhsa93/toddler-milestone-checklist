@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-23T22:57:13.940Z",
+  "updatedAt": "2026-09-24T23:12:59.547Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -97,7 +97,7 @@
       "code": "gyeongnam",
       "name": "경상남도",
       "pharmacy": 544,
-      "emergency": 49
+      "emergency": 48
     },
     {
       "code": "jeju",

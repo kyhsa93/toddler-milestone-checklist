@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-01T23:53:34.891Z",
+  "updatedAt": "2026-10-02T23:46:40.755Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -12,7 +12,7 @@
     {
       "code": "busan",
       "name": "부산광역시",
-      "pharmacy": 636,
+      "pharmacy": 637,
       "emergency": 38
     },
     {
@@ -43,7 +43,7 @@
       "code": "ulsan",
       "name": "울산광역시",
       "pharmacy": 185,
-      "emergency": 12
+      "emergency": 13
     },
     {
       "code": "sejong",
@@ -84,7 +84,7 @@
     {
       "code": "jeonnam",
       "name": "전라남도",
-      "pharmacy": 237,
+      "pharmacy": 233,
       "emergency": 46
     },
     {

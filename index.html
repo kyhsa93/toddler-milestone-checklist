@@ -787,6 +787,7 @@
     flex-wrap: wrap;
   }
   footer p { font-size: 12px; color: var(--ink-faint); max-width: 34ch; margin: 0; }
+  footer a { color: inherit; }
   .footer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .footer-share-status {
     flex-basis: 100%;
@@ -1044,6 +1045,7 @@
 
   <footer>
     <p id="txt-footer-note"></p>
+    <p><a id="privacy-link" href="https://kyhsa93.github.io/privacy-policy">개인정보처리방침</a></p>
     <div class="footer-actions">
       <button class="share-app-btn" id="share-app-btn" type="button"></button>
       <button class="reset-btn" id="reset-checklist-btn" type="button"></button>
@@ -1157,6 +1159,7 @@
       growthEmpty: "아직 기록이 없어요. 위에서 첫 기록을 추가해보세요.",
       growthNote2: "이 기록은 개인 추적용이에요. 정확한 백분위·성장 평가는 영유아 검진에서 확인해주세요.",
       footerNote: "모든 기록은 이 브라우저(기기)에만 저장되며, 외부 서버로 전송되지 않아요.",
+      privacyLink: "개인정보처리방침",
       resetChecklistBtn: "체크리스트 초기화",
       resetGrowthBtn: "성장 기록 초기화",
       shareAppBtn: "공유하기",
@@ -1366,6 +1369,7 @@
       growthEmpty: "No entries yet. Add your first one above.",
       growthNote2: "This log is for personal tracking only. Get official percentile and growth assessments at checkups.",
       footerNote: "All records are stored only in this browser (device) and are never sent to a server.",
+      privacyLink: "Privacy policy",
       resetChecklistBtn: "Reset checklist",
       resetGrowthBtn: "Reset growth log",
       shareAppBtn: "Share",
@@ -1957,6 +1961,7 @@
     document.getElementById("txt-gth-4").textContent = s.gthPercentile;
     document.getElementById("growth-percentile-note").textContent = s.percentileNote;
     document.getElementById("txt-footer-note").textContent = s.footerNote;
+    document.getElementById("privacy-link").textContent = s.privacyLink;
     document.getElementById("reset-checklist-btn").textContent = s.resetChecklistBtn;
     document.getElementById("reset-growth-btn").textContent = s.resetGrowthBtn;
     document.getElementById("share-app-btn").textContent = s.shareAppBtn;

@@ -1,6 +1,6 @@
 # toddler-milestone-checklist
 
-A personal, installable PWA for tracking developmental milestones from 2 to 36 months, plus a simple height/weight growth log (which covers birth onward). Available in Korean and English (toggle in the top-right corner); UI defaults to English until a language is chosen, matching [kyhsa93.github.io](https://kyhsa93.github.io)'s language switcher.
+A personal, installable PWA for tracking developmental milestones from 2 to 36 months, plus a simple height/weight growth log (which covers birth onward). Available in Korean and English (toggle in the top-right corner); UI defaults to Korean until a language is chosen, and the choice is remembered on the device.
 
 Live app: https://kyhsa93.github.io/toddler-milestone-checklist/
 

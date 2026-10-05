@@ -28,8 +28,6 @@ This is **not a diagnostic tool**. It is not affiliated with, and does not repro
 
 Developmental or medical conditions can only be assessed through standardized evaluation and clinical observation by a qualified pediatrician or developmental specialist. If you have concerns about your child's development, please talk to one — regardless of what this checklist shows.
 
-The checklist intentionally starts at 12 months, since developmental signs relevant here are not clinically observable in newborns.
-
 Growth percentiles are a reference calculation, not a diagnosis — official growth assessment should come from your pediatrician. WHO reference data was fetched directly from who.int. WHO publishes its materials under CC BY-NC-SA 3.0 IGO (checked 2026-10-04), which requires permission for commercial use, so this site carries no ads and stays non-commercial (Google Analytics remains, for visit measurement only); CDC reference data was sourced via the CDC-DNPAO-maintained `cdcanthro` package, which mirrors CDC's own published percentile data files (US federal public domain).
 
 The symptom urgency check **never diagnoses a disease** — it only estimates urgency (ER now / same-day doctor / monitor) from red-flag signs a parent can realistically self-assess. It covers 4 common categories, not every reason to seek care. If something worries you that isn't on the list, that alone is a reason to contact a doctor. Key thresholds used: fever ≥38.0°C in an infant under 3 months is always treated as an emergency regardless of other signs (AAP/HealthyChildren.org); breathing-rate red flags follow WHO IMCI's age bands (≥60/min under 2 months, ≥50/min at 2–12 months, ≥40/min at 12 months–5 years); a non-blanching rash with fever is flagged as an emergency (classic meningococcemia warning sign, per NHS guidance) regardless of how well the child otherwise seems.
@@ -46,10 +44,13 @@ Open `index.html` in any browser, or visit the live app above. No build step, no
 npm test
 ```
 
-Runs on plain `node --test`, no dependencies. Three things are covered:
+Runs on plain `node --test`, no dependencies. Six things are covered:
 
 - `lib/growth.js` (growth percentiles) and `lib/dosing.js` (fever-reducer doses) are split out of `index.html` specifically so they can be run outside a browser. These are the two calculations whose output a parent might act on, and a wrong answer from either looks exactly like a right one — so the dose tests pin every safety gate (no dose under 3 months, no ibuprofen under 6 months, the 4000mg ceiling) and the growth tests pin the reference tables, the standard switch at 24 months, and the age range actually covered.
 - `test/profiles.test.mjs` runs `index.html`'s own inline script against a stub DOM to check that per-child data really is stored per child. That failure mode isn't an error — it's one child's record showing up under another child's name, which looks entirely normal on screen.
+- `test/fetch-medical.test.mjs` runs the pharmacy/ER collector against a stub server (see [Refreshing the medical data](#refreshing-the-medical-data)).
+- `test/noscript.test.mjs` checks that the `<noscript>` checklist committed in `index.html` matches what `npm run noscript` (`scripts/build-noscript.mjs`) builds from the current milestone data, so editing a milestone means rerunning it.
+- `test/privacy.test.mjs` checks that the page links to the privacy policy and carries no ad script (see the WHO license note above).
 
 `lib/*.js` are plain scripts (no build step, in keeping with the rest of the app) that attach one global each, and are also loadable by `require` so the tests can import them. Adding another one means adding it to `sw.js`'s precache list too, or it will work online and break offline.
 

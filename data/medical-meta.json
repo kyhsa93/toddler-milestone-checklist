@@ -1,12 +1,12 @@
 {
-  "updatedAt": "2026-10-13T23:44:15.195Z",
+  "updatedAt": "2026-10-14T23:13:44.553Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
     {
       "code": "seoul",
       "name": "서울특별시",
-      "pharmacy": 2446,
+      "pharmacy": 2447,
       "emergency": 75
     },
     {

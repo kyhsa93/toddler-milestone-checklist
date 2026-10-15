@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-14T23:13:44.553Z",
+  "updatedAt": "2026-10-15T23:04:50.237Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -30,7 +30,7 @@
     {
       "code": "gwangju",
       "name": "광주광역시",
-      "pharmacy": 278,
+      "pharmacy": 277,
       "emergency": 24
     },
     {
@@ -48,7 +48,7 @@
     {
       "code": "sejong",
       "name": "세종특별자치시",
-      "pharmacy": 63,
+      "pharmacy": 62,
       "emergency": 2
     },
     {
@@ -60,7 +60,7 @@
     {
       "code": "gangwon",
       "name": "강원특별자치도",
-      "pharmacy": 303,
+      "pharmacy": 302,
       "emergency": 23
     },
     {

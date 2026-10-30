@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-29T23:57:14.029Z",
+  "updatedAt": "2026-10-30T23:45:22.570Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -24,7 +24,7 @@
     {
       "code": "incheon",
       "name": "인천광역시",
-      "pharmacy": 647,
+      "pharmacy": 648,
       "emergency": 28
     },
     {

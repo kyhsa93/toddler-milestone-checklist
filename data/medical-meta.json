@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-10T02:44:33.014Z",
+  "updatedAt": "2026-11-11T00:39:50.061Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
@@ -54,7 +54,7 @@
     {
       "code": "gyeonggi",
       "name": "경기도",
-      "pharmacy": 2687,
+      "pharmacy": 2688,
       "emergency": 97
     },
     {
@@ -84,7 +84,7 @@
     {
       "code": "jeonnam",
       "name": "전라남도",
-      "pharmacy": 224,
+      "pharmacy": 223,
       "emergency": 46
     },
     {

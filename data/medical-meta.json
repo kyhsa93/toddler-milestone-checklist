@@ -1,18 +1,18 @@
 {
-  "updatedAt": "2026-11-19T01:53:05.205Z",
+  "updatedAt": "2026-11-21T01:30:38.037Z",
   "staleRegions": [],
   "emergencyStale": false,
   "regions": [
     {
       "code": "seoul",
       "name": "서울특별시",
-      "pharmacy": 2447,
+      "pharmacy": 2449,
       "emergency": 75
     },
     {
       "code": "busan",
       "name": "부산광역시",
-      "pharmacy": 639,
+      "pharmacy": 642,
       "emergency": 37
     },
     {
@@ -30,7 +30,7 @@
     {
       "code": "gwangju",
       "name": "광주광역시",
-      "pharmacy": 269,
+      "pharmacy": 268,
       "emergency": 24
     },
     {
@@ -54,19 +54,19 @@
     {
       "code": "gyeonggi",
       "name": "경기도",
-      "pharmacy": 2695,
+      "pharmacy": 2698,
       "emergency": 97
     },
     {
       "code": "gangwon",
       "name": "강원특별자치도",
-      "pharmacy": 302,
+      "pharmacy": 303,
       "emergency": 23
     },
     {
       "code": "chungbuk",
       "name": "충청북도",
-      "pharmacy": 338,
+      "pharmacy": 336,
       "emergency": 19
     },
     {
@@ -78,25 +78,25 @@
     {
       "code": "jeonbuk",
       "name": "전북특별자치도",
-      "pharmacy": 281,
+      "pharmacy": 280,
       "emergency": 21
     },
     {
       "code": "jeonnam",
       "name": "전라남도",
-      "pharmacy": 220,
+      "pharmacy": 216,
       "emergency": 46
     },
     {
       "code": "gyeongbuk",
       "name": "경상북도",
-      "pharmacy": 461,
+      "pharmacy": 460,
       "emergency": 35
     },
     {
       "code": "gyeongnam",
       "name": "경상남도",
-      "pharmacy": 541,
+      "pharmacy": 539,
       "emergency": 48
     },
     {
